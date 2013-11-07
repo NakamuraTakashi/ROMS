@@ -46,7 +46,8 @@
       USE mod_grid
       USE mod_mixing
       USE mod_ocean
-# ifdef TS_PSOURCE
+/*# ifdef TS_PSOURCE */    /*!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm */
+# if defined TS_PSOURCE  ||  defined SGD_ON  /*!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add */
       USE mod_sources
 # endif
       USE mod_stepping
@@ -113,6 +114,13 @@
 # ifdef DIAGNOSTICS_TS
      &                    DIAGS(ng) % DiaTwrk,                          &
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                    GRID(ng) % sgd_src,                           &
+     &                    SOURCES(ng) % Qsgd,                           &
+     &                    SOURCES(ng) % Tsgd,                           &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                    OCEAN(ng) % t)
 # ifdef PROFILE
       CALL wclock_off (ng, iNLM, 35)
@@ -158,6 +166,11 @@
 # ifdef DIAGNOSTICS_TS
      &                          DiaTwrk,                                &
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                          sgd_src, Qsgd, Tsgd,                    &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                          t)
 !***********************************************************************
 !
@@ -242,6 +255,13 @@
 #  ifdef DIAGNOSTICS_TS
       real(r8), intent(inout) :: DiaTwrk(LBi:,LBj:,:,:,:)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:,LBj:)
+      real(r8), intent(in) :: Qsgd
+      real(r8), intent(in) :: Tsgd(NT(ng))
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  ifdef SUN
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
 #  else
@@ -299,6 +319,13 @@
       real(r8), intent(inout) :: DiaTwrk(LBi:UBi,LBj:UBj,N(ng),NT(ng),  &
      &                                   NDT)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: Qsgd
+      real(r8), intent(in) :: Tsgd(NT(ng))
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
 
 #  if defined FLOATS && defined FLOAT_VWALK
@@ -582,7 +609,14 @@
 !
 !  Apply tracers point sources to the horizontal advection terms.
 !
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
+#  ifdef SGD_ON
+          DO is=1,Nsrc-1
+#  else
           DO is=1,Nsrc
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!          DO is=1,Nsrc   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
             i=Isrc(is)
             j=Jsrc(is)
             IF (INT(Dsrc(is)).eq.0) THEN
@@ -917,6 +951,18 @@
             END IF
           END DO
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+!
+!  Apply mass point sources - Volume influx.
+!
+          DO i=I_RANGE
+            FC(i,0)=FC(i,0)+Qsgd*Tsgd(itrc)*sgd_src(i,j)
+          END DO
+
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
           DO k=1,N(ng)
             DO i=I_RANGE
               cff1=CF(i,0)*(FC(i,k)-FC(i,k-1))

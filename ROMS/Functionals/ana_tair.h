@@ -89,6 +89,14 @@
           Tair(i,j)=23.567_r8
         END DO
       END DO
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined SHIRAHO_REEF
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Tair(i,j)=23.567_r8
+        END DO
+      END DO
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       ana_tair.h: no values provided for Tair.
 #endif

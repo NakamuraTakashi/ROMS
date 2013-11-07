@@ -56,6 +56,15 @@
 #ifdef BBL_MODEL
       USE mod_bbl, ONLY : allocate_bbl, initialize_bbl
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!!!----------------------------------------------------------------------
+!!!  Initialize coral polyp model parameters
+!!!----------------------------------------------------------------------
+#ifdef REEF_ECOSYS
+      USE mod_coral
+      USE mod_seagrass
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
       implicit none
 !
@@ -139,6 +148,15 @@
 #if defined UV_PSOURCE || defined TS_PSOURCE || defined Q_PSOURCE
           CALL allocate_sources (ng)
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!!!----------------------------------------------------------------------
+!!!  Initialize coral polyp model parameters
+!!!----------------------------------------------------------------------
+#ifdef REEF_ECOSYS
+          CALL initialize_coral(LBi, UBi, LBj, UBj)
+          CALL initialize_seagrass(LBi, UBi, LBj, UBj)
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !$OMP END MASTER
 !$OMP BARRIER
         END DO

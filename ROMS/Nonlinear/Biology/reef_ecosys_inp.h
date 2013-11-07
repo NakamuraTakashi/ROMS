@@ -51,8 +51,8 @@
 !
       igrid=1                            ! nested grid counter
       itracer=0                          ! LBC tracer counter
-      iTrcStr=isTvar(idbio(1))           ! first LBC tracer to process
-      iTrcEnd=isTvar(idbio(NBT))         ! last  LBC tracer to process
+      iTrcStr=1 !isTvar(idbio(1))           ! first LBC tracer to process
+      iTrcEnd=NBT !isTvar(idbio(NBT))         ! last  LBC tracer to process
       nline=0                            ! LBC multi-line counter
 !
 !-----------------------------------------------------------------------
@@ -212,7 +212,8 @@
               END IF
               ifield=isTvar(idbio(itracer))
               Npts=load_lbc(Nval, Cval, line, nline, ifield, igrid,     &
-     &                        iTrcStr, iTrcEnd, LBC)
+     &                      iTrcStr, iTrcEnd,                           &
+     &                      Vname(1,idTvar(idbio(itracer))), LBC)
 #if defined ADJOINT || defined TANGENT || defined TL_IOMS
             CASE ('ad_LBC(isTvar)')
               IF (itracer.lt.NBT) THEN
@@ -222,7 +223,8 @@
               END IF
               ifield=isTvar(idbio(itracer))
               Npts=load_lbc(Nval, Cval, line, nline, ifield, igrid,     &
-     &                      iTrcStr, iTrcEnd, ad_LBC)
+     &                      iTrcStr, iTrcEnd,                           &
+     &                      Vname(1,idTvar(idbio(itracer))), ad_LBC)
 #endif
 #ifdef TS_PSOURCE
             CASE ('LtracerSrc')
@@ -920,7 +922,7 @@
      &        a,i2.2,a)
   40  FORMAT (/,' read_BioPar - variable info not yet loaded, ',a)
   50  FORMAT (/,' read_BioPar - Error while processing line: ',/,a)
-  60  FORMAT (/,/,' Fennel Model Parameters, Grid: ',i2.2,              &
+  60  FORMAT (/,/,' REEF ECOSYS Model Parameters, Grid: ',i2.2,              &
      &        /,  ' =================================',/)
   70  FORMAT (1x,i10,2x,a,t30,a)
   80  FORMAT (1p,e11.4,2x,a,t30,a)

@@ -31,7 +31,8 @@
       USE mod_param
       USE mod_grid
       USE mod_ocean
-# ifdef Q_PSOURCE
+/*# ifdef Q_PSOURCE               !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:rm*/
+# if defined Q_PSOURCE ||  defined SGD_ON  /*!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add*/
       USE mod_sources
 # endif
 # if defined SEDIMENT && defined SED_MORPH
@@ -69,6 +70,12 @@
      &                 GRID(ng) % omn,                                  &
      &                 SEDBED(ng) % bed_thick,                          &
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                 GRID(ng) % sgd_src,                              &
+     &                 SOURCES(ng) % Qsgd,                              &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                 GRID(ng) % Huon,                                 &
      &                 GRID(ng) % Hvom,                                 &
      &                 GRID(ng) % z_w,                                  &
@@ -94,6 +101,12 @@
 # if defined SEDIMENT && defined SED_MORPH
      &                       omn, bed_thick,                            &
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                       sgd_src,                                   &
+     &                       Qsgd,                                      &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                       Huon, Hvom,                                &
      &                       z_w,                                       &
      &                       W)
@@ -131,6 +144,12 @@
       real(r8), intent(in) :: omn(LBi:,LBj:)
       real(r8), intent(in):: bed_thick(LBi:,LBj:,:)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:,LBj:)
+      real(r8), intent(in) :: Qsgd
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: Huon(LBi:,LBj:,:)
       real(r8), intent(in) :: Hvom(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
@@ -149,6 +168,12 @@
       real(r8), intent(in) :: omn(LBi:UBi,LBj:UBj)
       real(r8), intent(in):: bed_thick(LBi:UBi,LBj:UBj,2)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: Qsgd
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: Huon(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: Hvom(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
@@ -212,6 +237,16 @@
           END IF
         END DO
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+!
+!  Apply mass point sources - Volume influx.
+!
+        DO i=Istr,Iend
+          W(i,j,1)=W(i,j,1)+Qsgd*sgd_src(i,j)
+        END DO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
         DO i=Istr,Iend
           wrk(i)=W(i,j,N(ng))/(z_w(i,j,N(ng))-z_w(i,j,0))

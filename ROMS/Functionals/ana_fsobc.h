@@ -167,6 +167,16 @@
           BOUNDARY(ng)%zeta_east(j)=fac*val*COS(omega-phase)
         END DO
       END IF
+!!!>>>>>>> Shiraho reef case >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:Add
+#elif SHIRAHO_REEF
+      IF (LBC(ieast,isFsur,ng)%acquire.and.                            &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+        cff=-1.0_r8*sin(2.0_r8*pi*time(ng)/(12.0_r8*3600.0_r8))
+        DO j=JstrT,JendT
+          BOUNDARY(ng)%zeta_east(j)=cff
+        END DO
+      END IF
+!!!<<<<<<<< Shiraho reef case <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:Add
 #else
       IF (LBC(ieast,isFsur,ng)%acquire.and.                             &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN

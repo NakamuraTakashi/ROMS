@@ -86,6 +86,14 @@
 # if defined BIO_FENNEL && defined CARBON
           real(r8), pointer :: pH(:,:)
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+          real(r8), pointer :: pH(:,:)
+#  if defined CARBON_ISOTOPE
+          real(r8), pointer :: d13C_DIC(:,:,:)
+#  endif
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #endif
 
 #if defined TANGENT || defined TL_IOMS
@@ -318,6 +326,14 @@
 # if defined BIO_FENNEL && defined CARBON
       allocate ( OCEAN(ng) % pH(LBi:UBi,LBj:UBj) )
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+      allocate ( OCEAN(ng) % pH(LBi:UBi,LBj:UBj) )
+#  if defined CARBON_ISOTOPE
+      allocate ( OCEAN(ng) % d13C_DIC(LBi:UBi,LBj:UBj,N(ng)) )
+#  endif
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #endif
 
@@ -611,6 +627,11 @@
             DO i=Imin,Imax
               OCEAN(ng) % pden(i,j,k) = IniVal
               OCEAN(ng) % rho(i,j,k) = IniVal
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS && defined CARBON_ISOTOPE
+              OCEAN(ng) % d13C_DIC(i,j,k) = IniVal
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
               OCEAN(ng) % u(i,j,k,1) = IniVal
               OCEAN(ng) % u(i,j,k,2) = IniVal

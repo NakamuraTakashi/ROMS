@@ -569,6 +569,34 @@
             CALL AttrVect_importRAttr (ocn2wav_AV, TRIM(code), A, Asize)
             Iexport=Iexport+1
 
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined BULK_FLUXES
+          CASE ('Uwind')                   ! 2D U-momentum
+
+            CALL ROMS_export2d (ng, tile,                               &
+     &                          id, gtype, scale, add_offset,           &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          FORCES(ng)%Uwind(:,:),                  &
+     &                          Fields(id)%ExpMin, Fields(id)%ExpMax,   &
+     &                          Asize, A,                               &
+     &                          status)
+            CALL AttrVect_importRAttr (ocn2wav_AV, TRIM(code), A, Asize)
+            Iexport=Iexport+1
+
+          CASE ('Vwind')                   ! 2D V-momentum
+
+            CALL ROMS_export2d (ng, tile,                               &
+     &                          id, gtype, scale, add_offset,           &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          FORCES(ng)%Vwind(:,:),                  &
+     &                          Fields(id)%ExpMin, Fields(id)%ExpMax,   &
+     &                          Asize, A,                               &
+     &                          status)
+            CALL AttrVect_importRAttr (ocn2wav_AV, TRIM(code), A, Asize)
+            Iexport=Iexport+1
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
         END SELECT
       END DO
 !

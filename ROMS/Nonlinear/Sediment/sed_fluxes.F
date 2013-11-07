@@ -245,6 +245,15 @@
         SED_LOOP: DO ised=1,NST
           indx=idsed(ised)
           DO i=Istr,Iend
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!
+!  Compute erosion, ero_flux (kg/m2).
+!
+            IF(bed_mass(i,j,1,bnew,ised) .le. 0.1_r8) THEN
+              ero_flux(i,j,ised)= 0.0_r8
+            ELSE
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!
 !
 !  Calculate critical shear stress in Pa
 !
@@ -269,6 +278,9 @@
      &               MIN(MAX(0.0_r8,cff2*(cff*tau_w(i,j)-1.0_r8)),      &
      &                   MIN(cff3*bottom(i,j,iactv),cff4)+              &
      &                   settling_flux(i,j,ised))
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Update global tracer variables (m Tunits for nnew indx, Tuints for 3)
 !  for erosive flux.

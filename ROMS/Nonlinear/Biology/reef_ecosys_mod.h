@@ -311,7 +311,7 @@
       iPPro=ic
 # ifdef NUTRIENTS
       ic=ic+1
-      iNO3u=ic
+      iNO3_=ic
 # endif
 !
 !  Set number of 3D diagnostics terms.

@@ -407,7 +407,8 @@ endif
 		ROMS/Nonlinear/Sediment \
 		ROMS/Functionals \
 		ROMS/Utility \
-		ROMS/Modules
+		ROMS/Modules \
+		User/MyModules
 
  includes :=	ROMS/Include
 ifdef MY_ANALYTICAL

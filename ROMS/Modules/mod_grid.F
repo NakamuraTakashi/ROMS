@@ -290,6 +290,18 @@
           real(r8), pointer :: ad_z_w(:,:,:)
 # endif
 #endif
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+          real(r8), pointer :: sgd_src(:,:)
+# endif
+#ifdef REEF_ECOSYS
+          real(r8), pointer :: p_coral(:,:)
+          real(r8), pointer :: p_seagrass(:,:)
+          real(r8), pointer :: p_algae(:,:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
         END TYPE T_GRID
 
         TYPE (T_GRID), allocatable :: GRID(:)
@@ -480,6 +492,17 @@
       allocate ( GRID(ng) % ad_z_w(LBi:UBi,LBj:UBj,0:N(ng)) )
 # endif
 #endif
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+      allocate ( GRID(ng) % sgd_src(LBi:UBi,LBj:UBj) )
+# endif
+#ifdef REEF_ECOSYS
+      allocate ( GRID(ng) % p_coral(LBi:UBi,LBj:UBj) )
+      allocate ( GRID(ng) % p_seagrass(LBi:UBi,LBj:UBj) )
+      allocate ( GRID(ng) % p_algae(LBi:UBi,LBj:UBj) )
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
       RETURN
       END SUBROUTINE allocate_grid
@@ -684,6 +707,16 @@
             GRID(ng) % Uscope(i,j) = IniVal
             GRID(ng) % Vscope(i,j) = IniVal
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SGD_ON
+            GRID(ng) % sgd_src(i,j) = IniVal
+# endif
+#ifdef REEF_ECOSYS
+            GRID(ng) % p_coral(i,j) = IniVal
+            GRID(ng) % p_seagrass(i,j) = IniVal
+            GRID(ng) % p_algae(i,j) = IniVal
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           END DO
 
 #ifdef SOLVE3D

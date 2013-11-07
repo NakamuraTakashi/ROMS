@@ -129,6 +129,20 @@
           Vwind(i,j)=v_wind
         END DO
       END DO
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined SHIRAHO_REEF
+      IF ((tdays(ng)-dstart).le.6.0_r8) THEN
+        u_wind=0.0_r8
+!!      v_wind=4.7936_r8
+        v_wind=0.0_r8
+      END IF
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Uwind(i,j)=u_wind
+          Vwind(i,j)=v_wind
+        END DO
+      END DO
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       ana_winds.h: no values provided for Uwind and Vwind.
 #endif

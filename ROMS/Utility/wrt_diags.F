@@ -78,7 +78,7 @@
 !  Write out averaged time.
 !
       CALL netcdf_put_fvar (ng, iNLM, DIA(ng)%name,                     &
-     &                      TRIM(Vname(idtime,ng)), DIAtime(ng:),       &
+     &                      TRIM(Vname(idtime,ng)), time(ng:),          &  !!!TN:Chanded, DIAtime(ng:) -> time(ng:)
      &                      (/DIA(ng)%Rindex/), (/1/),                  &
      &                      ncid = DIA(ng)%ncid,                        &
      &                      varid = DIA(ng)%Vid(idtime))
@@ -215,7 +215,7 @@
         END DO
       END DO
 # endif
-# if defined DIAGNOSTICS_BIO && defined BIO_FENNEL
+# if defined DIAGNOSTICS_BIO && ( defined BIO_FENNEL || defined REEF_ECOSYS )  /* !!!TN:Changed */
 !
 !  Write out 2D biological diagnostic fields.
 !
@@ -235,7 +235,7 @@
      &                       DIA(ng)%Rindex, gtype,                     &
      &                       LBi, UBi, LBj, UBj, scale,                 &
 #  ifdef MASKING
-     &                       GRID(ng) % rmask_dia,                      &
+     &                       GRID(ng) % rmask_io,                       & !!!TN:Changed rmask_dia -> rmask_io
 #  endif
      &                       DIAGS(ng) % DiaBio2d(:,:,ivar))
           IF (status.ne.nf90_noerr) THEN
@@ -261,7 +261,7 @@
      &                       DIA(ng)%Rindex, gtype,                     &
      &                       LBi, UBi, LBj, UBj, 1, N(ng), scale,       &
 #  ifdef MASKING
-     &                       GRID(ng) % rmask_dia,                      &
+     &                       GRID(ng) % rmask_io,                      & !!!TN:Changed rmask_dia -> rmask_io
 #  endif
      &                       DIAGS(ng) % DiaBio3d(:,:,:,ivar))
           IF (status.ne.nf90_noerr) THEN

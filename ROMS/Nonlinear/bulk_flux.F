@@ -779,7 +779,8 @@
           stflx(i,j,itemp)=(srflx(i,j)+lrflx(i,j)+                      &
      &                      lhflx(i,j)+shflx(i,j))
 # ifdef EMINUSP
-          evap(i,j)=LHeat(i,j)/Hlv(i,j)
+!          evap(i,j)=LHeat(i,j)/Hlv(i,j)       !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+          evap(i,j)=0.0_r8                     !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:add
           stflx(i,j,isalt)=cff*(evap(i,j)-rain(i,j))
 # endif
 # ifdef MASKING

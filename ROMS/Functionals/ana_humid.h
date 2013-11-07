@@ -96,6 +96,14 @@
           Hair(i,j)=0.776_r8
         END DO
       END DO
+!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined SHIRAHO_REEF
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Hair(i,j)=0.776_r8
+        END DO
+      END DO
+!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       ana_humidity.h: no values provided for Hair.
 #endif

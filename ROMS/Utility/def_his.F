@@ -2318,6 +2318,112 @@
           IF (exit_flag.ne.NoError) RETURN
         END IF
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SGD_ON
+!
+!  Define time-varying SGD point sources.
+!
+        IF (Hout(idSgds,ng)) THEN
+          Vinfo( 1)=Vname(1,idSgds)
+          Vinfo( 2)=Vname(2,idSgds)
+          Vinfo( 3)=Vname(3,idSgds)
+          Vinfo(14)=Vname(4,idSgds)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idSgds,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idSgds),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+#endif
+
+#if defined REEF_ECOSYS
+!
+!  Define time-varying coral coverage.
+!
+        IF (Hout(idCorl,ng)) THEN
+          Vinfo( 1)=Vname(1,idCorl)
+          Vinfo( 2)=Vname(2,idCorl)
+          Vinfo( 3)=Vname(3,idCorl)
+          Vinfo(14)=Vname(4,idCorl)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idCorl,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCorl),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define time-varying seagrass coverage.
+!
+        IF (Hout(idSgrs,ng)) THEN
+          Vinfo( 1)=Vname(1,idSgrs)
+          Vinfo( 2)=Vname(2,idSgrs)
+          Vinfo( 3)=Vname(3,idSgrs)
+          Vinfo(14)=Vname(4,idSgrs)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idSgrs,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idSgrs),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define time-varying algal coverage.
+!
+        IF (Hout(idAlga,ng)) THEN
+          Vinfo( 1)=Vname(1,idAlga)
+          Vinfo( 2)=Vname(2,idAlga)
+          Vinfo( 3)=Vname(3,idAlga)
+          Vinfo(14)=Vname(4,idAlga)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idAlga,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idAlga),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+# ifdef CARBON_ISOTOPE
+!
+!  Define time-varying carbon isotope ratio (d13C) of DIC.
+!
+
+        IF (Hout(idd13C,ng)) THEN
+          Vinfo( 1)=Vname(1,idd13C)
+          Vinfo( 2)=Vname(2,idd13C)
+          Vinfo( 3)=Vname(3,idd13C)
+          Vinfo(14)=Vname(4,idd13C)
+          Vinfo(16)=Vname(1,idtime)
+#  if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+#  endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idd13C,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idd13C),   &
+     &                   NF_FOUT, nvd4, t3dgrd, Aval, Vinfo, ncname)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+# endif
+
+#endif
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !-----------------------------------------------------------------------
 !  Leave definition mode.

@@ -778,7 +778,7 @@
 #   undef DIAGNOSTICS_TS
 # endif
 #endif
-#if !defined BIO_FENNEL && defined DIAGNOSTICS_BIO
+#if (!defined BIO_FENNEL && !defined REEF_ECOSYS) && defined DIAGNOSTICS_BIO  /* !!!TN:Changed */
 #  undef DIAGNOSTICS_BIO
 #endif
 #if defined DIAGNOSTICS_BIO || defined DIAGNOSTICS_TS || \

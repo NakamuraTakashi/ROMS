@@ -4713,7 +4713,7 @@
 !
 !     fields 5 and 6: wind
 
-#ifndef AIR_OCEAN
+/*#ifndef AIR_OCEAN*/ /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TN:rm*/
       IF (IFLDYN(5) .EQ. 1) THEN
         CALL FLFILE ( 5, 6, WXI, WYI,                                     40.31
      &               0, JWX2, JWX3, 0, JWY2, JWY3,
@@ -4739,7 +4739,7 @@
      &          (TSTVAL(IPTST), IPTST=1,MIN(10,NPTST))
         ENDIF
       ENDIF
-# endif
+/*# endif/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TN:rm*/
  122  FORMAT (A, 10(1X,E11.4))
 !     field 4: friction coeff.
       IF (IFLDYN(4) .EQ. 1) THEN

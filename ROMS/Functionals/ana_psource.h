@@ -93,6 +93,11 @@
 #ifdef SEDIMENT
       USE mod_sediment
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+      USE mod_biology
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #ifdef DISTRIBUTE
 !
       USE distribute_mod, ONLY : mp_bcastf, mp_bcasti
@@ -234,6 +239,15 @@
             Jsrc(is)=is-Mm(ng)
           END DO
         END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined SHIRAHO_REEF
+        IF (Master.and.DOMAIN(ng)%SouthWest_Test(tile)) THEN
+          Nsrc=1
+          Dsrc(Nsrc)=0.0_r8
+          Isrc(Nsrc)=1
+          Jsrc(Nsrc)=58
+        END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
         ana_psource.h: No values provided for Nsrc, Dsrc, Isrc, Jsrc.
 #endif
@@ -448,6 +462,15 @@
 #  ifdef DISTRIBUTE
       CALL mp_collect (ng, iNLM, Msrc, Pspv, Qbar)
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined SHIRAHO_REEF
+      DO is=1,Nsrc
+        Qbar(is)=4.0d0   ! (m3/s)
+      END DO
+#  ifdef DISTRIBUTE
+      CALL mp_collect (ng, iNLM, Msrc, Pspv, Qbar)
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # else
       ana_psource.h: No values provided for Qbar.
 # endif
@@ -497,6 +520,38 @@
           Tsrc(Nsrc,k,isalt)=0.0_r8
         END DO
       END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif SHIRAHO_REEF
+      IF (DOMAIN(ng)%NorthEast_Test(tile)) THEN
+        DO k=1,N(ng)
+          DO is=1,Nsrc
+            Tsrc(is,k,itemp)=40.0d0
+            Tsrc(is,k,isalt)=50.0d0
+#  ifdef SEDIMENT
+            Tsrc(is,k,idmud(1))=1.0d0  !(kg/m3 = g/L) commonly 0.1 g/L see Blanco et al. 2010
+#  endif
+#  ifdef REEF_ECOSYS
+            Tsrc(is,k,iNO3_)=100.d0
+            Tsrc(is,k,iNH4_)=0.5d0
+            Tsrc(is,k,iChlo)=0.d0
+            Tsrc(is,k,iPhyt)=0.d0
+            Tsrc(is,k,iZoop)=0.d0
+            Tsrc(is,k,iLDeN)=0.1d0
+            Tsrc(is,k,iSDeN)=0.1d0
+#   ifdef CARBON
+            Tsrc(is,k,iLDeC)=0.01d0
+            Tsrc(is,k,iSDeC)=0.1d0
+            Tsrc(is,k,iTIC_)=3000.d0
+            Tsrc(is,k,iTAlk)=3000.d0
+#   endif
+#   ifdef OXYGEN
+            Tsrc(is,k,iOxyg)=10.0_r8/0.02241_r8
+#   endif
+#  endif
+          END DO
+        END DO
+      END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # else
       ana_psource.h: No values provided for Tsrc.
 # endif

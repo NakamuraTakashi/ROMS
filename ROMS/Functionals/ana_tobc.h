@@ -61,6 +61,12 @@
 #ifdef SEDIMENT
       USE mod_sediment
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef BIOLOGY
+      USE mod_biology
+      USE mod_geochem
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Imported variable declarations.
 !
@@ -218,6 +224,43 @@
           END DO
         END DO
       END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined SHIRAHO_REEF
+      IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO j=JstrT,JendT
+            BOUNDARY(ng)%t_east(j,k,itemp)=T0(ng)
+            BOUNDARY(ng)%t_east(j,k,isalt)=S0(ng)
+#  ifdef SEDIMENT
+            BOUNDARY(ng)%t_east(j,k,idmud(1))=0.0_r8  !(kg/m3 = g/L)
+#  endif
+#  ifdef REEF_ECOSYS
+            BOUNDARY(ng)%t_east(j,k,iTIC_)=TIC_0(ng)
+            BOUNDARY(ng)%t_east(j,k,iTAlk)=TAlk0(ng)
+            BOUNDARY(ng)%t_east(j,k,iOxyg)=Oxyg0(ng)
+#   ifdef CARBON_ISOTOPE
+            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#   endif
+#   ifdef NUTRIENTS
+            BOUNDARY(ng)%t_east(j,k,iNO3_)=0.5_r8
+            BOUNDARY(ng)%t_east(j,k,iNO2_)=0.05_r8
+            BOUNDARY(ng)%t_east(j,k,iNH4_)=0.1_r8
+            BOUNDARY(ng)%t_east(j,k,iPO4_)=0.03_r8
+            BOUNDARY(ng)%t_east(j,k,iChlo)=0.02_r8
+            BOUNDARY(ng)%t_east(j,k,iPhyt)=0.08_r8
+            BOUNDARY(ng)%t_east(j,k,iZoop)=0.06_r8
+            BOUNDARY(ng)%t_east(j,k,iLDeC)=0.002_r8
+            BOUNDARY(ng)%t_east(j,k,iSDeC)=0.06_r8
+            BOUNDARY(ng)%t_east(j,k,iLDeN)=0.02_r8
+            BOUNDARY(ng)%t_east(j,k,iSDeN)=0.04_r8
+#   endif
+#  endif
+
+          END DO
+        END DO
+      END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #else
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &

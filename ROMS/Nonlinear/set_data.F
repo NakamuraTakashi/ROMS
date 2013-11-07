@@ -760,6 +760,12 @@
      &                  update)
         IF (exit_flag.ne.NoError) RETURN
 
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
+#    ifdef SGD_ON
+        SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng))
+#    endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
 #    ifdef SOLVE3D
         DO k=1,N(ng)
           DO i=1,Nsrc(ng)
@@ -781,6 +787,13 @@
             IF (exit_flag.ne.NoError) RETURN
           END IF
         END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
+#    ifdef SGD_ON
+        DO itrc=1,NT(ng)
+          SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
+        END DO
+#    endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #   endif
       END IF
 #  endif

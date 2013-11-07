@@ -549,6 +549,36 @@
                   TEMPMCT(INDXG,7)=REAL( avdata(IP) )
                 END DO
               END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# else
+            CASE ('Uwind')               ! surface wind u-velocity
+
+              CALL AttrVect_exportRAttr (ocn2wav_AV, TRIM(code),        &
+     &                                   avdata, gsmsize)
+              Iimport=Iimport+1
+              IP=0
+              DO IY=Jstr,Jend
+                DO IX=Istr,Iend
+                  IP=IP+1
+                  INDXG=(IY-1)*MXC+IX
+                  TEMPMCT(INDXG,6)=REAL( avdata(IP) )
+                END DO
+              END DO
+
+            CASE ('Vwind')              ! surface wind v-velocity
+
+              CALL AttrVect_exportRAttr (ocn2wav_AV, TRIM(code),        &
+     &                                   avdata, gsmsize)
+              Iimport=Iimport+1
+              IP=0
+              DO IY=Jstr,Jend
+                DO IX=Istr,Iend
+                  IP=IP+1
+                  INDXG=(IY-1)*MXC+IX
+                  TEMPMCT(INDXG,7)=REAL( avdata(IP) )
+                END DO
+              END DO
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # endif
           END SELECT
         END DO

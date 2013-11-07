@@ -50,6 +50,9 @@
       USE mod_param
       USE mod_biology
       USE mod_scalars
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      USE mod_geochem
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Imported variable declarations.
 !
@@ -350,6 +353,43 @@
           END DO
         END DO
       END DO
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+
+#elif defined REEF_ECOSYS
+!
+!-----------------------------------------------------------------------
+!  Coral reef ecosystem model.
+!-----------------------------------------------------------------------
+!
+      DO k=1,N(ng)
+        DO j=JstrT,JendT
+          DO i=IstrT,IendT
+            t(i,j,k,1,iTIC_)=TIC_0(ng)     ! umol kg-1
+            t(i,j,k,1,iTAlk)=TAlk0(ng)     ! umol kg-1
+            t(i,j,k,1,iOxyg)=Oxyg0(ng)     ! umol L-1
+# ifdef CARBON_ISOTOPE
+            t(i,j,k,1,iT13C)=R13C_fromd13C( d13C0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+# endif
+# ifdef NUTRIENTS            
+            t(i,j,k,1,iNO3_)=0.5_r8
+            t(i,j,k,1,iNO2_)=0.05_r8
+            t(i,j,k,1,iNH4_)=0.1_r8
+            t(i,j,k,1,iPO4_)=0.03_r8
+            t(i,j,k,1,iChlo)=0.02_r8
+            t(i,j,k,1,iPhyt)=0.08_r8
+            t(i,j,k,1,iZoop)=0.06_r8
+            t(i,j,k,1,iLDeC)=0.002_r8
+            t(i,j,k,1,iSDeC)=0.06_r8
+            t(i,j,k,1,iLDeN)=0.02_r8
+            t(i,j,k,1,iSDeN)=0.04_r8
+# endif
+
+          END DO
+        END DO
+      END DO
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
 #endif
       RETURN
       END SUBROUTINE ana_biology_tile

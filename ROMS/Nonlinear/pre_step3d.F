@@ -533,7 +533,14 @@
 !
 !  Apply tracers point sources to the horizontal advection terms.
 !
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
+#   ifdef SGD_ON
+          DO is=1,Nsrc-1
+#   else
           DO is=1,Nsrc
+#   endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!          DO is=1,Nsrc  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
             i=Isrc(is)
             j=Jsrc(is)
             IF (LtracerSrc(itrc,ng).and.                                &

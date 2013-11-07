@@ -495,7 +495,7 @@
         END DO
 # endif
 
-# if defined DIAGNOSTICS_BIO && defined BIO_FENNEL
+# if defined DIAGNOSTICS_BIO && ( defined BIO_FENNEL || defined REEF_ECOSYS )  /* !!!TN:Changed */
 !
 !  Define 2D biological diagnostic fields.
 !
@@ -634,7 +634,7 @@
             END DO
           END DO
 # endif
-# ifdef BIO_FENNEL
+# if defined BIO_FENNEL || defined REEF_ECOSYS  /* !!!TN:Changed */
           DO ivar=1,NDbio2d
             ifield=iDbio2(ivar)
             IF (TRIM(var_name(i)).eq.TRIM(Vname(1,ifield))) THEN
@@ -709,7 +709,7 @@
           END DO
         END DO
 # endif
-# ifdef BIO_FENNEL
+# if defined BIO_FENNEL || defined REEF_ECOSYS  /* !!!TN:Changed */
         DO ivar=1,NDbio2d
           ifield=iDbio2(ivar)
           IF (.not.got_var(ifield).and.Dout(ifield,ng)) THEN

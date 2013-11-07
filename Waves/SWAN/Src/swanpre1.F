@@ -1136,6 +1136,20 @@
           PSNAME = 'WXGRID  '
 #ifdef MODEL_COUPLING
           CALL SINPGR (IGRD, IGR2, PSNAME)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+          IGR1 = 5
+          IGR2 = 6
+          LWINDR = 2                                                        30.10
+          IWIND  = LWINDM                                                   30.10
+          VARWI  = .TRUE.
+          IF (JVX2.EQ.0) THEN
+            MCMVAR = MCMVAR + 2
+            JWX2   = MCMVAR - 1
+            JWY2   = MCMVAR
+          ENDIF
+          IF (.NOT.ALLOCATED(WXI)) ALLOCATE(WXI(MXG(IGR1),MYG(IGR1)))
+          IF (.NOT.ALLOCATED(WYI)) ALLOCATE(WYI(MXG(IGR2),MYG(IGR2)))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #endif
         ELSE IF (KEYWIS ('WX')) THEN
           IGRD = 5

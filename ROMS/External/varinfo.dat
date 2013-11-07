@@ -2846,6 +2846,163 @@
   'r2dvar'
   1.0d0
 
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!
+!---------------------------------------------------------------------
+!  Define names of variables associated with Coral reef ecosystem 
+!  model.
+!---------------------------------------------------------------------
+!
+'p_coral'                                          ! Input/Output
+  'coral coverage'
+  'nondimensional'                                          ! []
+  'coverage, scalar, series'
+  'ocean_time'
+  'idCorl'
+  'r2dvar'
+  1.0d0
+
+'p_seagrass'                                          ! Input/Output
+  'seagrass coverage'
+  'nondimensional'                                          ! []
+  'coverage, scalar, series'
+  'ocean_time'
+  'idSgrs'
+  'r2dvar'
+  1.0d0
+
+'p_algae'                                          ! Input/Output
+  'algal coverage'
+  'nondimensional'                                          ! []
+  'coverage, scalar, series'
+  'ocean_time'
+  'idAlga'
+  'r2dvar'
+  1.0d0
+
+'sgd_src'                                          ! Input
+  'source points of submarine groundwater discharge'
+  'nondimensional'                                          ! []
+  'src, scalar, series'
+  'ocean_time'
+  'idSgds'
+  'r2dvar'
+  1.0d0
+
+'TI13C'                                              ! Input/Output
+  'total inorganic carbon'
+  'millimole_carbon meter-3'                       ! [millimole/m3]
+  'TI13C, scalar, series'
+  'ocean_time'
+  'idTvar(iT13C)'
+  'r3dvar'
+  1.0d0
+
+'d13C_DIC'                                              ! Input/Output
+  'carbon isotope ratio of DIC'
+  'per mill VPDB'                                       ! [per mill]
+  'd13C_DIC, scalar, series'
+  'ocean_time'
+  'idd13C'
+  'r3dvar'
+  1.0d0
+!
+!  Diagnostic variables.
+!
+'coral_Pg'                                             ! Input/Output
+  'coral gross photosynthetic rate'
+  'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
+  'Pg, scalar, series'
+  'ocean_time'
+  'iDbio2(iClPg)'
+  'r2dvar'
+  1.0d0
+
+'coral_R'                                             ! Input/Output
+  'coral respiration rate'
+  'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
+  'R, scalar, series'
+  'ocean_time'
+  'iDbio2(iCl_R)'
+  'r2dvar'
+  1.0d0
+
+'coral_Pn'                                             ! Input/Output
+  'coral net photosynthetic rate'
+  'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
+  'Pn, scalar, series'
+  'ocean_time'
+  'iDbio2(iClPn)'
+  'r2dvar'
+  1.0d0
+
+'coral_G'                                             ! Input/Output
+  'coral calcification rate'
+  'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
+  'G, scalar, series'
+  'ocean_time'
+  'iDbio2(iCl_G)'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Pg'                                             ! Input/Output
+  'seagrass gross photosynthetic rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'Pg, scalar, series'
+  'ocean_time'
+  'iDbio2(iSgPg)'
+  'r2dvar'
+  1.0d0
+
+'seagrass_R'                                             ! Input/Output
+  'coral respiration rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'R, scalar, series'
+  'ocean_time'
+  'iDbio2(iSg_R)'
+  'r2dvar'
+  1.0d0
+
+'seagrass_Pn'                                             ! Input/Output
+  'seagrass net photosynthetic rate'
+  'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
+  'Pn, scalar, series'
+  'ocean_time'
+  'iDbio2(iSgPn)'
+  'r2dvar'
+  1.0d0
+
+
+'pH'                                       ! Input/Output
+  'sea surface pH'
+  'total scale'                 ! [total scale]
+  'pH, scalar, series'
+  'ocean_time'
+  'iDbio2(ipHt_)'
+  'r2dvar'
+  1.0d0
+
+'Warg'                                       ! Input/Output
+  'sea surface aragonite saturation state'
+  'nodimension'                               ! []
+  'Warg, scalar, series'
+  'ocean_time'
+  'iDbio2(iWarg)'
+  'r2dvar'
+  1.0d0
+
+'PARbot'                                       ! Output
+  'bottom photn flux density'
+  'umol m-2 s-1'                               ! [umol m-2 s-1]
+  'PARbott, scalar, series'
+  'ocean_time'
+  'iDbio2(iPARb)'
+  'r2dvar'
+  1.0d0
+
+
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
 !
 !---------------------------------------------------------------------
 !  Define names of variables associated with Fennel et al (2006),

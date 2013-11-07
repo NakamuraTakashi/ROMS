@@ -28,7 +28,7 @@
 # if defined SEDIMENT && defined SED_MORPH && defined SOLVE3D
       USE mod_sedbed
 # endif
-# if defined UV_PSOURCE || defined Q_PSOURCE
+# if defined UV_PSOURCE || defined Q_PSOURCE  ||  defined SGD_ON  /*!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add ||  defined SGD_ON */
       USE mod_sources
 # endif
       USE mod_stepping
@@ -125,6 +125,11 @@
      &                  DIAGS(ng) % DiaRUfrc,   DIAGS(ng) % DiaRVfrc,   &
 #  endif
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                  GRID(ng) % sgd_src,     SOURCES(ng) % Qsgd,     &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                  OCEAN(ng) % rubar,      OCEAN(ng) % rvbar,      &
      &                  OCEAN(ng) % rzeta,                              &
      &                  OCEAN(ng) % ubar,       OCEAN(ng) % vbar,       &
@@ -207,6 +212,11 @@
      &                        DiaRUfrc, DiaRVfrc,                       &
 #  endif
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+     &                        sgd_src, Qsgd,                            &
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                        rubar, rvbar, rzeta,                      &
      &                        ubar,  vbar, zeta)
 !***********************************************************************
@@ -352,6 +362,12 @@
       real(r8), intent(inout) :: DiaRVfrc(LBi:,LBj:,:,:)
 #   endif
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:,LBj:)
+      real(r8), intent(in) :: Qsgd
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: rubar(LBi:,LBj:,:)
       real(r8), intent(inout) :: rvbar(LBi:,LBj:,:)
       real(r8), intent(inout) :: rzeta(LBi:,LBj:,:)
@@ -469,6 +485,12 @@
       real(r8), intent(inout) :: DiaRVfrc(LBi:UBi,LBj:UBj,3,NDM2d-1)
 #   endif
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#  ifdef SGD_ON
+      real(r8), intent(in) :: sgd_src(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: Qsgd
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: rubar(LBi:UBi,LBj:UBj,2)
       real(r8), intent(inout) :: rvbar(LBi:UBi,LBj:UBj,2)
       real(r8), intent(inout) :: rzeta(LBi:UBi,LBj:UBj,2)
@@ -940,6 +962,20 @@
         END IF
       END DO
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+!
+!  Apply mass point sources - Volume influx.
+
+      DO j=Jstr,Jend
+        DO i=Istr,Iend
+          zeta(i,j,knew)=zeta(i,j,knew)+Qsgd*pm(i,j)*pn(i,j)*           &
+     &                   dtfast(ng)*sgd_src(i,j)
+        END DO
+      END DO
+
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Set free-surface lateral boundary conditions.
 !
@@ -2476,7 +2512,14 @@
 !  Apply mass point sources.
 !-----------------------------------------------------------------------
 !
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
+#  ifdef SGD_ON
+      DO is=1,Nsrc-1
+#  else
       DO is=1,Nsrc
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!      DO is=1,Nsrc  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
         i=Isrc(is)
         j=Jsrc(is)
         IF (((IstrR.le.i).and.(i.le.IendR)).and.                        &

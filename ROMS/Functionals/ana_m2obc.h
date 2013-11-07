@@ -107,6 +107,13 @@
       real(r8) :: my_area, my_flux, tid_flow, riv_flow, cff1, cff2,     &
      &            model_flux
 #endif
+!!!>>>>>>> Shiraho reef case >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:Add
+#if defined SHIRAHO_REEF
+      real(r8) :: my_area, my_flux, tid_flow, riv_flow, cff1, cff2,     &
+     &            model_flux
+#endif
+!!!<<<<<<<< Shiraho reef case <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:Add
+
 #if defined TEST_CHAN
       real(r8) :: my_area, my_width
 #endif
