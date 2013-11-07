@@ -1,15 +1,14 @@
       SUBROUTINE read_BioPar (model, inp, out, Lwrite)
 !
-!svn $Id: fennel_inp.h 620 2012-06-07 18:31:34Z arango $
+!svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2012 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2013 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
 !                                                                      !
 !  This routine reads in Fennel et al. (2006) ecosystem model input    !
 !  parameters. They are specified in input script "fennel.in".         !
-!  It is included in routine "read_biopar.F".                          !
 !                                                                      !
 !=======================================================================
 !
@@ -51,8 +50,8 @@
 !
       igrid=1                            ! nested grid counter
       itracer=0                          ! LBC tracer counter
-      iTrcStr=1 !isTvar(idbio(1))           ! first LBC tracer to process
-      iTrcEnd=NBT !isTvar(idbio(NBT))         ! last  LBC tracer to process
+      iTrcStr=1                          ! first LBC tracer to process
+      iTrcEnd=NBT                        ! last  LBC tracer to process
       nline=0                            ! LBC multi-line counter
 !
 !-----------------------------------------------------------------------
@@ -143,7 +142,6 @@
               Npts=load_r(Nval, Rval, Ngrids, Oxyg0)
             CASE ('d13C0')
               Npts=load_r(Nval, Rval, Ngrids, d13C0)
-
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
             CASE ('TNU2')
               Npts=load_r(Nval, Rval, NBT*Ngrids, Rbio)
@@ -225,6 +223,16 @@
               Npts=load_lbc(Nval, Cval, line, nline, ifield, igrid,     &
      &                      iTrcStr, iTrcEnd,                           &
      &                      Vname(1,idTvar(idbio(itracer))), ad_LBC)
+#endif
+#ifdef TCLIMATOLOGY
+            CASE ('LtracerCLM')
+              Npts=load_l(Nval, Cval, NBT*Ngrids, Ltrc)
+              DO ng=1,Ngrids
+                DO itrc=1,NBT
+                  i=idbio(itrc)
+                  LtracerCLM(i,ng)=Ltrc(itrc,ng)
+                END DO
+              END DO
 #endif
 #ifdef TS_PSOURCE
             CASE ('LtracerSrc')
@@ -515,6 +523,7 @@
               END DO
 
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+
             CASE ('Dout(iCOfx)')
               IF (iDbio2(iCOfx).eq.0) THEN
                 IF (Master) WRITE (out,40) 'iDbio2(iCOfx)'
@@ -537,7 +546,6 @@
               DO ng=1,Ngrids
                 Dout(i,ng)=Lbio(ng)
               END DO
-
             CASE ('Dout(iO2fx)')
               IF (iDbio2(iO2fx).eq.0) THEN
                 IF (Master) WRITE (out,40) 'iDbio2(iO2fx)'
@@ -549,7 +557,6 @@
               DO ng=1,Ngrids
                 Dout(i,ng)=Lbio(ng)
               END DO
-
             CASE ('Dout(iPPro)')
               IF (iDbio3(iPPro).eq.0) THEN
                 IF (Master) WRITE (out,40) 'iDbio3(iPPro)'
@@ -679,6 +686,16 @@
      &            'Small detritus sinking velocity (m/day).'
             WRITE (out,80) pCO2air(ng), 'pCO2air',                      &
      &            'CO2 partial pressure in air (ppm by volume).'
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            WRITE (out,80) TAlk0(ng), 'TAlk0',                          &
+     &            'Total alkalinity  (umol/kg).'
+            WRITE (out,80) TIC_0(ng), 'TIC_0',                          &
+     &            'Total dissolved inorganic carbon (umol/kg).'
+            WRITE (out,80) Oxyg0(ng), 'Oxyg0',                          &
+     &            'Dissolved oxygen (umol/L).'
+            WRITE (out,80) d13C0(ng), 'd13C0',                          &
+     &            'd13C in DIC (per mill).'
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #ifdef TS_DIF2
             DO itrc=1,NBT
               i=idbio(itrc)
@@ -742,6 +759,14 @@
      &              'Nudging/relaxation time scale (days)',             &
      &              'for tracer ', i, TRIM(Vname(1,idTvar(i)))
             END DO
+#ifdef TCLIMATOLOGY
+            DO itrc=1,NBT
+              i=idbio(itrc)
+              WRITE (out,110) LtracerCLM(i,ng), 'LtracerCLM',           &
+     &              i, 'Processing climatology on tracer ', i,          &
+     &              TRIM(Vname(1,idTvar(i)))
+            END DO
+#endif
 #ifdef TS_PSOURCE
             DO itrc=1,NBT
               i=idbio(itrc)
@@ -779,7 +804,6 @@
      &       'Write out time-dependent d13C of DIC.'
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
    (defined RP_AVERAGES && defined TL_IOMS) || \
@@ -875,14 +899,14 @@
               DO itrc=1,NDbio2d
                 i=iDbio2(itrc)
                 IF (Dout(i,ng)) WRITE (out,130)                         &
-     &              Dout(i,ng), 'Dout(iDbio2)',                         &
+     &              Dout(i,ng), 'Hout(iDbio2)',                         &
      &              'Write out diagnostics for', TRIM(Vname(1,i))
               END DO
             END IF
             DO itrc=1,NDbio3d
               i=iDbio3(itrc)
               IF (Dout(i,ng)) WRITE (out,130)                           &
-     &            Dout(i,ng), 'Dout(iDbio3)',                           &
+     &            Dout(i,ng), 'Hout(iDbio3)',                           &
      &            'Write out diagnostics for', TRIM(Vname(1,i))
             END DO
 #endif
@@ -922,7 +946,7 @@
      &        a,i2.2,a)
   40  FORMAT (/,' read_BioPar - variable info not yet loaded, ',a)
   50  FORMAT (/,' read_BioPar - Error while processing line: ',/,a)
-  60  FORMAT (/,/,' REEF ECOSYS Model Parameters, Grid: ',i2.2,              &
+  60  FORMAT (/,/,' Reef Ecosys Model Parameters, Grid: ',i2.2,              &
      &        /,  ' =================================',/)
   70  FORMAT (1x,i10,2x,a,t30,a)
   80  FORMAT (1p,e11.4,2x,a,t30,a)

@@ -168,10 +168,10 @@
       real(r8), allocatable :: ZooMR(:)              ! 1/day
       real(r8), allocatable :: pCO2air(:)            ! ppmv
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-      real(r8), allocatable :: TAlk0(:)              ! ppmv
-      real(r8), allocatable :: TIC_0(:)              ! ppmv
-      real(r8), allocatable :: Oxyg0(:)              ! ppmv
-      real(r8), allocatable :: d13C0(:)              ! ppmv
+      real(r8), allocatable :: TAlk0(:)              ! umol/kg
+      real(r8), allocatable :: TIC_0(:)              ! umol/kg
+      real(r8), allocatable :: Oxyg0(:)              ! umol/L
+      real(r8), allocatable :: d13C0(:)              ! per mill
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       CONTAINS
 
@@ -311,7 +311,7 @@
       iPPro=ic
 # ifdef NUTRIENTS
       ic=ic+1
-      iNO3_=ic
+      iNO3u=ic
 # endif
 !
 !  Set number of 3D diagnostics terms.
