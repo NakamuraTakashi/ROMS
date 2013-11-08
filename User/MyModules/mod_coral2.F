@@ -1,5 +1,5 @@
 
-!!!====== ver 2013/01/09 ===============================================
+!!!=== ver 2013/01/09   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -23,7 +23,7 @@
     real(8), allocatable, save :: cCO2aqcoe(:,:,:)
 
 
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
 !  13C isotope
     real(8), allocatable, save :: DI13Ccal(:,:,:)
     real(8), allocatable, save :: DI13Ccoe(:,:,:)
@@ -33,7 +33,7 @@
     real(8), allocatable, save :: c13CO2aqcoe(:,:,:)
 #endif
 
-#if defined NUTRIENTS
+#if defined CORAL_NUTRIENTS
 !  Nutrients dynamics
     real(8), allocatable, save :: NO3coral(:,:,:)
     real(8), allocatable, save :: NO2coral(:,:,:)
@@ -87,7 +87,7 @@
       allocate( cCO2aqcal(nCL,LBi:UBi,LBj:UBj) , &
      &          cCO2aqcoe(nCL,LBi:UBi,LBj:UBj)   )
      
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
       allocate( DI13Ccal(nCL,LBi:UBi,LBj:UBj) , &
      &          DI13Ccoe(nCL,LBi:UBi,LBj:UBj) , &
      &          c13CH2O (nCL,LBi:UBi,LBj:UBj) , &
@@ -96,7 +96,7 @@
      &          c13CO2aqcoe(nCL,LBi:UBi,LBj:UBj)  )
 #endif
 
-#if defined NUTRIENTS
+#if defined CORAL_NUTRIENTS
       allocate( NO3coral(nCL,LBi:UBi,LBj:UBj), &
      &          NO2coral(nCL,LBi:UBi,LBj:UBj), &
      &          NH4coral(nCL,LBi:UBi,LBj:UBj), &
@@ -147,12 +147,12 @@
 !            CH2O (n,i,j)=3.d5 !450 ug/cm2 = 15 umol cm-2 -> 5.e6 umol kg-1 (腔腸内平均濃度とした）
             CH2O (n,i,j)=15.d0 !450 ug/cm2 = 15 umol cm-2 -> 5.e6 umol kg-1 (腔腸内平均濃度とした）
 
-#if defined NONE_CO2_EQ
+#if defined CORAL_NONE_CO2_EQ
             cCO2aqcal(n,i,j)= 9.d0
             cCO2aqcoe(n,i,j)=33.d0
 #endif
 
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
             R13C=R13C_fromd13C(-15.d0)
 !          c13CH2O (n,i,j)=R13C/(1.+R13C)*CH2O(n,i,j)
             c13CH2O (n,i,j)=R13C*CH2O(n,i,j)
@@ -165,7 +165,7 @@
 !          DI13Ccal (n,i,j)=R13C/(1.+R13C)*DICcal (n,i,j)
             DI13Ccal (n,i,j)=R13C*DICcal (n,i,j)
 
-# if defined NONE_CO2_EQ
+# if defined CORAL_NONE_CO2_EQ
             R13C=R13C_fromd13C(-8.d0)
             c13CO2aqcal(n,i,j)=R13C*cCO2aqcal(n,i,j)
 
@@ -185,7 +185,7 @@
 !!!  Main program of coral polyp model (Nakamura et al. 2013)
 !!! **********************************************************************
 
-    subroutine coral_polyp      &
+    subroutine coral_polyp        &
 !          input parameters
      &            (n,i,j          &   ! n: coral compartment; i,j: position
      &            ,dt             &   ! Time step (sec)
@@ -195,7 +195,7 @@
      &            ,DICamb         &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
      &            ,TAamb          &   ! Total alkalinity (TA: umol kg-1)
      &            ,DOamb          &   ! Dissolved oxygen (umol L-1)
-#if defined NUTRIENTS         
+#if defined CORAL_NUTRIENTS         
      &            ,NO3amb         &   ! NO3 (umol L-1)
      &            ,NO2amb         &   ! NO2 (umol L-1)
      &            ,NH4amb         &   ! NH4 (umol L-1)
@@ -206,7 +206,7 @@
      &            ,PHYamb         &   ! phytoplankton (umol C L-1)
      &            ,ZOOamb         &   ! zooplankton (umol C L-1)
 #endif
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
      &            ,DI13Camb       &   !13C of DIC (umol kg-1)
 #endif
      &            ,tau_amb        &   ! bottom shear stress (N m-2)
@@ -218,7 +218,7 @@
      &            ,DICuptake      &   ! DIC uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,TAuptake       &   ! TA  uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,DOuptake       &   ! DO  uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-#if defined NUTRIENTS
+#if defined CORAL_NUTRIENTS
      &            ,NO3uptake      &   ! NO3 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,NO2uptake      &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,NH4uptake      &   ! NH4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
@@ -229,7 +229,7 @@
      &            ,PHYuptake      &   ! Phytoplankton ingestion rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,ZOOuptake      &   ! Zooplankton ingestion rate (nmol cm-2 s-1)  * direction of water column to coral is positive
 #endif
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
      &            ,DI13Cuptake    &   ! DI13C uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
 #endif
      &             )
@@ -249,7 +249,7 @@
       real(8), intent(in) :: DICamb   
       real(8), intent(in) :: TAamb    
       real(8), intent(in) :: DOamb    
-#if defined NUTRIENTS
+#if defined CORAL_NUTRIENTS
       real(8), intent(in) :: NO3amb   
       real(8), intent(in) :: NO2amb   
       real(8), intent(in) :: NH4amb   
@@ -260,7 +260,7 @@
       real(8), intent(in) :: PHYamb   
       real(8), intent(in) :: ZOOamb   
 #endif
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
       real(8), intent(in) :: DI13Camb 
 #endif
       real(8), intent(in) :: tau_amb  
@@ -272,7 +272,7 @@
       real(8), intent(out) :: DICuptake
       real(8), intent(out) :: TAuptake 
       real(8), intent(out) :: DOuptake 
-#if defined NUTRIENTS
+#if defined CORAL_NUTRIENTS
       real(8), intent(out) :: NO3uptake
       real(8), intent(out) :: NO2uptake
       real(8), intent(out) :: NH4uptake
@@ -283,7 +283,7 @@
       real(8), intent(out) :: PHYuptake
       real(8), intent(out) :: ZOOuptake
 #endif
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
       real(8), intent(out) :: DI13Cuptake
 #endif
 
@@ -339,7 +339,7 @@
       real(8), parameter :: K_CH2O(nCL) = 5.d0   !umol cm-2!!!*適当
       real(8), parameter :: K_DO(nCL)   = 46.d0  ! ca. 46 (umol kg-1) Newton & Atkinson (1991)
 
-      real(8), parameter :: ratio(nCL)  = 1.0d0 !0.8d0  !1.0d0* !!!*適当
+      real(8), parameter :: ratio(nCL)  = 0.9d0 !!!0.9d0 0.8d0  !1.0d0* !!!*適当
 
 !     Temperature dependency parameters (Hikosaka et al. 2006) 
 !        - Parameters estimated from data by Fujimura et al. (2008)
@@ -350,20 +350,20 @@
 
 !      real(8), parameter :: k_Gn(nCL) /1.d-2/!(未使用）
 
-      real(8), parameter :: eeff = 0.3d0 !0.05d0 !0.3d0*!Energy efficency of calcification
-      real(8), parameter :: E_other = 5.0d3 !1.d4 ! 5.0d3* Energy flux of other metabolisms (nJ cm-2 s-1)
+      real(8), parameter :: eeff = 0.01d0   !!! 0.01d0 0.02d0 !0.3d0*!Energy efficency of calcification
+      real(8), parameter :: E_other = 1.d4 !!! 1.d4 ! 5.0d3* Energy flux of other metabolisms (nJ cm-2 s-1)
 
-      real(8), parameter :: k_CO2i = 1.5d-3 !1.5d-3* !permeability coefficient (cm s-1): Sueltemeyer and Rinast (1996): (1.49d-3 cm s-1)
-      real(8), parameter :: k_TA   = 3.0d-3 !5.0d-5 !3.0d-3* !conductivity of TA through the leak pass (cm s-1) *Tuned
-      real(8), parameter :: k_DIC  = 3.0d-3 !5.0d-5 !3.0d-3* !conductivity of DIC through the leak pass (cm s-1) *Tuned
+      real(8), parameter :: k_CO2i = 1.5d-3 ! 1.5d-3* !permeability coefficient (cm s-1): Sueltemeyer and Rinast (1996): (1.49d-3 cm s-1)
+      real(8), parameter :: k_TA   = 3.0d-5 !!! 3.0d-5  5.0d-5 !3.0d-3* !conductivity of TA through the leak pass (cm s-1) *Tuned
+      real(8), parameter :: k_DIC  = 3.0d-5 !!! 3.0d-5  5.0d-5 !3.0d-3* !conductivity of DIC through the leak pass (cm s-1) *Tuned
 
 !----- for carbon isotope ------------------------
 
-#if defined CARBON_ISOTOPE
-      real(8), parameter :: a_phot = -20.d-3+1.d0!!!!!!!!!!!!!!!!!!適当
-      real(8), parameter :: a_resp =   0.d-3+1.d0
-      real(8), parameter :: a_calc =   2.7d-3+1.d0 
-      real(8), parameter :: a_co2  =  -8.d-3+1.d0!!!!!!!!!!!!!!!!!!適当-8-4.4
+#if defined CORAL_CARBON_ISOTOPE
+      real(8), parameter :: a_phot = -20.0d-3 + 1.0d0!!!!!!!!!!!!!!!!!!適当
+      real(8), parameter :: a_resp =   0.0d-3 + 1.0d0
+      real(8), parameter :: a_calc =   2.7d-3 + 1.0d0 
+      real(8), parameter :: a_co2  =  -7.0d-3 + 1.0d0!!!!!!!!!!!!!!!!!!適当-8-4.4
 #endif
 
 !--- Other variables ----------------------------------------------
@@ -374,7 +374,7 @@
       real(8) pHcal,fCO2cal,cHCO3cal,cCO3cal,Wargcal
       real(8) pHcoe,fCO2coe,cHCO3coe,cCO3coe
       real(8) pHamb,fCO2amb,cCO2aqamb,cHCO3amb,cCO3amb,Wargamb  !!!!!不要：アウトプット用
-#if defined NONE_CO2_EQ
+#if defined CORAL_NONE_CO2_EQ
       real(8) cHcoe,cOHcoe
       real(8) cHcal,cOHcal
       real(8) leak_CO2aq, CO2aquptake
@@ -394,7 +394,7 @@
 !----- for cabon isotope calculation -------------------
 
       real(8) d13C_DICcoe,d13C_DICcal,d13C_CH2O,d13C_DICamb,d13C_arg
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
       real(8) R13Ccoe,R13Ccal,R13CH2O,R13Camb,R13Carg
       real(8) R13Cleak,R13Cfco2,R13Cuptake
       real(8) F_13CO2,k_13CO2i
@@ -406,7 +406,8 @@
       real(8) R13C_HCO3cal
       real(8) c13CO2aqamb
 #endif
-
+      real(8) d11Barg
+      
 !  Output
       real(8), save :: time        = 0.d0  !sec
       real(8), save :: S_PFD_dt    = 0.d0
@@ -418,6 +419,8 @@
       real(8), save :: S_CH2O_dt    = 0.d0
       real(8), save :: dsec         = 0.d0 !sec
       real(8), save :: dday         = 1.d0 !day
+
+      real(8), save :: S_d11BargxGn_dt = 0.d0
 
 
 !----------- Temperature (K)  --------------------------------
@@ -446,7 +449,7 @@
 !      Si_PHY=(65.7d0*tau_amb**0.4d0+4.7d0)*1.d-4
 !      Si_nZOO=(65.7d0*tau_amb**0.4d0+4.7d0)*1.d-4
 
-#if defined NUTRIENTS
+#if defined CORAL_NUTRIENTS
 
 !------- Nutrients flux (nmol cm-2 s-1) ------------------------
 
@@ -491,7 +494,7 @@
 #endif
 
 !----CO2*+H2O <-> H+ +HCO3- is none equilibrium
-#if defined NONE_CO2_EQ
+#if defined CORAL_NONE_CO2_EQ
 !----------- CO2 system in calcified fulid -------------------
       pHcal     = pH_fromATCTcCO2aq(TAcal(n,i,j),DICcal(n,i,j),cCO2aqcal(n,i,j),TKamb, Samb)
       cHCO3cal  = cHCO3_noneq(DICcal(n,i,j),cCO2aqcal(n,i,j),pHcal,TKamb, Samb)!! for Isotope
@@ -530,7 +533,7 @@
       cCO3coe   = cCO3_fromCTpH(DICcoe(n,i,j),pHcoe,TKamb, Samb)!! for Isotope
       fCO2coe   = fCO2_fromcCO2aq(cCO2aqcoe(n,i,j),TKamb, Samb)  !! for output
 
-# if defined TESTMODE
+# if defined CORAL_TESTMODE
 !----------- CO2 system in ambient seawater ------------------- !! for output
       pHamb   = pH_fromATCT(TAamb,DICamb,TKamb, Samb)
       cCO2aqamb = cCO2aq_fromCTpH(DICamb,pHamb,TKamb, Samb)
@@ -539,7 +542,7 @@
       fCO2amb   = fCO2_fromcCO2aq(cCO2aqamb,TKamb, Samb)  !! for output
       Wargamb = Warg_fromcCO3(cCO3amb,TKamb, Samb)
 # endif
-#endif  /*end NONE_CO2_EQ*/
+#endif  /*end CORAL_NONE_CO2_EQ*/
 
 
 !----- Gross photosynthesis rate (nmolO2 cm-2 s-1) -----------------
@@ -590,7 +593,7 @@
 !  C6H12O6 + 6 O2 + 38 ADP + 38 Pi -> 6 CO2 + 6 H2O + 38 ATP  dG=-2873.4 kJ/mol
 !  ATP + H2O -> ADP + Pi  dG=-7.3kcal/mol=-30.5kJ/mol
 
-      E_tot=30.5d3*38.d0/6.d0*R  !nJ cm-2 s-1
+      E_tot=30.5d3 * 38.0d0/6.0d0 * R  !nJ cm-2 s-1
       E_ca=E_tot-E_other
       E_ca=max(E_ca,0.d0) !Error handring
 
@@ -603,7 +606,7 @@
 !      F_H=max(F_H,0.) !Error handring
 !      F_H=E_ca/50000.*2.
 
-#if defined NUTRIENTS
+#if defined CORAL_NUTRIENTS
 !
 !----- Plankton predation --------------------------
 !      PHYuptake=Si(nPHY)*cPHY*1.023d0
@@ -630,15 +633,15 @@
 !   DO uptake (nmol cm-2 s-1)
       DOuptake =Si*(DOamb-DOcoe(n,i,j))*1.023d0
 
-#if defined NONE_CO2_EQ
+#if defined CORAL_NONE_CO2_EQ
       leak_CO2aq=k_DIC*(cCO2aqcoe(n,i,j)-cCO2aqcal(n,i,j))*1.023d0
       CO2aquptake=Si*(cCO2aqamb-cCO2aqcoe(n,i,j))*1.023d0
 #endif
 
 !!! ----- Isotope calculation ----------------------------------------------------
-#if defined CARBON_ISOTOPE  
+#if defined CORAL_CARBON_ISOTOPE  
 
-# if defined NONE_CO2_EQ
+# if defined CORAL_NONE_CO2_EQ
 !----------- CO2 system in calcified fulid -------------------
 
 !      cH13CO3cal  = cH13CO3_noneq(DI13Ccal(n,i,j), c13CO2aqcal(n,i,j), pHcal, TKamb, Samb)
@@ -695,13 +698,14 @@
       DI13Cuptake=Si *(DI13Camb-DI13Ccoe(n,i,j))*1.023d0
       leak_DI13C=k_DIC*(DI13Ccoe(n,i,j)-DI13Ccal(n,i,j))*1.023d0
                     
-# if defined NONE_CO2_EQ
+# if defined CORAL_NONE_CO2_EQ
 ! Carbon isotope fluxes
       c13CO2aquptake=Si *(c13CO2aqamb-c13CO2aqcoe(n,i,j))*1.023d0
       leak_13CO2aq=k_DIC*(c13CO2aqcoe(n,i,j)-c13CO2aqcal(n,i,j))*1.023d0
 # endif
 
 #endif /* End isotope calculation */
+
 
 !------------ internal condition change -----------------------------
 
@@ -758,7 +762,7 @@
      &             )/coe_tick/1.023d0 *dt   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
       DOcoe (n,i,j)=max( DOcoe (n,i,j),0.d0) !Error handring
 
-#if defined NONE_CO2_EQ
+#if defined CORAL_NONE_CO2_EQ
 
       kp1=kp1_Johnson1982(TKamb, Samb)
       km1=km1_Johnson1982(TKamb, Samb)
@@ -804,7 +808,7 @@
 #endif
 
 !!! ----- Isotope calculation ----------------------------------------------------
-#if defined CARBON_ISOTOPE
+#if defined CORAL_CARBON_ISOTOPE
 
 !      a_calc=exp((3.-0.140*Gn/0.011098)/1000.)    ! kinetic effect calcualtion: 1 mm y-1 
                    ! -> (10cm*1.4g/cm) /(365*24*60*60s*40g/mol)* 10**6 = 0.011098 umol cm-2 s-1
@@ -837,7 +841,7 @@
      &             )/cal_tick/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
 
 
-# if defined NONE_CO2_EQ
+# if defined CORAL_NONE_CO2_EQ
 
       kp1=kp1/1.013d0
       km1=km1/1.022d0
@@ -894,12 +898,16 @@
       d13C_arg=d13C_fromR13C(R13Carg)
 
 #endif  /* End isotope calculation */
+#if defined CORAL_BORON_ISOTOPE
+      d11Barg = d11B_BOH4_frompHd11BT(pHcal,39.5d0, TKamb, Samb)
+#endif  /* End isotope calculation */
+
 
 !------------------------------------------------------------------------
 ! Print section (for debug)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!debug
-#if defined DEBUG
+#if defined CORAL_DEBUG
       if(i.eq.35 .and. j.eq.96) then
         
         Pn=Pg-R
@@ -916,7 +924,7 @@
 #endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!debug
 
-#if defined TESTMODE
+#if defined CORAL_TESTMODE
 
       time = time +dt  ! sec
       
@@ -938,7 +946,8 @@
      &   ,cCO2aqcal(n,i,j),cHCO3cal,cCO3cal &
      &   ,cCO2aqcoe(n,i,j),cHCO3coe,cCO3coe &
      &   ,c13CO2aqcal(n,i,j),cH13CO3cal,c13CO3cal &
-     &   ,c13CO2aqcoe(n,i,j),cH13CO3coe,c13CO3coe
+     &   ,c13CO2aqcoe(n,i,j),cH13CO3coe,c13CO3coe &
+     &   ,d11Barg
      
       dsec=dsec+10.*60.  !!!!!!!!!!!!!!! print 10 min interval 
 !      dsec=dsec+60.*60.  !!!!!!!!!!!!!!! print 1 hour interval 
@@ -954,6 +963,8 @@
       S_Pg_dt        =S_Pg_dt+Pg*dt
       S_R_dt         =S_R_dt +R *dt
       S_CH2O_dt      =S_CH2O_dt+CH2O(n,i,j)*dt
+      
+      S_d11BargxGn_dt=S_d11BargxGn_dt+d11Barg*Gn*dt
 
       if((time/86400.).ge.dday) then
 
@@ -967,7 +978,8 @@
      &   ,S_d13CargxGn_dt            &
      &   ,S_d13CargxGn_dt/S_Gn_dt    &  !d13C
      &   ,S_d13CCH2O_dt/24./60./60.  & ! 1 day avaraged value of d13C_CH2O
-     &   ,Wargamb
+     &   ,Wargamb,TAamb,DICamb,pHamb   &
+     &   ,S_d11BargxGn_dt/S_Gn_dt    
 
         dday=dday+1.d0 !!!!!!!!!!!!!!!! print 1 day interval
         
@@ -978,6 +990,8 @@
         S_Pg_dt=0.d0
         S_R_dt=0.d0
         S_CH2O_dt=0.d0
+        
+        S_d11BargxGn_dt=0.d0
 
       endif
 #endif
@@ -986,7 +1000,7 @@
      end subroutine coral_polyp
 
 
-#if defined NUTRIENTS
+#if defined CORAL_NUTRIENTS
 
 !!! **********************************************************************
 !!!  Zooxanthellae population dynamics
@@ -1364,7 +1378,7 @@
 !------------------------------------------------------------------------
 ! Print section (for debug)
 
-# if defined TESTMODE
+# if defined CORAL_TESTMODE
 
 !      if(iprint.eq.0) then
 !

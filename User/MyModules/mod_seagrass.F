@@ -1,5 +1,5 @@
 
-!!!====== ver 2013/01/09 ===============================================
+!!!=== ver 2013/01/09   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -130,8 +130,8 @@
       real(8) ldocn,ldocd
 #endif
 #if defined CARBON_ISOTOPE
-      real(8), parameter :: a_phot  = -20.d-3+1.d0!!!!!!!!!!!!!!!!!!“K“–
-      real(8), parameter :: a_resp  =   0.d-3+1.d0!!!!!!!!!!!!!!!!!!“K“–
+      real(8), parameter :: a_phot  = -7.d-3+1.d0  ! -5 to -10 per mill (Dr. Miyajima, pers. comn.)
+      real(8), parameter :: a_resp  =  0.d-3+1.d0  !
       real(8) R13C_DIC, R13C_CH2O
 #endif
 

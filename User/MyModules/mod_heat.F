@@ -1,5 +1,5 @@
 
-!!!====== ver 2013/01/10 ===============================================
+!!!=== ver 2013/05/15   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -10,98 +10,217 @@
 
     implicit none
 
-    real(8), allocatable, save ::                 &
-     &  radi(:,:,:)    ,radir(:,:,:)            
+    real(8), allocatable, save :: tg(:,:) 
+
 
   contains
-
 !!! **********************************************************************
-!!!  set initial conditions for ecosystem model
+!!!  set initial conditions for heat
 !!! **********************************************************************
 
-      subroutine heat_setini(im,jm,kb)
+    subroutine initialize_heat(LBi, UBi, LBj, UBj)
 
       implicit none
-      
-      integer, intent(in) :: im,jm,kb  !Grid size of x, y, z
-      
-!      integer, parameter :: imm1=im-1, jmm1=jm-1, kbm1=kb-1
+! input parameters
+      integer, intent(in) :: LBi, UBi, LBj, UBj
+      integer i,j,n
 
-      integer i,j,k
 
-      allocate( radi(im,jm,kb)   ,radir(im,jm,kb) )
+      allocate( tg(LBi:UBi,LBj:UBj)  )
 
-!   Initialization
-      radi(:,:,:)=0.
-      radir(:,:,:)=0.
+!  Set initial conditions
+      do j=LBj,UBj
+        do i=LBi,UBi
+          tg(i,j)=29.1d0
+        enddo
+      enddo
 
       return
-    end subroutine heat_setini
+    end subroutine initialize_heat
 
 
 ! **********************************************************************
-!  shortwave radiation (W/m2) of water column
+!  Heat and mass balance of water column
 ! **********************************************************************
 
-    subroutine shortwave(im,jm,kb,ssradi,dz,d)
+    SUBROUTINE heat_mass_balance  &
+!          input parameters
+     &            (N              &   ! Number of vertical grid (following ROMS vertical grid)
+     &            ,i,j            &   ! i,j: position
+     &            ,dt             &   ! Time step (sec)
+     &            ,dz             &   ! dz(N): vertical grid size (m)
+     &            ,ssradi         &   ! Surface shortwave radiation (W m-2)
+     &            ,tair           &   ! air temperature (oC)
+     &            ,pair           &   ! atm pressure (hPa)
+     &            ,eair           &   ! vapor pressur (hPa)
+     &            ,u10            &   ! wind speed (m s-1)
+     &            ,fvol_pre       &   ! Precipitation volume flux (m s-1)
+
+     &            ,Tmp            &   ! Tmp(N): Temperature (oC)
+     &            ,Sal            &   ! Sal(N): Salinity (PSU)
+
+!          output parameters
+     &            ,dTmp_dt        &   ! dTmp_dt(N): dTmp/dt (K s-1)
+     &             )
+!
+!-----------------------------------------------------------------------
+!                                                                       
+!                     rho point    Face                                 
+!                       (i,j)                                           
+!                    _____|______  _N    Surface                        
+!                   /     |      /|                                     
+!      z     Layer /___________ / |                                     
+!                  |           |  |_N-1                                 
+!     dz(N) {   N  |           | /|                                     
+!                  |___________|/ : :                                   
+!                  |           |  :      Water column                   
+!               :  :           :  |_2                                   
+!               :  :           : /|                                     
+!               :  |___________|/ |                                     
+!                  |           |  |_1                                   
+!     dz(2) {   2  |           | /|                                     
+!                  |___________|/ |                                     
+!                  |           |  |_0    Bottom                         
+!     dz(1) {   1  |           | /                                      
+!                  |___________|/                                       
+!                                                                       
+!                                                                       
+!      A vertical section of the ecosys grid showing water column.      
+!-----------------------------------------------------------------------
 !
       implicit none
 
-      integer, intent(in) :: im,jm,kb  !Grid size of x, y, z
-      real(8), intent(in) :: ssradi    ! Sea surface solar radiation (W m-2)
-      real(8), intent(in) :: dz(kb)    ! ohmega grid size
-      real(8), intent(in) :: d(im,jm)  ! water depth (m)
+! input parameters
+      integer, intent(in) :: N          
+      integer, intent(in) :: i,j        
+      real(8), intent(in) :: dt         
+      real(8), intent(in) :: dz(N)      
+      real(8), intent(in) :: ssradi     
+      real(8), intent(in) :: tair    ! air temperature (oC)
+      real(8), intent(in) :: pair    ! atm pressure (hPa)
+      real(8), intent(in) :: eair    ! vapor pressur (hPa)
+      real(8), intent(in) :: u10        
+      real(8), intent(in) :: fvol_pre  ! Precipitation volume flux (m s-1)
 
-      real(8) tr, bsed,cbsed
+      real(8), intent(in) :: Tmp(N)        
+      real(8), intent(in) :: Sal(N)        
+! output parameters
+      real(8), intent(out) :: dTmp_dt(N)     
+
+      real(8), parameter :: Cpw   = 3.99d6   ! Seawater heat capacity 3.99d6 J m-3 K-1
+      real(8), parameter :: Eevap = 2.44d6   ! Heat of evaporation 2.44d6 J m-3
+
+      real(8) :: lradi, sens
+      real(8) :: fvol_evap
+      real(8) :: radi, radir
+      real(8) :: tr, bsed,cbsed
         !Tr: transmission, 
         !bsed: turbidity parameter; offshere water = 1, 
         !                           coast water    = 2-3, 
         !                           cloudy water   = 5-9
         !cbsed:adjusting parameter for bsed
-      integer i,j,k
+        
+      real(8) :: Ftbot    ! Bottom heat flux (K m s-1)
+      real(8) :: Diff     ! Vertical eddy diffusion coefficient (m2 s-1)
+            
+      integer :: k
+
+
+      cbsed=10. !!!“K“–!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Check after Sed changed
+
+!-----------------------------------------------------------------------
+! Initialize all time difference values (d_XXX)
+!-----------------------------------------------------------------------
+      
+      DO k=1,N
+        dTmp_dt(k) = 0.0d0
+!        dSal_dt(k) = 0.0d0
+      END DO
+      
+!-----------------------------------------------------------------------
+! Sea suface heat flux
+!-----------------------------------------------------------------------
+
+! Long wave radiation (W m-2)
+      lradi = long_wave_radi(Tmp(N))
+
+! Sensible heat (W m-2)
+      sens = sensheat(Tmp(N), tair, pair, eair, u10)
+
+! Evaporation volume flux (m s-1)
+      fvol_evap=evaporation(Tmp(N), Sal(N), tair, pair, eair, u10) 
+      
+
+
+      dTmp_dt(N) = dTmp_dt(N) + ( (-lradi -sens -fvol_evap*Eevap)/Cpw     &
+     &                             +fvol_pre*(tair-Tmp(N))                &
+     &                          )  /dz(N)
+
+!-----------------------------------------------------------------------
+! Water column heat flux
+!-----------------------------------------------------------------------
+      
+! Short wave radiation
 
 ! Ref. Kondo et al.(1979) J. Phys. Oceanogr. 9, 360-372.
 !      Kondo (1994) book
 
-      cbsed=10. !!!“K“–!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Check after Sed changed
-
-      do j=2,jm-1
-        do i=2,im-1
-        
-!         Sea surface
-          radi(i,j,1)=(1.e0-0.07)*ssradi
-                  
-          do k=1,kb-1
-            bsed=1.0e0!+cbsed*Ci(nSed,i,j,1)
-            tr= 0.14*exp(500.0e0 *dz(k)*d(i,j))         &
-     &         +0.23*exp( 12.0e0 *dz(k)*d(i,j))         &
-     &         +0.14*exp( 25.0e0 *dz(k)*d(i,j))         &
-     &         +0.13*exp(  0.4e0 *dz(k)*d(i,j))         &
-     &         +0.20*exp(  0.1e0 *dz(k)*d(i,j)*bsed)         &
-     &         +0.16*exp(  0.04e0*dz(k)*d(i,j)*bsed)
-            radi(i,j,k+1)=radi(i,j,1)*tr
-            
-          end do
-
-!         Refrection from bottom
-          radir(i,j,kb)=-(1.e0-0.7)*radi(i,j,kb) !TN:Albedo of bottom sediment = 0.7            
-          
-          do k=kb-1,1,-1
-            bsed=1.0e0!+cbsed*Ci(nSed,i,j,1)
-            tr= 0.14*exp(500.0e0 *dz(k)*d(i,j))         &
-     &         +0.23*exp( 12.0e0 *dz(k)*d(i,j))         &
-     &         +0.14*exp( 25.0e0 *dz(k)*d(i,j))         &
-     &         +0.13*exp(  0.4e0 *dz(k)*d(i,j))         &
-     &         +0.20*exp(  0.1e0 *dz(k)*d(i,j)*bsed)         &
-     &         +0.16*exp(  0.04e0*dz(k)*d(i,j)*bsed)
-            radir(i,j,k)=radir(i,j,k+1)*tr
-          end do
-          
-        end do
-      end do
+      radi=(1.0d0-0.07)*ssradi
       
-      return
-    end subroutine shortwave
+      do k=N,1,-1
+        bsed=2.0e0!+cbsed*Ci(nSed,i,j,1)
+        tr= 0.14*exp(-500.0d0 *dz(k))         &
+     &     +0.23*exp( -12.0d0 *dz(k))         &
+     &     +0.14*exp( -25.0d0 *dz(k))         &
+     &     +0.13*exp(  -0.4d0 *dz(k))         &
+     &     +0.20*exp(  -0.1d0 *dz(k)*bsed)    &
+     &     +0.16*exp(  -0.04d0*dz(k)*bsed)
+
+        dTmp_dt(k) = dTmp_dt(k) + radi*(1.0d0-tr)/Cpw/dz(k)
+
+        radi=radi*tr
+
+      end do
+
+!     Refrection from bottom
+      radir=(1.0d0-0.5)*radi !TN:Albedo of bottom sediment = 0.7            
+      
+!-----------------------------------------------------------------------
+! Bottom heat flux
+!-----------------------------------------------------------------------
+      
+      Diff = 1.0d-3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      
+      Ftbot= Diff *(tg(i,j)-Tmp(1))/(dz(1)/2)
+      dTmp_dt(1) = dTmp_dt(1) + Ftbot/dz(1)
+
+      tg(i,j)=tg(i,j)                                &
+     &         +(-1.0d0/(0.1*86400.)*(tg(i,j)-29.0)  &  ! 0.1 day relaxation time
+     &            -Ftbot                             &
+     &            +(radi-radir)/3.0d6/0.1            &  ! ‰·“x‚Ìã‚ª‚éŠâ”Õ‚ÌŒú‚³‚ğ0.2m‚Æ‰¼’è
+     &           )*dt                                   ! Šâ”Õ‚Ì”M—e—Ê3.0e6 J m-3 K-1‚Æ‰¼’è
+
+!-----------------------------------------------------------------------
+! Water column heat flux
+!-----------------------------------------------------------------------
+
+      do k=1,N
+        bsed=2.0d0!+cbsed*Ci(nSed,i,j,1)
+        tr= 0.14*exp(-500.0d0 *dz(k))         &
+     &     +0.23*exp( -12.0d0 *dz(k))         &
+     &     +0.14*exp( -25.0d0 *dz(k))         &
+     &     +0.13*exp(  -0.4d0 *dz(k))         &
+     &     +0.20*exp(  -0.1d0 *dz(k)*bsed)    &
+     &     +0.16*exp(  -0.04d0*dz(k)*bsed)
+     
+        dTmp_dt(k) = dTmp_dt(k) + radir*(1.0d0-tr)/Cpw/dz(k)
+
+        radir=radir*tr
+        
+      end do
+          
+      RETURN
+    END SUBROUTINE heat_mass_balance
 
 
 !! **********************************************************************
@@ -211,22 +330,22 @@
 
 !      tair=27.0
 !      pair=1013.0
-!      Hum=50.e0   ! Humidity
+!      Hum=50.d0   ! Humidity
 
-!      eair=sat_vapor_press(tair)*Hum/100.e0    ! vapor pressur (hPa)
+!      eair=sat_vapor_press(tair)*Hum/100.d0    ! vapor pressur (hPa)
       rhoatm=dens_air(tair,pair,eair)                   !density of air (kg m-3)
       spHuma=specific_humidity(eair,pair)               !air specific humidity (kg kg-1)
-      esw=(1.e0-5.37e-4*Ssurf)*sat_vapor_press(tsurf)   !vapor pressur on sea surface(hPa)
+      esw=(1.d0-5.37d-4*Ssurf)*sat_vapor_press(tsurf)   !vapor pressur on sea surface(hPa)
       spHumw=specific_humidity(esw,pair)                !specific humidity at sea surface (kg kg-1)
 
-      evaporation=rhoatm*1.2e-3*u10*(spHumw-spHuma)*1.0e-3 ! Evaporation volume flux (m s-1)
+      evaporation=rhoatm*1.2d-3*u10*(spHumw-spHuma)*1.0d-3 ! Evaporation volume flux (m s-1)
 
       return
     end function evaporation
 
 
 ! **********************************************************************
-!  Sensible heat (W m-2)
+!  Sensible heat (W m-2)  [sea surface to air is postive]
 ! **********************************************************************
 
     real(8) function sensheat(tsurf, tair, pair, eair, u10) !sensible heat (W m-2)
@@ -248,7 +367,7 @@
 !      eair=sat_vapor_press(tair)*Hum/100.e0    ! vapor pressur (hPa)
 
       rhoatm=dens_air(tair,pair,eair)                 !density of air (kg m-3)
-      sensheat=1005.e0*rhoatm*1.2e-3*u10*(tsurf-tair) !sensible heat (W m-2)
+      sensheat=1005.d0*rhoatm*1.2d-3*u10*(tsurf-tair) !sensible heat (W m-2)
               !1005 J kg-1 K-1 -> ‹ó‹C‚Ì’èˆ³”ä”M
       return
     end function sensheat
@@ -263,7 +382,7 @@
 !                          input parameters
       real(8), intent(in) :: tsurf   ! Sea surface temperature (oC)
       
-      long_wave_radi = 0.96*(5.670e-8*(tsurf+273.15)**4-295.0)!295.“K“– ‘å‹C¨ŠC—m‚Ö‚Ì’·”g•úË(W/m2)
+      long_wave_radi = 0.96*(5.670d-8*(tsurf+273.15)**4-295.0)!295.“K“– ‘å‹C¨ŠC—m‚Ö‚Ì’·”g•úË(W/m2)
       
       return
     end function long_wave_radi
