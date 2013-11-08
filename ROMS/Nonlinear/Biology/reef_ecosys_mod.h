@@ -310,8 +310,8 @@
       ic=1     ! ic reset
       iPPro=ic
 #ifdef CARBON_ISOTOPE
-      i=i+1
-      id13C=ic+i  ! +1
+      ic=ic+1
+      id13C=ic  ! +1
 #endif
 #ifdef NUTRIENTS
       ic=ic+1
