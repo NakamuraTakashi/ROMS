@@ -56,7 +56,7 @@
 !***********************************************************************
 !
       USE mod_param
-# if defined DIAGNOSTICS_BIO && ( defined BIO_FENNEL || defined REEF_ECOSYS ) /*!!!TN:changed*/
+# if defined DIAGNOSTICS_BIO && defined BIO_FENNEL
       USE mod_biology
 # endif
       USE mod_diags
@@ -73,7 +73,7 @@
 # endif
 # ifdef DISTRIBUTE
 #  if defined WET_DRY         || \
-     (defined DIAGNOSTICS_BIO &&  ( defined BIO_FENNEL || defined REEF_ECOSYS ) ) /*!!!TN:changed*/
+     (defined DIAGNOSTICS_BIO && defined BIO_FENNEL)
       USE mp_exchange_mod, ONLY : mp_exchange2d
 #  endif
       USE mp_exchange_mod, ONLY : mp_exchange3d
@@ -516,7 +516,7 @@
 # endif
 
 # if defined DIAGNOSTICS_TS  || defined DIAGNOSTICS_UV || \
-    (defined DIAGNOSTICS_BIO &&  ( defined BIO_FENNEL || defined REEF_ECOSYS ) ) /*!!!TN:change*/
+    (defined DIAGNOSTICS_BIO && defined BIO_FENNEL)
 !
 !-----------------------------------------------------------------------
 !  Apply periodic or gradient boundary conditions for output purposes.
@@ -583,7 +583,7 @@
 #    endif
 #   endif
 #  endif
-#  if defined DIAGNOSTICS_BIO && ( defined BIO_FENNEL || defined REEF_ECOSYS ) /*!!!TN:changed*/
+#  if defined DIAGNOSTICS_BIO && defined BIO_FENNEL
 !
 !  Biological terms 2D diagnostics.
 !

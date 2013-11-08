@@ -25,6 +25,12 @@
       CALL ana_biology_tile (ng, tile, model,                           &
      &                       LBi, UBi, LBj, UBj,                        &
      &                       IminS, ImaxS, JminS, JmaxS,                &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined REEF_ECOSYS
+     &                       OCEAN(ng) % HisBio2d,                      &
+     &                       OCEAN(ng) % HisBio3d,                      &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                       OCEAN(ng) % t)
 !
 ! Set analytical header file name used.
@@ -44,6 +50,12 @@
       SUBROUTINE ana_biology_tile (ng, tile, model,                     &
      &                             LBi, UBi, LBj, UBj,                  &
      &                             IminS, ImaxS, JminS, JmaxS,          &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined REEF_ECOSYS
+     &                             HisBio2d,                            &
+     &                             HisBio3d,                            &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                             t)
 !***********************************************************************
 !
@@ -61,8 +73,20 @@
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
 !
 #ifdef ASSUMED_SHAPE
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+      real(r8), intent(inout) :: HisBio2d(LBi:,LBj:,:)
+      real(r8), intent(inout) :: HisBio3d(LBi:,LBj:,:,:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: t(LBi:,LBj:,:,:,:)
 #else
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined REEF_ECOSYS
+      real(r8), intent(inout) :: HisBio2d(LBi:UBi,LBj:UBj,NHbio2d)
+      real(r8), intent(inout) :: HisBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
 #endif
 !
@@ -77,6 +101,12 @@
       real(r8) :: cff10, cff11, cff12, cff13, cff14, cff15
       real(r8) :: salt, sftm, temp
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined REEF_ECOSYS
+      real(r8) :: TmpK, Salt, sspH, cCO3, cCO2aq, ssfCO2, ssCO2flux
+      real(r8) :: DOsatu, ssO2flux
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #include "set_bounds.h"
 
@@ -383,8 +413,43 @@
             t(i,j,k,1,iLDeN)=0.02_r8
             t(i,j,k,1,iSDeN)=0.04_r8
 # endif
+            HisBio3d(i,j,k,iPPro) = 0.0_r8
+            HisBio3d(i,j,k,id13C) = d13C0(ng)
 
           END DO
+        END DO
+      END DO
+      
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+
+          TmpK = t(i,j,N(ng),1,iTemp)+273.15_r8
+          Salt = t(i,j,N(ng),1,iSalt)
+
+          HisBio2d(i,j,iClPg) = 0.0_r8
+          HisBio2d(i,j,iCl_R) = 0.0_r8
+          HisBio2d(i,j,iClPn) = 0.0_r8
+          HisBio2d(i,j,iCl_G) = 0.0_r8
+          HisBio2d(i,j,iSgPg) = 0.0_r8
+          HisBio2d(i,j,iSg_R) = 0.0_r8
+          HisBio2d(i,j,iSgPn) = 0.0_r8
+          
+          DOsatu=O2satu(TmpK,Salt)
+          ssO2flux = Flux_O2(Oxyg0(ng), DOsatu, 0.0d0, TmpK, Salt )  ! sea to air is positive
+          HisBio2d(i,j,iO2fx) = ssO2flux
+
+          sspH = pH_fromATCT( TAlk0(ng), TIC_0(ng),TmpK, Salt )
+          cCO3=cCO3_fromCTpH( TIC_0(ng), sspH, TmpK, Salt )
+          cCO2aq = cCO2aq_fromCTpH( TIC_0(ng), sspH, TmpK, Salt )
+
+          HisBio2d(i,j,ipHt_) = sspH
+          HisBio2d(i,j,iWarg) = Warg_fromcCO3( cCO3, TmpK, Salt )
+          
+          ssfCO2 = fCO2_fromcCO2aq( cCO2aq, TmpK, Salt )
+          HisBio2d(i,j,ipCO2) = ssfCO2
+          
+          ssCO2flux = Flux_CO2(ssfCO2, pCO2air(ng), 0.0d0, TmpK, Salt )  ! sea to air is positive 
+          HisBio2d(i,j,iCOfx) = ssCO2flux
         END DO
       END DO
 

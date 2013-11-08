@@ -28,10 +28,6 @@
                 idSgrs=varid
               CASE ('idAlga')
                 idAlga=varid
-# ifdef CARBON_ISOTOPE
-              CASE ('idd13C')
-                idd13C=varid
-# endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
               CASE ('idTvar(iTIC_)')
                 idTvar(iTIC_)=varid
@@ -64,7 +60,51 @@
               CASE ('idTvar(iSDeC)')
                 idTvar(iSDeC)=varid
 # endif
+              CASE ('iHbio2(iClPg)')
+                iHbio2(iClPg)=varid
+              CASE ('iHbio2(iCl_R)')
+                iHbio2(iCl_R)=varid
+              CASE ('iHbio2(iClPn)')
+                iHbio2(iClPn)=varid
+              CASE ('iHbio2(iCl_G)')
+                iHbio2(iCl_G)=varid
+              CASE ('iHbio2(iSgPg)')
+                iHbio2(iSgPg)=varid
+              CASE ('iHbio2(iSg_R)')
+                iHbio2(iSg_R)=varid
+              CASE ('iHbio2(iSgPn)')
+                iHbio2(iSgPn)=varid
 
+              CASE ('iHbio2(ipHt_)')
+                iHbio2(ipHt_)=varid
+              CASE ('iHbio2(iWarg)')
+                iHbio2(iWarg)=varid
+
+
+              CASE ('iHbio2(iCOfx)')
+                iHbio2(iCOfx)=varid
+              CASE ('iHbio2(ipCO2)')
+                iHbio2(ipCO2)=varid
+              CASE ('iHbio2(iO2fx)')
+                iHbio2(iO2fx)=varid
+
+              CASE ('iHbio2(iPARb)')
+                iHbio2(iPARb)=varid
+
+              CASE ('iHbio3(iPPro)')
+                iHbio3(iPPro)=varid
+# ifdef CARBON_ISOTOPE
+              CASE ('iHbio3(id13C)')
+                iHbio3(id13C)=varid
+# endif
+# ifdef NUTRIENTS
+              CASE ('iHbio3(iNO3u)')
+                iHbio3(iNO3u)=varid
+#  ifdef DENITRIFICATION
+              CASE ('iHbio2(iDNIT)')
+                iHbio2(iDNIT)=varid
+#  endif
+# endif
 
 /*
 **  Adjoint sensitivity state biological tracers.
@@ -268,51 +308,4 @@
 #endif
 
 
-#ifdef DIAGNOSTICS_BIO
-
-/*
-**  Biological tracers term diagnostics.
-*/
-              CASE ('iDbio2(iClPg)')
-                iDbio2(iClPg)=varid
-              CASE ('iDbio2(iCl_R)')
-                iDbio2(iCl_R)=varid
-              CASE ('iDbio2(iClPn)')
-                iDbio2(iClPn)=varid
-              CASE ('iDbio2(iCl_G)')
-                iDbio2(iCl_G)=varid
-              CASE ('iDbio2(iSgPg)')
-                iDbio2(iSgPg)=varid
-              CASE ('iDbio2(iSg_R)')
-                iDbio2(iSg_R)=varid
-              CASE ('iDbio2(iSgPn)')
-                iDbio2(iSgPn)=varid
-
-              CASE ('iDbio2(ipHt_)')
-                iDbio2(ipHt_)=varid
-              CASE ('iDbio2(iWarg)')
-                iDbio2(iWarg)=varid
-
-
-              CASE ('iDbio2(iCOfx)')
-                iDbio2(iCOfx)=varid
-              CASE ('iDbio2(ipCO2)')
-                iDbio2(ipCO2)=varid
-              CASE ('iDbio2(iO2fx)')
-                iDbio2(iO2fx)=varid
-
-              CASE ('iDbio2(iPARb)')
-                iDbio2(iPARb)=varid
-
-              CASE ('iDbio3(iPPro)')
-                iDbio3(iPPro)=varid
-# ifdef NUTRIENTS
-              CASE ('iDbio3(iNO3u)')
-                iDbio3(iNO3u)=varid
-#  ifdef DENITRIFICATION
-              CASE ('iDbio2(iDNIT)')
-                iDbio2(iDNIT)=varid
-#  endif
-# endif
-#endif
 

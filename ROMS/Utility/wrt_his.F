@@ -72,6 +72,7 @@
       integer :: LBij, UBij
 #endif
       integer :: Fcount, gfactor, gtype, status, tile
+      integer :: ifield
 #ifdef SOLVE3D
       integer :: i, itrc, j, k
 #endif
@@ -2523,32 +2524,56 @@
           RETURN
         END IF
       END IF
-# ifdef CARBON_ISOTOPE
 !
-!  Write out time-dependent d13C of DIC
+!  Write out time-dependent Biological 2D fields.
 !
+      DO i=1,NHbio2d
+        ifield=iHbio2(i)
+        IF (Hout(ifield,ng)) THEN
+          scale=1.0_r8
+          gtype=gfactor*r2dvar
+          status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid,                    &
+     &                     HIS(ng)%Vid(ifield),                         &
+     &                     HIS(ng)%Rindex, gtype,                       &
+     &                     LBi, UBi, LBj, UBj, scale,                   &
+# ifdef MASKING
+     &                     GRID(ng) % rmask_io,                         &
+# endif
+     &                     OCEAN(ng) % HisBio2d(:,:,i))
+          IF (status.ne.nf90_noerr) THEN
+            IF (Master) THEN
+              WRITE (stdout,10) TRIM(Vname(1,ifield)), HIS(ng)%Rindex
+            END IF
+            exit_flag=3
+            ioerror=status
+            RETURN
+          END IF
+        END IF
+      END DO
 
-      IF (Hout(idd13C,ng)) THEN
-        scale=1.0_r8
-        gtype=gfactor*r3dvar
-        status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idd13C), &
+      DO i=1,NHbio3d
+        ifield=iHbio3(i)
+        IF (Hout(ifield,ng)) THEN
+          scale=1.0_r8
+          gtype=gfactor*r3dvar
+          status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid,                    &
+     &                     HIS(ng)%Vid(ifield),                         &
      &                     HIS(ng)%Rindex, gtype,                       &
      &                     LBi, UBi, LBj, UBj, 1, N(ng), scale,         &
 # ifdef MASKING
      &                     GRID(ng) % rmask_io,                         &
 # endif
-     &                     OCEAN(ng) % d13C_DIC)
-        IF (status.ne.nf90_noerr) THEN
-          IF (Master) THEN
-            WRITE (stdout,10) TRIM(Vname(1,idd13C)), HIS(ng)%Rindex
+     &                     OCEAN(ng) % HisBio3d(:,:,:,i))
+          IF (status.ne.nf90_noerr) THEN
+            IF (Master) THEN
+              WRITE (stdout,10) TRIM(Vname(1,ifield)), HIS(ng)%Rindex
+            END IF
+            exit_flag=3
+            ioerror=status
+            RETURN
           END IF
-          exit_flag=3
-          ioerror=status
-          RETURN
         END IF
-      END IF
-
-# endif
+      END DO
 
 #endif
 

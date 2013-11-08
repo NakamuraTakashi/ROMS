@@ -35,6 +35,10 @@
 
       logical, dimension(Ngrids) :: Lbio
       logical, dimension(NBT,Ngrids) :: Ltrc
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      logical, dimension(NHbio2d,Ngrids) :: Hbio2
+      logical, dimension(NHbio3d,Ngrids) :: Hbio3
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
       real(r8), dimension(NBT,Ngrids) :: Rbio
 
@@ -298,15 +302,34 @@
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idAlga,:))
 
-#ifdef CARBON_ISOTOPE
-            CASE ('Hout(idd13C)')
-              IF (idd13C.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idd13C'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idd13C,:))
-#endif
+            CASE ('Hout(iHbio2)')
+              Npts=load_l(Nval, Cval, NHbio2d*Ngrids, Hbio2)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbio2d
+                  i=iHbio2(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbio2(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Hout(i,ng)=Hbio2(itrc,ng)
+                END DO
+              END DO
+            CASE ('Hout(iHbio3)')
+              Npts=load_l(Nval, Cval, NHbio3d*Ngrids, Hbio3)
+              DO ng=1,Ngrids
+                DO itrc=1,NHbio3d
+                  i=iHbio3(itrc)
+                  IF (i.eq.0) THEN
+                    IF (Master) WRITE (out,30)                          &
+     &                                'iHbio3(', itrc, ')'
+                    exit_flag=5
+                    RETURN
+                  END IF
+                  Hout(i,ng)=Hbio3(itrc,ng)
+                END DO
+              END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #if defined AVERAGES    || \
@@ -407,193 +430,6 @@
                   Dout(idDtrc(itrc,iTvdif),ng)=Ltrc(i,ng)
                 END DO
               END DO
-#endif
-#ifdef DIAGNOSTICS_BIO
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-            CASE ('Dout(iClPg)')
-              IF (iDbio2(iClPg).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iClPg)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iClPg)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iCl_R)')
-              IF (iDbio2(iCl_R).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iCl_R)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iCl_R)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iClPn)')
-              IF (iDbio2(iClPn).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iClPn)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iClPn)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iCl_G)')
-              IF (iDbio2(iCl_G).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iCl_G)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iCl_G)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iSgPg)')
-              IF (iDbio2(iSgPg).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iSgPg)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iSgPg)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iSg_R)')
-              IF (iDbio2(iSg_R).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iSg_R)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iSg_R)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iSgPn)')
-              IF (iDbio2(iSgPn).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iSgPn)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iSgPn)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-
-            CASE ('Dout(ipHt_)')
-              IF (iDbio2(ipHt_).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(ipHt_)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(ipHt_)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iWarg)')
-              IF (iDbio2(iWarg).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iWarg)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iWarg)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iPARb)')
-              IF (iDbio2(iPARb).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iPARb)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iPARb)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-
-            CASE ('Dout(iCOfx)')
-              IF (iDbio2(iCOfx).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iCOfx)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iCOfx)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(ipCO2)')
-              IF (iDbio2(ipCO2).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(ipCO2)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(ipCO2)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iO2fx)')
-              IF (iDbio2(iO2fx).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iO2fx)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iO2fx)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-            CASE ('Dout(iPPro)')
-              IF (iDbio3(iPPro).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio3(iPPro)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio3(iPPro)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-# ifdef NUTRIENTS
-            CASE ('Dout(iNO3u)')
-              IF (iDbio3(iNO3u).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio3(iNO3u)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio3(iNO3u)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-#  ifdef DENITRIFICATION
-            CASE ('Dout(iDNIT)')
-              IF (iDbio2(iDNIT).eq.0) THEN
-                IF (Master) WRITE (out,40) 'iDbio2(iDNIT)'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Lbio)
-              i=iDbio2(iDNIT)
-              DO ng=1,Ngrids
-                Dout(i,ng)=Lbio(ng)
-              END DO
-#  endif
-# endif
 #endif
           END SELECT
         END IF
@@ -789,20 +625,34 @@
             END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 
-          IF (Hout(idCorl,ng)) WRITE (out,120) Hout(idCorl,ng),         &
-     &       'Hout(idCorls)',                                            &
-     &       'Write out time-dependent coral coverage.'
-          IF (Hout(idSgrs,ng)) WRITE (out,120) Hout(idSgrs,ng),         &
-     &       'Hout(idSgrs)',                                            &
-     &       'Write out time-dependent seagrass coverage.'
-          IF (Hout(idAlga,ng)) WRITE (out,120) Hout(idAlga,ng),         &
-     &       'Hout(idAlga)',                                            &
-     &       'Write out time-dependent algal coverage.'
+            IF (Hout(idCorl,ng)) WRITE (out,120) Hout(idCorl,ng),         &
+     &         'Hout(idCorls)',                                            &
+     &         'Write out time-dependent coral coverage.'
+            IF (Hout(idSgrs,ng)) WRITE (out,120) Hout(idSgrs,ng),         &
+     &         'Hout(idSgrs)',                                            &
+     &         'Write out time-dependent seagrass coverage.'
+            IF (Hout(idAlga,ng)) WRITE (out,120) Hout(idAlga,ng),         &
+     &         'Hout(idAlga)',                                            &
+     &         'Write out time-dependent algal coverage.'
 #ifdef CARBON_ISOTOPE
-          IF (Hout(idd13C,ng)) WRITE (out,120) Hout(idd13C,ng),         &
-     &       'Hout(idd13C)',                                            &
-     &       'Write out time-dependent d13C of DIC.'
+            IF (Hout(idd13C,ng)) WRITE (out,120) Hout(idd13C,ng),         &
+     &         'Hout(idd13C)',                                            &
+     &         'Write out time-dependent d13C of DIC.'
 #endif
+            IF (NHbio2d.gt.0) THEN
+              DO itrc=1,NHbio2d
+                i=iHbio2(itrc)
+                IF (Hout(i,ng)) WRITE (out,130)                         &
+     &              Hout(i,ng), 'Hout(iHbio2)',                         &
+     &              'Write out', TRIM(Vname(1,i))
+              END DO
+            END IF
+            DO itrc=1,NHbio3d
+              i=iHbio3(itrc)
+              IF (Hout(i,ng)) WRITE (out,130)                           &
+     &            Hout(i,ng), 'Hout(iHbio3)',                           &
+     &            'Write out', TRIM(Vname(1,i))
+            END DO
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined AVERAGES    || \
    (defined AD_AVERAGES && defined ADJOINT) || \
@@ -892,22 +742,6 @@
      &          WRITE (out,120) .TRUE., 'Dout(iTvdif)',                 &
      &              'Write out vertical diffusion, tracer ', itrc,      &
      &              TRIM(Vname(1,idTvar(itrc)))
-            END DO
-#endif
-#ifdef DIAGNOSTICS_BIO
-            IF (NDbio2d.gt.0) THEN
-              DO itrc=1,NDbio2d
-                i=iDbio2(itrc)
-                IF (Dout(i,ng)) WRITE (out,130)                         &
-     &              Dout(i,ng), 'Hout(iDbio2)',                         &
-     &              'Write out diagnostics for', TRIM(Vname(1,i))
-              END DO
-            END IF
-            DO itrc=1,NDbio3d
-              i=iDbio3(itrc)
-              IF (Dout(i,ng)) WRITE (out,130)                           &
-     &            Dout(i,ng), 'Hout(iDbio3)',                           &
-     &            'Write out diagnostics for', TRIM(Vname(1,i))
             END DO
 #endif
           END IF

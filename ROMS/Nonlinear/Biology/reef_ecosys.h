@@ -128,13 +128,8 @@
      &                   FORCES(ng) % sustr,                            &
      &                   FORCES(ng) % svstr,                            &
 #endif
-#ifdef CARBON_ISOTOPE
-     &                   OCEAN(ng) % d13C_DIC,                          &
-#endif
-#ifdef DIAGNOSTICS_BIO
-     &                   DIAGS(ng) % DiaBio2d,                          &
-     &                   DIAGS(ng) % DiaBio3d,                          &
-#endif
+     &                   OCEAN(ng) % HisBio2d,                          &
+     &                   OCEAN(ng) % HisBio3d,                          &
      &                   GRID(ng) % p_coral,                            &
      &                   GRID(ng) % p_seagrass,                         &
      &                   GRID(ng) % p_algae,                            &
@@ -176,12 +171,7 @@
 #else
      &                         sustr, svstr,                            &
 #endif
-#ifdef CARBON_ISOTOPE
-     &                         d13C_DIC,                                &
-#endif
-#ifdef DIAGNOSTICS_BIO
-     &                         DiaBio2d, DiaBio3d,                      &
-#endif
+     &                         HisBio2d, HisBio3d,                      &
      &                         p_coral,                                 &
      &                         p_seagrass,                              &
      &                         p_algae,                                 &
@@ -228,13 +218,8 @@
       real(r8), intent(in) :: sustr(LBi:,LBj:)
       real(r8), intent(in) :: svstr(LBi:,LBj:)
 # endif
-#ifdef CARBON_ISOTOPE
-      real(r8), intent(inout) :: d13C_DIC(LBi:,LBj:,:)
-#endif
-# ifdef DIAGNOSTICS_BIO
-      real(r8), intent(inout) :: DiaBio2d(LBi:,LBj:,:)
-      real(r8), intent(inout) :: DiaBio3d(LBi:,LBj:,:,:)
-# endif
+      real(r8), intent(inout) :: HisBio2d(LBi:,LBj:,:)
+      real(r8), intent(inout) :: HisBio3d(LBi:,LBj:,:,:)
       real(r8), intent(inout) :: p_coral(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: p_seagrass(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
@@ -269,13 +254,8 @@
       real(r8), intent(in) :: sustr(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: svstr(LBi:UBi,LBj:UBj)
 # endif
-#ifdef CARBON_ISOTOPE
-      real(r8), intent(inout) :: d13C_DIC(LBi:UBi,LBj:UBj,UBk)
-#endif
-# ifdef DIAGNOSTICS_BIO
-      real(r8), intent(inout) :: DiaBio2d(LBi:UBi,LBj:UBj,NDbio2d)
-      real(r8), intent(inout) :: DiaBio3d(LBi:UBi,LBj:UBj,UBk,NDbio3d)
-# endif
+      real(r8), intent(inout) :: HisBio2d(LBi:UBi,LBj:UBj,NHbio2d)
+      real(r8), intent(inout) :: HisBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
       real(r8), intent(inout) :: p_coral(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: p_seagrass(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
@@ -441,20 +421,18 @@
           END IF
 # endif
 
-#if defined DIAGNOSTICS && defined DIAGNOSTICS_BIO
-            DiaBio2d(i,j,iClPg) = coral_Pg
-            DiaBio2d(i,j,iCl_R) = coral_R
-            DiaBio2d(i,j,iClPn) = coral_Pg-coral_R
-            DiaBio2d(i,j,iCl_G) = coral_Gn
-            DiaBio2d(i,j,iSgPg) = sgrass_Pg
-            DiaBio2d(i,j,iSg_R) = sgrass_R
-            DiaBio2d(i,j,iSgPn) = sgrass_Pg-sgrass_R
-            DiaBio2d(i,j,iO2fx) = ssO2flux
-            DiaBio2d(i,j,iCOfx) = ssCO2flux
-            DiaBio2d(i,j,ipHt_) = sspH
-            DiaBio2d(i,j,iWarg) = ssWarg
-            DiaBio2d(i,j,ipCO2) = ssfCO2
-#endif
+            HisBio2d(i,j,iClPg) = coral_Pg
+            HisBio2d(i,j,iCl_R) = coral_R
+            HisBio2d(i,j,iClPn) = coral_Pg-coral_R
+            HisBio2d(i,j,iCl_G) = coral_Gn
+            HisBio2d(i,j,iSgPg) = sgrass_Pg
+            HisBio2d(i,j,iSg_R) = sgrass_R
+            HisBio2d(i,j,iSgPn) = sgrass_Pg-sgrass_R
+            HisBio2d(i,j,iO2fx) = ssO2flux
+            HisBio2d(i,j,iCOfx) = ssCO2flux
+            HisBio2d(i,j,ipHt_) = sspH
+            HisBio2d(i,j,iWarg) = ssWarg
+            HisBio2d(i,j,ipCO2) = ssfCO2
 
 !-----------------------------------------------------------------------
 !  Update global tracer variables: Add increment due to BGC processes
@@ -479,7 +457,7 @@
     &                              +dtrc_dt(k,ibio)*dt(ng)*Hz(i,j,k)
             END DO
 ! Carbon isotope ratio calculation
-            d13C_DIC(i,j,k)=d13C_fromR13C(t(i,j,k,nnew,iT13C)/t(i,j,k,nnew,iTIC_))
+            HisBio3d(i,j,k,id13C)=d13C_fromR13C(t(i,j,k,nnew,iT13C)/t(i,j,k,nnew,iTIC_))
           END DO
 
         END DO

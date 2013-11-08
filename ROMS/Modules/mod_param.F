@@ -524,6 +524,16 @@
 !
       integer :: NDrhs
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+!
+!  Number of biological history fields.  Currenly, only available for
+!  the Fennel model.
+!
+      integer :: NHbio2d                ! 2D fields
+      integer :: NHbio3d                ! 3D fields
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #if defined FOUR_DVAR || defined IMPULSE
 !

@@ -2898,23 +2898,23 @@
   'r3dvar'
   1.0d0
 
+!--------------------------------------
+
 'd13C_DIC'                                              ! Input/Output
   'carbon isotope ratio of DIC'
   'per mill VPDB'                                       ! [per mill]
   'd13C_DIC, scalar, series'
   'ocean_time'
-  'idd13C'
+  'iHbio3(id13C)'
   'r3dvar'
   1.0d0
-!
-!  Diagnostic variables.
-!
+
 'coral_Pg'                                             ! Input/Output
   'coral gross photosynthetic rate'
   'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
   'Pg, scalar, series'
   'ocean_time'
-  'iDbio2(iClPg)'
+  'iHbio2(iClPg)'
   'r2dvar'
   1.0d0
 
@@ -2923,7 +2923,7 @@
   'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
   'R, scalar, series'
   'ocean_time'
-  'iDbio2(iCl_R)'
+  'iHbio2(iCl_R)'
   'r2dvar'
   1.0d0
 
@@ -2932,7 +2932,7 @@
   'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
   'Pn, scalar, series'
   'ocean_time'
-  'iDbio2(iClPn)'
+  'iHbio2(iClPn)'
   'r2dvar'
   1.0d0
 
@@ -2941,7 +2941,7 @@
   'nmol cm-2 s-1'                                 ! [nmol cm-2 s-1]
   'G, scalar, series'
   'ocean_time'
-  'iDbio2(iCl_G)'
+  'iHbio2(iCl_G)'
   'r2dvar'
   1.0d0
 
@@ -2950,7 +2950,7 @@
   'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
   'Pg, scalar, series'
   'ocean_time'
-  'iDbio2(iSgPg)'
+  'iHbio2(iSgPg)'
   'r2dvar'
   1.0d0
 
@@ -2959,7 +2959,7 @@
   'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
   'R, scalar, series'
   'ocean_time'
-  'iDbio2(iSg_R)'
+  'iHbio2(iSg_R)'
   'r2dvar'
   1.0d0
 
@@ -2968,7 +2968,7 @@
   'mmol m-2 s-1'                                 ! [mmol m-2 s-1]
   'Pn, scalar, series'
   'ocean_time'
-  'iDbio2(iSgPn)'
+  'iHbio2(iSgPn)'
   'r2dvar'
   1.0d0
 
@@ -2978,7 +2978,7 @@
   'total scale'                 ! [total scale]
   'pH, scalar, series'
   'ocean_time'
-  'iDbio2(ipHt_)'
+  'iHbio2(ipHt_)'
   'r2dvar'
   1.0d0
 
@@ -2987,7 +2987,7 @@
   'nodimension'                               ! []
   'Warg, scalar, series'
   'ocean_time'
-  'iDbio2(iWarg)'
+  'iHbio2(iWarg)'
   'r2dvar'
   1.0d0
 
@@ -2996,10 +2996,63 @@
   'umol m-2 s-1'                               ! [umol m-2 s-1]
   'PARbott, scalar, series'
   'ocean_time'
-  'iDbio2(iPARb)'
+  'iHbio2(iPARb)'
   'r2dvar'
   1.0d0
 
+'CO2_airsea'                                       ! Input/Output
+  'CO2 air-sea flux'
+  'millimole_carbon meter-2 day-1'                 ! [millimole/m2/day]
+  'CO2_airsea, scalar, series'
+  'ocean_time'
+  'iHbio2(iCOfx)'
+  'r2dvar'
+  1.0d0
+
+'denitrification'                                  ! Input/Output
+  'denitrification'
+  'millimole_nitrogen meter-2 day-1'               ! [millimole/m2/day]
+  'denitrification, scalar, series'
+  'ocean_time'
+  'iHbio2(iDNIT)'
+  'r2dvar'
+  1.0d0
+
+'pCO2'                                             ! Input/Output
+  'partial pressure of CO2'
+  'microatmophere'                                 ! [microatmosphere]
+  'pCO2, scalar, series'
+  'ocean_time'
+  'iHbio2(ipCO2)'
+  'r2dvar'
+  1.0d0
+
+'O2_airsea'                                        ! Input/Output
+  'O2 air-sea flux'
+  'millimole_oxygen meter-2 day-1'                 ! [millimole/m2/day]
+  'O2_airsea, scalar, series'
+  'ocean_time'
+  'iHbio2(iO2fx)'
+  'r2dvar'
+  1.0d0
+
+'P_Production'                                     ! Input/Output
+  'primary production'
+  'millimole_nitrogen meter-3 day-1'               ! [millimole/m3/day]
+  'P_Production, scalar, series'
+  'ocean_time'
+  'iHbio3(iPPro)'
+  'r3dvar'
+  1.0d0
+
+'NO3_uptake'                                       ! Input/Output
+  'NO3 uptake'
+  'millimole_nitrogen meter-3 day-1'               ! [millimole/m3/day]
+  'NO3_uptake, scalar, series'
+  'ocean_time'
+  'iHbio3(iNO3u)'
+  'r3dvar'
+  1.0d0
 
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 

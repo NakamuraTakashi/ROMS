@@ -94,13 +94,10 @@
       integer :: iLDeP                  ! Large detritus P-concentration
       integer :: iSDeP                  ! Small detritus P-concentration
 #endif
-
-#if defined DIAGNOSTICS && defined DIAGNOSTICS_BIO
 !
-!  Biological 2D diagnostic variable IDs.
+!  Biological 2D Histrory variable IDs.
 !
-      integer, allocatable :: iDbio2(:)       ! 2D biological terms
-
+      integer, allocatable :: iHbio2(:)       ! 2D biological terms
       integer  :: iClPg                       ! coral gross photosynthesis rate
       integer  :: iCl_R                       ! coral respiration rate
       integer  :: iClPn                       ! coral net photosynthesis rate
@@ -115,18 +112,21 @@
       integer  :: ipCO2                       ! partial pressure of CO2
       integer  :: iO2fx                       ! air-sea O2 flux
       integer  :: iPARb                       ! bottom photon flux density (umol m-2 s-1)
-# ifdef NUTRIENTS
+#ifdef NUTRIENTS
       integer  :: iDNIT                       ! denitrification flux
-# endif
-!
-!  Biological 3D diagnostic variable IDs.
-!
-      integer, allocatable :: iDbio3(:)       ! 3D biological terms
-      integer  :: iPPro                       ! primary productivity
-# ifdef NUTRIENTS
-      integer  :: iNO3u                       ! NO3 uptake
-# endif
 #endif
+      integer, allocatable :: iHbio3(:)       ! 3D biological terms
+      integer  :: iPPro                       ! primary productivity
+#ifdef CARBON_ISOTOPE
+      integer  :: id13C                  ! d13C of total inorganic carbon
+#endif
+#ifdef NUTRIENTS
+      integer  :: iNO3u                       ! NO3 uptake
+#endif
+
+      integer, allocatable :: iDbio2(:)       ! 2D biological terms
+      integer, allocatable :: iDbio3(:)       ! 3D biological terms
+
 !
 !  Biological parameters.
 !
@@ -202,11 +202,11 @@
       iTAlk=ic+i
       i=i+1
       iOxyg=ic+i  !  4
-# ifdef CARBON_ISOTOPE
+#ifdef CARBON_ISOTOPE
       i=i+1
       iT13C=ic+i  ! +1
-# endif
-# ifdef NUTRIENTS
+#endif
+#ifdef NUTRIENTS
       i=i+1
       iNO3_=ic+i
       i=i+1
@@ -233,7 +233,7 @@
       iLDeP=ic+i
       i=i+1
       iSDeP=ic+i ! +13
-# endif
+#endif
 
 !-----------------------------------------------------------------------
 !  Determine number of biological tracers.
@@ -252,18 +252,13 @@
         idbio(i)=NAT+NPT+NCS+NNS+i
       END DO
 
-#if defined DIAGNOSTICS && defined DIAGNOSTICS_BIO
 !
 !-----------------------------------------------------------------------
-!  Set sources and sinks biology diagnostic parameters.
+!  Set sources and sinks biology history/diagnostic parameters.
 !-----------------------------------------------------------------------
+
 !
-!  Set number of diagnostics terms.
-!
-      NDbio3d=2
-      NDbio2d=0
-!
-!  Initialize 2D biology diagnostic indices.
+!  Initialize 2D biology indices.
 !
       ic=1     ! ic reset
       iClPg=ic
@@ -295,40 +290,43 @@
       ic=ic+1
       iPARb=ic
       
-# ifdef NUTRIENTS
+#ifdef NUTRIENTS
       ic=ic+1
       iDNIT=ic
-# endif
+#endif
+!  Set number of 2D history terms.
 !
-!  Set number of 2D diagnostics terms.
+      NHbio2d=ic
 !
-      NDbio2d=ic
+!  Allocate biological history vectors
+!
+      IF (.not.allocated(iHbio2)) THEN
+        allocate ( iHbio2(NHbio2d) )
+      END IF
 
 !----------------------------------------------------------------------
-!  Initialize 3D biology diagnostic indices.
+!  Initialize 3D biology indices.
 !
       ic=1     ! ic reset
       iPPro=ic
-# ifdef NUTRIENTS
+#ifdef CARBON_ISOTOPE
+      i=i+1
+      id13C=ic+i  ! +1
+#endif
+#ifdef NUTRIENTS
       ic=ic+1
       iNO3u=ic
-# endif
-!
-!  Set number of 3D diagnostics terms.
-!
-      NDbio3d=ic
-
-
-!----------------------------------------------------------------------
-!  Allocate biological diagnostics vectors
-!
-      IF (.not.allocated(iDbio2)) THEN
-        allocate ( iDbio2(NDbio2d) )
-      END IF
-      IF (.not.allocated(iDbio3)) THEN
-        allocate ( iDbio3(NDbio3d) )
-      END IF
 #endif
+!
+!  Set number of 3D history terms.
+!
+      NHbio3d=ic
+
+
+      IF (.not.allocated(iHbio3)) THEN
+        allocate ( iHbio3(NHbio3d) )
+      END IF
+
 !
 !-----------------------------------------------------------------------
 !  Allocate various module variables.

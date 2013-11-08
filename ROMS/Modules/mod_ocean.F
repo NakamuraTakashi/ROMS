@@ -88,10 +88,8 @@
 # endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 # if defined REEF_ECOSYS
-          real(r8), pointer :: pH(:,:)
-#  if defined CARBON_ISOTOPE
-          real(r8), pointer :: d13C_DIC(:,:,:)
-#  endif
+          real(r8), pointer :: HisBio2d(:,:,:)
+          real(r8), pointer :: HisBio3d(:,:,:,:)
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #endif
@@ -328,10 +326,8 @@
 # endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 # if defined REEF_ECOSYS
-      allocate ( OCEAN(ng) % pH(LBi:UBi,LBj:UBj) )
-#  if defined CARBON_ISOTOPE
-      allocate ( OCEAN(ng) % d13C_DIC(LBi:UBi,LBj:UBj,N(ng)) )
-#  endif
+      allocate ( OCEAN(ng) % HisBio2d(LBi:UBi,LBj:UBj,NHbio2d) )
+      allocate ( OCEAN(ng) % HisBio3d(LBi:UBi,LBj:UBj,N(ng),NHbio3d) )
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
@@ -627,12 +623,6 @@
             DO i=Imin,Imax
               OCEAN(ng) % pden(i,j,k) = IniVal
               OCEAN(ng) % rho(i,j,k) = IniVal
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-# if defined REEF_ECOSYS && defined CARBON_ISOTOPE
-              OCEAN(ng) % d13C_DIC(i,j,k) = IniVal
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-
               OCEAN(ng) % u(i,j,k,1) = IniVal
               OCEAN(ng) % u(i,j,k,2) = IniVal
               OCEAN(ng) % v(i,j,k,1) = IniVal
