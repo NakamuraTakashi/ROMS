@@ -61,8 +61,7 @@
 !!!  Initialize coral polyp model parameters
 !!!----------------------------------------------------------------------
 #ifdef REEF_ECOSYS
-      USE mod_coral
-      USE mod_seagrass
+      USE mod_reef_ecosys
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
@@ -153,8 +152,7 @@
 !!!  Initialize coral polyp model parameters
 !!!----------------------------------------------------------------------
 #ifdef REEF_ECOSYS
-          CALL initialize_coral(LBi, UBi, LBj, UBj)
-          CALL initialize_seagrass(LBi, UBi, LBj, UBj)
+          CALL initialize_reef_ecosys(LBi, UBi, LBj, UBj)
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !$OMP END MASTER
