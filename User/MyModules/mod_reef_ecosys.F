@@ -284,9 +284,10 @@
       ssCO2flux = Flux_CO2(ssfCO2, pCO2air, U10, TmpK, Sal(N) )  ! sea to air is positive 
 
       dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(1)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      
+#if defined CARBON_ISOTOPE
       R13C=R13C_fromd13C(-10.d0)
       dDI13C_dt(N) = dDI13C_dt(N)- ssCO2flux*R13C /dz(1) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#endif
 
 
 !!!---------------------------------------------------------------------
