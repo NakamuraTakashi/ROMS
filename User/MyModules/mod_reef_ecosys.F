@@ -264,7 +264,7 @@
       DOsatu=O2satu(TmpK,Sal(N))
       ssO2flux = Flux_O2(DOx(N), DOsatu, U10, TmpK, Sal(N) )  ! sea to air is positive
 
-      dDOx_dt(N) = dDOx_dt(N) - ssO2flux  /dz(1)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      dDOx_dt(N) = dDOx_dt(N) - ssO2flux  /dz(N)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 !-----------------------------------------------------------------------
@@ -283,10 +283,10 @@
 !----------- CO2 gas exchange rate (mmol m-2 s-1). -------------------
       ssCO2flux = Flux_CO2(ssfCO2, pCO2air, U10, TmpK, Sal(N) )  ! sea to air is positive 
 
-      dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(1)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(N)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #if defined CARBON_ISOTOPE
       R13C=R13C_fromd13C(-10.d0)
-      dDI13C_dt(N) = dDI13C_dt(N)- ssCO2flux*R13C /dz(1) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      dDI13C_dt(N) = dDI13C_dt(N)- ssCO2flux*R13C /dz(N) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #endif
 
 
