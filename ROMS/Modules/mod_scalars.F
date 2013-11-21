@@ -594,8 +594,17 @@
 !
 !  Minimum and maximum threshold for transfer coefficient of momentum.
 !
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef SHIRAHO_REEF
+        real(r8) :: Cdb_min = 0.01_r8  ! 0.000001_r8 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Changed
+        real(r8) :: Cdb_max = 0.05_r8  ! 0.5_r8      !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Changed
+#else
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         real(r8) :: Cdb_min = 0.000001_r8
-        real(r8) :: Cdb_max = 0.5_r8
+        real(r8) :: Cdb_max = 0.5_r8     
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Surface and bottom roughness (m)
 !

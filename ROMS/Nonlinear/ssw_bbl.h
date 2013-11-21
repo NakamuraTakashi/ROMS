@@ -653,10 +653,10 @@
           bustr(i,j)=0.5_r8*(Tauc(i-1,j)+Tauc(i,j))*anglec
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #    ifdef LIMIT_BSTRESS
-          cff3=cff*0.5_r8*(Hz(i-1,j,1)+Hz(i,j,1))
+          cff3=0.75_r8*0.5_r8*(Hz(i-1,j,1)+Hz(i,j,1))
           bustr(i,j)=SIGN(1.0_r8, bustr(i,j))*                          &
      &               MIN(ABS(bustr(i,j)),                               &
-     &                   ABS(u(i,j,1,nrhs))*cff3)
+     &                   ABS(u(i,j,1,nrhs))*cff3/dt(ng))
 #    endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END DO
@@ -667,10 +667,10 @@
           bvstr(i,j)=0.5_r8*(Tauc(i,j-1)+Tauc(i,j))*anglec
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #    ifdef LIMIT_BSTRESS
-          cff3=cff*0.5_r8*(Hz(i,j-1,1)+Hz(i,j,1))
+          cff3=0.75_r8*0.5_r8*(Hz(i,j-1,1)+Hz(i,j,1))
           bvstr(i,j)=SIGN(1.0_r8, bvstr(i,j))*                          &
      &               MIN(ABS(bvstr(i,j)),                               &
-     &                   ABS(v(i,j,1,nrhs))*cff3)
+     &                   ABS(v(i,j,1,nrhs))*cff3/dt(ng))
 #    endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END DO
