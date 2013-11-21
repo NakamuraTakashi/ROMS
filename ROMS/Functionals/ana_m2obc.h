@@ -36,6 +36,12 @@
 #ifdef MASKING
      &                     GRID(ng) % umask,                            &
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SHIRAHO_REEF
+     &                     OCEAN(ng) % ubar,                            &
+     &                     OCEAN(ng) % vbar,                            &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                     OCEAN(ng) % zeta)
 !
 ! Set analytical header file name used.
@@ -60,6 +66,12 @@
 #ifdef MASKING
      &                           umask,                                 &
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#if defined SHIRAHO_REEF
+     &                           ubar,                                  &
+     &                           vbar,                                  &
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                           zeta)
 !***********************************************************************
 !
@@ -85,6 +97,12 @@
 # ifdef MASKING
       real(r8), intent(in) :: umask(LBi:,LBj:)
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined SHIRAHO_REEF
+      real(r8), intent(in) :: ubar(LBi:,LBj:,:)
+      real(r8), intent(in) :: vbar(LBi:,LBj:,:)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: zeta(LBi:,LBj:,:)
 #else
       real(r8), intent(in) :: angler(LBi:UBi,LBj:UBj)
@@ -95,6 +113,12 @@
 # ifdef MASKING
       real(r8), intent(in) :: umask(LBi:UBi,LBj:UBj)
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# if defined SHIRAHO_REEF
+      real(r8), intent(in) :: ubar(LBi:UBi,LBj:UBj,3)
+      real(r8), intent(in) :: vbar(LBi:UBi,LBj:UBj,3)
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: zeta(LBi:UBi,LBj:UBj,3)
 #endif
 !
@@ -107,12 +131,12 @@
       real(r8) :: my_area, my_flux, tid_flow, riv_flow, cff1, cff2,     &
      &            model_flux
 #endif
-!!!>>>>>>> Shiraho reef case >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #if defined SHIRAHO_REEF
       real(r8) :: my_area, my_flux, tid_flow, riv_flow, cff1, cff2,     &
      &            model_flux
 #endif
-!!!<<<<<<<< Shiraho reef case <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN:Add
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 #if defined TEST_CHAN
       real(r8) :: my_area, my_width
@@ -347,6 +371,21 @@
      &                                         COS(omega-phase))
         END DO
       END IF
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined SHIRAHO_REEF
+
+! This condition have to use with Flather boundary condition
+
+      IF (LBC(ieast,isUbar,ng)%acquire.and.                             &
+     &    LBC(ieast,isVbar,ng)%acquire.and.                             &
+     &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
+
+        DO j=JstrP,JendP
+          BOUNDARY(ng)%ubar_east(j)=ubar(Iend,j,knew)
+          BOUNDARY(ng)%vbar_east(j)=vbar(Iend,j,knew)
+        END DO
+      END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       IF (LBC(ieast,isUbar,ng)%acquire.and.                             &
      &    LBC(ieast,isVbar,ng)%acquire.and.                             &

@@ -278,7 +278,7 @@
       integer :: Iter, i, ibio, isink, itrc, ivar, j, k, ks
 
       real(r8) :: PFDsurf    
-      real(r8) :: tau        
+      real(r8) :: tau, tau_u, tau_v        
       real(r8) :: u10        
       
       real(r8) :: sspH      
@@ -337,8 +337,12 @@
 !-----------------------------------------------------------------------
 
 #ifdef BBL_MODEL
-            tau = SQRT(bustrcwmax(i,j)*bustrcwmax(i,j)+          &
-     &                   bvstrcwmax(i,j)*bvstrcwmax(i,j)) *rho0    !! (m2 s-2) * (kg m-3) = (kg m-1 s-2) = (kg m s-2 m-2) = (N m-2)
+            tau_u=bustrc(i,j)+0.5_r8*bustrw(i,j)
+            tau_v=bvstrc(i,j)+0.5_r8*bvstrw(i,j)
+            tau = SQRT(tau_u*tau_u + tau_v*tau_v) *rho0    !! (m2 s-2) * (kg m-3) = (kg m-1 s-2) = (kg m s-2 m-2) = (N m-2)
+            
+!            tau = SQRT(bustrcwmax(i,j)*bustrcwmax(i,j)+          &
+!     &                   bvstrcwmax(i,j)*bvstrcwmax(i,j)) *rho0    !! (m2 s-2) * (kg m-3) = (kg m-1 s-2) = (kg m s-2 m-2) = (N m-2)
 #else
             tau = 0.5_r8*SQRT((bustr(i,j)+bustr(i+1,j))*         &
      &                          (bustr(i,j)+bustr(i+1,j))+         &
@@ -419,7 +423,7 @@
 !
 #ifdef MASKING
           END IF
-# endif
+#endif
 
             HisBio2d(i,j,iClPg) = coral_Pg
             HisBio2d(i,j,iCl_R) = coral_R
@@ -453,11 +457,26 @@
           DO k=1,N(ng)
             DO itrc=1,NBT
               ibio=idbio(itrc)
+              
+              IF(dtrc_dt(k,ibio)*0.0_r8 /= 0.0_r8) THEN  !!!---------Error Handling: Check NAN
+                dtrc_dt(k,ibio)=0.0_r8
+                write(50,*) i,j,k,ibio,dtrc_dt(k,ibio)                &
+    &            ,t(i,j,k,nnew,ibio),t(i,j,k,nstp,ibio)               &
+    &            ,coral_Pg,coral_R,sgrass_Pg,sgrass_R,ssO2flux        &
+    &            ,ssCO2flux,rmask_io(i,j)
+              END IF
+              
               t(i,j,k,nnew,ibio)=t(i,j,k,nnew,ibio)                    &
     &                              +dtrc_dt(k,ibio)*dt(ng)*Hz(i,j,k)
+    
+              t(i,j,k,nnew,ibio)=MAX(0.0_r8,t(i,j,k,nnew,ibio))!!!---------Error Handling
+              
             END DO
+
+#if defined CARBON_ISOTOPE
 ! Carbon isotope ratio calculation
             HisBio3d(i,j,k,id13C)=d13C_fromR13C(t(i,j,k,nnew,iT13C)/t(i,j,k,nnew,iTIC_))
+#endif
           END DO
 
         END DO

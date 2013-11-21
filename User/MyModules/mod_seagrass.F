@@ -68,6 +68,7 @@
      &            (n,i,j          &   ! n: coral compartment; i,j: position
      &            ,PFD            &   ! Photon flux density (umol m-2 s-1)
      &            ,DICamb         &   ! DIC (umol kg-1)
+     &            ,DOamb          &   ! DO (umol L-1)
 #if defined NUTRIENTS         
      &            ,NH4amb         &   ! NH4 concentration (umol L-1)
 #endif
@@ -98,6 +99,7 @@
       integer, intent(in) :: n,i,j
       real(8), intent(in) :: PFD
       real(8), intent(in) :: DICamb
+      real(8), intent(in) :: DOamb
 #if defined NUTRIENTS         
       real(8), intent(in) :: NH4amb
 #endif
@@ -139,7 +141,14 @@
 
       Pg= pmax*tanh(PFD/pIk)/3600.d0   !Light response curve [mmolC/m2/s]
       R = p0/3600.d0   !Light response curve [mmolC/m2/s]
-
+      
+      IF(DICamb<=0.d0) THEN !-----For Error handling
+        Pg =0.d0
+      ENDIF
+      IF(DOamb<=0.d0) THEN !-----For Error handling
+        R=0.d0
+      ENDIF
+      
       DICuptake= Pg-R
       DOuptake = R -Pg
 
@@ -147,6 +156,10 @@
 #if defined CARBON_ISOTOPE
       R13C_DIC  = DI13Camb/DICamb
       R13C_CH2O = c13CH2Osg(n,i,j)/CH2Osg(n,i,j)
+      
+      IF(DI13Camb<=0.d0) THEN !-----For Error handling
+        R13C_DIC =0.d0
+      ENDIF
 
       DI13Cuptake=Pg*R13C_DIC*a_phot - R*R13C_CH2O*a_resp
 #endif

@@ -458,6 +458,7 @@
      &            (1,i,j          &   ! n: seagrass compartment; i,j: position
      &            ,PFD            &   ! Photon flux density (umol m-2 s-1)
      &            ,DIC(1)         &   ! DIC (umol kg-1)
+     &            ,DOx(1)         &   ! DO  (umol L-1)
 #if defined NUTRIENTS         
      &            ,NH4(1)         &   ! NH4 concentration (umol L-1)
 #endif

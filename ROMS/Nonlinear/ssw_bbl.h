@@ -52,6 +52,9 @@
      &                GRID(ng) % z_w,                                   &
      &                GRID(ng) % angler,                                &
      &                GRID(ng) % ZoBot,                                 &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+     &                GRID(ng) % Hz,                                    &
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined SSW_CALC_UB
      &                FORCES(ng) % Hwave,                               &
 #else
@@ -92,6 +95,9 @@
      &                      IminS, ImaxS, JminS, JmaxS,                 &
      &                      nrhs,                                       &
      &                      h, z_r, z_w, angler, ZoBot,                 &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+     &                      Hz,                                         &
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined SSW_CALC_UB
      &                      Hwave,                                      &
 #else
@@ -136,6 +142,9 @@
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
       real(r8), intent(in) :: angler(LBi:,LBj:)
       real(r8), intent(in) :: ZoBot(LBi:,LBj:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      real(r8), intent(in) :: Hz(LBi:,LBj:,:)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # if defined SSW_CALC_UB
       real(r8), intent(in) :: Hwave(LBi:,LBj:)
 # else
@@ -171,6 +180,9 @@
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
       real(r8), intent(in) :: angler(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: ZoBot(LBi:UBi,LBj:UBj)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # if defined SSW_CALC_UB
       real(r8), intent(in) :: Hwave(LBi:UBi,LBj:UBj)
 # else
@@ -639,12 +651,28 @@
         DO i=IstrU,Iend
           anglec=Ur_sg(i,j)/(0.5*(Umag(i-1,j)+Umag(i,j)))
           bustr(i,j)=0.5_r8*(Tauc(i-1,j)+Tauc(i,j))*anglec
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#    ifdef LIMIT_BSTRESS
+          cff3=cff*0.5_r8*(Hz(i-1,j,1)+Hz(i,j,1))
+          bustr(i,j)=SIGN(1.0_r8, bustr(i,j))*                          &
+     &               MIN(ABS(bustr(i,j)),                               &
+     &                   ABS(u(i,j,1,nrhs))*cff3)
+#    endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END DO
       END DO
       DO j=JstrV,Jend
         DO i=Istr,Iend
           anglec=Vr_sg(i,j)/(0.5_r8*(Umag(i,j-1)+Umag(i,j)))
           bvstr(i,j)=0.5_r8*(Tauc(i,j-1)+Tauc(i,j))*anglec
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#    ifdef LIMIT_BSTRESS
+          cff3=cff*0.5_r8*(Hz(i,j-1,1)+Hz(i,j,1))
+          bvstr(i,j)=SIGN(1.0_r8, bvstr(i,j))*                          &
+     &               MIN(ABS(bvstr(i,j)),                               &
+     &                   ABS(v(i,j,1,nrhs))*cff3)
+#    endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END DO
       END DO
       DO j=Jstr,Jend
