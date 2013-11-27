@@ -66,13 +66,13 @@
 !!!  set initial conditions for coral polyp model (Nakamura et al. 2013)
 !!! **********************************************************************
 
-    subroutine initialize_coral(LBi, UBi, LBj, UBj)
+    subroutine initialize_coral(ng, LBi, UBi, LBj, UBj)
 
       use mod_geochem
       
       implicit none
 ! input parameters
-      integer, intent(in) :: LBi, UBi, LBj, UBj
+      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
       real(8)  R13C
       integer i,j,n
 

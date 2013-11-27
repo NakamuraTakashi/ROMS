@@ -14,17 +14,17 @@
 !!!  Set initial conditions for reef ecosystem model
 !!! **********************************************************************
 
-    SUBROUTINE initialize_reef_ecosys(LBi, UBi, LBj, UBj)
+    SUBROUTINE initialize_reef_ecosys(ng, LBi, UBi, LBj, UBj)
       
       USE mod_coral
       USE mod_seagrass
       
       implicit none
 
-      integer, intent(in) :: LBi, UBi, LBj, UBj
+      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
 
-      CALL initialize_coral(LBi, UBi, LBj, UBj)
-      CALL initialize_seagrass(LBi, UBi, LBj, UBj)
+      CALL initialize_coral(ng, LBi, UBi, LBj, UBj)
+      CALL initialize_seagrass(ng, LBi, UBi, LBj, UBj)
       
       RETURN
     END SUBROUTINE initialize_reef_ecosys

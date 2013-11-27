@@ -18,11 +18,11 @@
 !!!  set initial conditions for heat
 !!! **********************************************************************
 
-    subroutine initialize_heat(LBi, UBi, LBj, UBj)
+    subroutine initialize_heat(ng, LBi, UBi, LBj, UBj)
 
       implicit none
 ! input parameters
-      integer, intent(in) :: LBi, UBi, LBj, UBj
+      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
       integer i,j,n
 
 

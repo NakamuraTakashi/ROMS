@@ -55,9 +55,7 @@
       USE mod_ocean
       USE mod_stepping
       USE mod_scalars
-# if defined TS_PSOURCE || defined UV_PSOURCE || defined Q_PSOURCE
       USE mod_sources
-# endif
 !
 # ifdef ANALYTICAL
       USE analytical_mod
@@ -741,42 +739,41 @@
 !
       CALL ana_spinning (ng, tile, iNLM)
 # endif
-
-# if defined UV_PSOURCE || defined TS_PSOURCE || defined Q_PSOURCE
 !
 !-----------------------------------------------------------------------
 !  Set point Sources/Sinks (river runoff).
 !-----------------------------------------------------------------------
 !
-#  ifdef ANA_PSOURCE
-      CALL ana_psource (ng, tile, iNLM)
-#  else
+# ifdef ANA_PSOURCE
+      IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN
+        CALL ana_psource (ng, tile, iNLM)
+      END IF
+# else
       IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
-#   if defined UV_PSOURCE || defined Q_PSOURCE
-        CALL set_ngfld (ng, iNLM, idRtra, 1, Nsrc(ng), 1,               &
-     &                  1, Nsrc(ng), 1,                                 &
-     &                  SOURCES(ng) % QbarG,                            &
-     &                  SOURCES(ng) % Qbar,                             &
-     &                  update)
-        IF (exit_flag.ne.NoError) RETURN
+        IF (LuvSrc(ng).or.LwSrc(ng)) THEN
+          CALL set_ngfld (ng, iNLM, idRtra, 1, Nsrc(ng), 1,             &
+     &                    1, Nsrc(ng), 1,                               &
+     &                    SOURCES(ng) % QbarG,                          &
+     &                    SOURCES(ng) % Qbar,                           &
+     &                    update)
+          IF (exit_flag.ne.NoError) RETURN
 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
-#    ifdef SGD_ON
-        SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng))
-#    endif
+#  ifdef SGD_ON
+          SOURCES(ng)%Qsgd=SOURCES(ng)%Qbar(Nsrc(ng))
+#  endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-
-#    ifdef SOLVE3D
-        DO k=1,N(ng)
-          DO i=1,Nsrc(ng)
-            SOURCES(ng)%Qsrc(i,k)=SOURCES(ng)%Qbar(i)*                  &
-     &                            SOURCES(ng)%Qshape(i,k)
+#  ifdef SOLVE3D
+          DO k=1,N(ng)
+            DO i=1,Nsrc(ng)
+              SOURCES(ng)%Qsrc(i,k)=SOURCES(ng)%Qbar(i)*                &
+     &                              SOURCES(ng)%Qshape(i,k)
+            END DO
           END DO
-        END DO
-#    endif
-#   endif
+#  endif
+        END IF
 
-#   if defined TS_PSOURCE && defined SOLVE3D
+#  ifdef SOLVE3D
         DO itrc=1,NT(ng)
           IF (LtracerSrc(itrc,ng)) THEN
             CALL set_ngfld (ng, iNLM, idRtrc(itrc), 1, Nsrc(ng), N(ng), &
@@ -788,15 +785,14 @@
           END IF
         END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
-#    ifdef SGD_ON
+#   ifdef SGD_ON
         DO itrc=1,NT(ng)
           SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
         END DO
-#    endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #   endif
-      END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  endif
+      END IF
 # endif
 !
 !-----------------------------------------------------------------------

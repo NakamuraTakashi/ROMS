@@ -46,10 +46,6 @@
       USE mod_grid
       USE mod_mixing
       USE mod_ocean
-/*# ifdef TS_PSOURCE */    /*!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm */
-# if defined TS_PSOURCE  ||  defined SGD_ON  /*!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add */
-      USE mod_sources
-# endif
       USE mod_stepping
 !
 !  Imported variable declarations.
@@ -67,18 +63,6 @@
      &                    LBi, UBi, LBj, UBj,                           &
      &                    IminS, ImaxS, JminS, JmaxS,                   &
      &                    nrhs(ng), nstp(ng), nnew(ng),                 &
-# if defined TS_PSOURCE || defined Q_PSOURCE
-     &                    Msrc(ng), Nsrc(ng),                           &
-     &                    SOURCES(ng) % Isrc,                           &
-     &                    SOURCES(ng) % Jsrc,                           &
-     &                    SOURCES(ng) % Tsrc,                           &
-# endif
-# ifdef TS_PSOURCE
-     &                    SOURCES(ng) % Dsrc,                           &
-# endif
-# ifdef Q_PSOURCE
-     &                    SOURCES(ng) % Qsrc,                           &
-# endif
 # ifdef MASKING
      &                    GRID(ng) % rmask,                             &
      &                    GRID(ng) % umask,                             &
@@ -117,8 +101,6 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 # ifdef SGD_ON
      &                    GRID(ng) % sgd_src,                           &
-     &                    SOURCES(ng) % Qsgd,                           &
-     &                    SOURCES(ng) % Tsgd,                           &
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                    OCEAN(ng) % t)
@@ -133,16 +115,6 @@
      &                          LBi, UBi, LBj, UBj,                     &
      &                          IminS, ImaxS, JminS, JmaxS,             &
      &                          nrhs, nstp, nnew,                       &
-# if defined TS_PSOURCE || defined Q_PSOURCE
-     &                          Msrc, Nsrc,                             &
-     &                          Isrc, Jsrc, Tsrc,                       &
-# endif
-# ifdef TS_PSOURCE
-     &                          Dsrc,                                   &
-# endif
-# ifdef Q_PSOURCE
-     &                          Qsrc,                                   &
-# endif
 # ifdef MASKING
      &                          rmask, umask, vmask,                    &
 # endif
@@ -168,7 +140,7 @@
 # endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 # ifdef SGD_ON
-     &                          sgd_src, Qsgd, Tsgd,                    &
+     &                          sgd_src                                 &
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                          t)
@@ -180,6 +152,7 @@
       USE mod_nesting
 # endif
       USE mod_scalars
+      USE mod_sources
 !
       USE exchange_3d_mod, ONLY : exchange_r3d_tile
 # ifdef DISTRIBUTE
@@ -202,23 +175,8 @@
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
       integer, intent(in) :: nrhs, nstp, nnew
-# if defined TS_PSOURCE || defined Q_PSOURCE
-      integer, intent(in) :: Msrc, Nsrc
-# endif
 !
 # ifdef ASSUMED_SHAPE
-#  if defined TS_PSOURCE || defined Q_PSOURCE
-      integer, intent(in) :: Isrc(:)
-      integer, intent(in) :: Jsrc(:)
-
-      real(r8), intent(in) :: Tsrc(:,:,:)
-#  endif
-#  ifdef TS_PSOURCE
-      real(r8), intent(in) :: Dsrc(:)
-#  endif
-#  ifdef Q_PSOURCE
-      real(r8), intent(in) :: Qsrc(:,:)
-#  endif
 #  ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:,LBj:)
       real(r8), intent(in) :: umask(LBi:,LBj:)
@@ -258,8 +216,6 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #  ifdef SGD_ON
       real(r8), intent(in) :: sgd_src(LBi:,LBj:)
-      real(r8), intent(in) :: Qsgd
-      real(r8), intent(in) :: Tsgd(NT(ng))
 #  endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  ifdef SUN
@@ -273,18 +229,6 @@
 
 # else
 
-#  if defined TS_PSOURCE || defined Q_PSOURCE
-      integer, intent(in) :: Isrc(Msrc)
-      integer, intent(in) :: Jsrc(Msrc)
-
-      real(r8), intent(in) :: Tsrc(Msrc,N(ng),NT(ng))
-#  endif
-#  ifdef TS_PSOURCE
-      real(r8), intent(in) :: Dsrc(Msrc)
-#  endif
-#  ifdef Q_PSOURCE
-      real(r8), intent(in) :: Qsrc(Msrc,N(ng))
-#  endif
 #  ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: umask(LBi:UBi,LBj:UBj)
@@ -322,8 +266,6 @@
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #  ifdef SGD_ON
       real(r8), intent(in) :: sgd_src(LBi:UBi,LBj:UBj)
-      real(r8), intent(in) :: Qsgd
-      real(r8), intent(in) :: Tsgd(NT(ng))
 #  endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
@@ -605,67 +547,70 @@
             END DO
           END DO
 # endif
-# if defined TS_PSOURCE && !defined Q_PSOURCE
 !
-!  Apply tracers point sources to the horizontal advection terms.
+!  Apply tracers point sources to the horizontal advection terms,
+!  if any.
 !
+          IF (.not.LwSrc(ng).and.ANY(LtracerSrc(:,ng))) THEN
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
 #  ifdef SGD_ON
-          DO is=1,Nsrc-1
+            DO is=1,Nsrc(ng)-1
 #  else
-          DO is=1,Nsrc
+            DO is=1,Nsrc(ng)
 #  endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-!          DO is=1,Nsrc   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
-            i=Isrc(is)
-            j=Jsrc(is)
-            IF (INT(Dsrc(is)).eq.0) THEN
-#  ifdef TS_MPDATA
-              IF (((IstrUm2.le.i).and.(i.le.Iendp3)).and.               &
-     &            ((JstrVm2.le.j).and.(j.le.Jendp2i))) THEN
-#  else
-              IF (((Istr.le.i).and.(i.le.Iend+1)).and.                  &
-     &            ((Jstr.le.j).and.(j.le.Jend))) THEN
-#  endif
-                IF (LtracerSrc(itrc,ng)) THEN
-                  FX(i,j)=Huon(i,j,k)*Tsrc(is,k,itrc)
-#  ifdef MASKING
-                ELSE
-                  IF ((rmask(i  ,j).eq.0.0_r8).and.                     &
-     &                (rmask(i-1,j).eq.1.0_r8)) THEN
-                    FX(i,j)=Huon(i,j,k)*t(i-1,j,k,3,itrc)
-                  ELSE IF ((rmask(i  ,j).eq.1.0_r8).and.                &
-     &                     (rmask(i-1,j).eq.0.0_r8)) THEN
-                    FX(i,j)=Huon(i,j,k)*t(i  ,j,k,3,itrc)
-                  END IF
-#  endif
-                END IF
-              END IF
-            ELSE IF (INT(Dsrc(is)).eq.1) THEN
-#  ifdef TS_MPDATA
-              IF (((IstrUm2.le.i).and.(i.le.Iendp2i)).and.              &
-     &            ((JstrVm2.le.j).and.(j.le.Jendp3))) THEN
-#  else
-              IF (((Istr.le.i).and.(i.le.Iend)).and.                    &
-     &            ((Jstr.le.j).and.(j.le.Jend+1))) THEN
-#  endif
-                IF (LtracerSrc(itrc,ng)) THEN
-                  FE(i,j)=Hvom(i,j,k)*Tsrc(is,k,itrc)
-#  ifdef MASKING
-                ELSE
-                  IF ((rmask(i,j  ).eq.0.0_r8).and.                     &
-     &                (rmask(i,j-1).eq.1.0_r8)) THEN
-                    FE(i,j)=Hvom(i,j,k)*t(i,j-1,k,3,itrc)
-                  ELSE IF ((rmask(i,j  ).eq.1.0_r8).and.                &
-     &                     (rmask(i,j-1).eq.0.0_r8)) THEN
-                    FE(i,j)=Hvom(i,j,k)*t(i,j  ,k,3,itrc)
-                  END IF
-#  endif
-                END IF
-              END IF
-            END IF
-          END DO
+!            DO is=1,Nsrc(ng)   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+              i=SOURCES(ng)%Isrc(is)
+              j=SOURCES(ng)%Jsrc(is)
+              IF (INT(SOURCES(ng)%Dsrc(is)).eq.0) THEN
+# ifdef TS_MPDATA
+                IF (((IstrUm2.le.i).and.(i.le.Iendp3)).and.             &
+     &              ((JstrVm2.le.j).and.(j.le.Jendp2i))) THEN
+# else
+                IF (((Istr.le.i).and.(i.le.Iend+1)).and.                &
+     &              ((Jstr.le.j).and.(j.le.Jend))) THEN
 # endif
+                  IF (LtracerSrc(itrc,ng)) THEN
+                    FX(i,j)=Huon(i,j,k)*                                &
+     &                      SOURCES(ng)%Tsrc(is,k,itrc)
+# ifdef MASKING
+                  ELSE
+                    IF ((rmask(i  ,j).eq.0.0_r8).and.                   &
+     &                  (rmask(i-1,j).eq.1.0_r8)) THEN
+                      FX(i,j)=Huon(i,j,k)*t(i-1,j,k,3,itrc)
+                    ELSE IF ((rmask(i  ,j).eq.1.0_r8).and.              &
+     &                       (rmask(i-1,j).eq.0.0_r8)) THEN
+                      FX(i,j)=Huon(i,j,k)*t(i  ,j,k,3,itrc)
+                    END IF
+# endif
+                  END IF
+                END IF
+              ELSE IF (INT(SOURCES(ng)%Dsrc(is)).eq.1) THEN
+# ifdef TS_MPDATA
+                IF (((IstrUm2.le.i).and.(i.le.Iendp2i)).and.            &
+     &              ((JstrVm2.le.j).and.(j.le.Jendp3))) THEN
+# else
+                IF (((Istr.le.i).and.(i.le.Iend)).and.                  &
+     &              ((Jstr.le.j).and.(j.le.Jend+1))) THEN
+# endif
+                  IF (LtracerSrc(itrc,ng)) THEN
+                    FE(i,j)=Hvom(i,j,k)*                                &
+     &                      SOURCES(ng)%Tsrc(is,k,itrc)
+# ifdef MASKING
+                  ELSE
+                    IF ((rmask(i,j  ).eq.0.0_r8).and.                   &
+     &                  (rmask(i,j-1).eq.1.0_r8)) THEN
+                      FE(i,j)=Hvom(i,j,k)*t(i,j-1,k,3,itrc)
+                    ELSE IF ((rmask(i,j  ).eq.1.0_r8).and.              &
+     &                       (rmask(i,j-1).eq.0.0_r8)) THEN
+                      FE(i,j)=Hvom(i,j,k)*t(i,j  ,k,3,itrc)
+                    END IF
+# endif
+                  END IF
+                END IF
+              END IF
+            END DO
+          END IF
 
 # ifdef NESTING
 !
@@ -926,13 +871,23 @@
           DO i=I_RANGE
             CF(i,0)=dt(ng)*pm(i,j)*pn(i,j)
           END DO
-# ifdef Q_PSOURCE
+!
+!  Apply mass point sources (volume vertical influx), if any.
+!
+          IF (LwSrc(ng)) THEN
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
 !
 !  Apply mass point sources - Volume influx.
 !
-          DO is=1,Nsrc
-            IF (LtracerSrc(itrc,ng)) THEN
-              i=Isrc(is)
+            DO i=I_RANGE
+              FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                         &
+     &                        SOURCES(ng)%Tsgd(itrc)*sgd_src(i,j)
+            END DO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+            DO is=1,Nsrc(ng)
+              i=SOURCES(ng)%Isrc(is)
 #  ifdef TS_MPDATA
               IF (((IstrUm2.le.i).and.(i.le.Iendp2i)).and.              &
      &            ((JstrVm2.le.j).and.(j.le.Jendp2i))) THEN
@@ -940,28 +895,18 @@
               IF (((IstrR.le.i).and.(i.le.IendR)).and.                  &
      &            ((JstrR.le.j).and.(j.le.JendR))) THEN
 #  endif
-                IF (j.eq.Jsrc(is)) THEN
+                IF (j.eq.SOURCES(ng)%Jsrc(is)) THEN
                   DO k=1,N(ng)-1
                     FC(i,k)=FC(i,k)+0.5_r8*                             &
-     &                      (Qsrc(is,k  )*Tsrc(is,k  ,itrc)+            &
-     &                       Qsrc(is,k+1)*Tsrc(is,k+1,itrc))
+     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
+                             SOURCES(ng)%Tsrc(is,k  ,itrc)+             &
+     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
+     &                       SOURCES(ng)%Tsrc(is,k+1,itrc))
                   END DO
                 END IF
               END IF
-            END IF
-          END DO
-# endif
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-# ifdef SGD_ON
-!
-!  Apply mass point sources - Volume influx.
-!
-          DO i=I_RANGE
-            FC(i,0)=FC(i,0)+Qsgd*Tsgd(itrc)*sgd_src(i,j)
-          END DO
-
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+            END DO
+          END IF
 
           DO k=1,N(ng)
             DO i=I_RANGE

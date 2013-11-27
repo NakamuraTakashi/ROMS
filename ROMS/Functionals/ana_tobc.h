@@ -62,7 +62,7 @@
       USE mod_sediment
 #endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#ifdef BIOLOGY
+#ifdef REEF_ECOSYS
       USE mod_biology
       USE mod_geochem
 #endif
