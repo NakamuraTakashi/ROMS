@@ -60,26 +60,10 @@
               CASE ('idTvar(iSDeC)')
                 idTvar(iSDeC)=varid
 # endif
-              CASE ('iHbio2(iClPg)')
-                iHbio2(iClPg)=varid
-              CASE ('iHbio2(iCl_R)')
-                iHbio2(iCl_R)=varid
-              CASE ('iHbio2(iClPn)')
-                iHbio2(iClPn)=varid
-              CASE ('iHbio2(iCl_G)')
-                iHbio2(iCl_G)=varid
-              CASE ('iHbio2(iSgPg)')
-                iHbio2(iSgPg)=varid
-              CASE ('iHbio2(iSg_R)')
-                iHbio2(iSg_R)=varid
-              CASE ('iHbio2(iSgPn)')
-                iHbio2(iSgPn)=varid
-
               CASE ('iHbio2(ipHt_)')
                 iHbio2(ipHt_)=varid
               CASE ('iHbio2(iWarg)')
                 iHbio2(iWarg)=varid
-
 
               CASE ('iHbio2(iCOfx)')
                 iHbio2(iCOfx)=varid
@@ -90,6 +74,33 @@
 
               CASE ('iHbio2(iPARb)')
                 iHbio2(iPARb)=varid
+
+              CASE ('iHbio2(iClPg)')
+                iHbio2(iClPg)=varid
+              CASE ('iHbio2(iCl_R)')
+                iHbio2(iCl_R)=varid
+              CASE ('iHbio2(iClPn)')
+                iHbio2(iClPn)=varid
+              CASE ('iHbio2(iCl_G)')
+                iHbio2(iCl_G)=varid
+              CASE ('iHbio2(iCogC)')
+                iHbio2(iCogC)=varid
+#ifdef CORAL_CARBON_ISOTOPE
+              CASE ('iHbio2(iC13t)')
+                iHbio2(iC13t)=varid
+#endif
+#ifdef CORAL_ZOOXANTHELLAE
+              CASE ('iHbio2(iCzox)')
+                iHbio2(iCzox)=varid
+#endif
+              CASE ('iHbio2(iSgPg)')
+                iHbio2(iSgPg)=varid
+              CASE ('iHbio2(iSg_R)')
+                iHbio2(iSg_R)=varid
+              CASE ('iHbio2(iSgPn)')
+                iHbio2(iSgPn)=varid
+
+
 
               CASE ('iHbio3(iPPro)')
                 iHbio3(iPPro)=varid

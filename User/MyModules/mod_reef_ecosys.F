@@ -93,6 +93,7 @@
      &            ,ssWarg         &   ! sea surface aragonite saturation state
      &            ,ssCO2flux      &   ! sea surface CO2 flux (mmol m-2 s-1)
      &            ,ssO2flux       &   ! sea surface O2 flux (mmol m-2 s-1)
+     &            ,PFDbott        &   ! Bottom photon flux density (umol m-2 s-1)
      &            ,coral_Pg       &   ! Coral gross photosynthesis rate (nmol cm-2 s-1)
      &            ,coral_R        &   ! Coral respiration rate (nmol cm-2 s-1)
      &            ,coral_Gn       &   ! Coral calcification rate (nmol cm-2 s-1)
@@ -188,6 +189,7 @@
       real(8), intent(out) :: ssWarg    
       real(8), intent(out) :: ssCO2flux 
       real(8), intent(out) :: ssO2flux  
+      real(8), intent(out) :: PFDbott   
       real(8), intent(out) :: coral_Pg  
       real(8), intent(out) :: coral_R   
       real(8), intent(out) :: coral_Gn  
@@ -242,6 +244,7 @@
       ssWarg    = 4.0d0   ! sea surface aragonite saturation state
       ssCO2flux = 0.0d0   ! sea surface CO2 flux (mmol m-2 s-1)
       ssO2flux  = 0.0d0   ! sea surface O2 flux (mmol m-2 s-1)
+      PFDbott   = 0.0d0   ! Bottom photon flux density (umol m-2 s-1)
       coral_Pg  = 0.0d0   ! Coral gross photosynthesis rate (nmol cm-2 s-1)
       coral_R   = 0.0d0   ! Coral respiration rate (nmol cm-2 s-1)
       coral_Gn  = 0.0d0   ! Coral calcification rate (nmol cm-2 s-1)
@@ -264,7 +267,7 @@
       DOsatu=O2satu(TmpK,Sal(N))
       ssO2flux = Flux_O2(DOx(N), DOsatu, U10, TmpK, Sal(N) )  ! sea to air is positive
 
-      dDOx_dt(N) = dDOx_dt(N) - ssO2flux  /dz(1)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      dDOx_dt(N) = dDOx_dt(N) - ssO2flux  /dz(N)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 !-----------------------------------------------------------------------
@@ -283,10 +286,10 @@
 !----------- CO2 gas exchange rate (mmol m-2 s-1). -------------------
       ssCO2flux = Flux_CO2(ssfCO2, pCO2air, U10, TmpK, Sal(N) )  ! sea to air is positive 
 
-      dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(1)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(N)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #if defined CARBON_ISOTOPE
       R13C=R13C_fromd13C(-10.d0)
-      dDI13C_dt(N) = dDI13C_dt(N)- ssCO2flux*R13C /dz(1) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      dDI13C_dt(N) = dDI13C_dt(N)- ssCO2flux*R13C /dz(N) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #endif
 
 
@@ -358,6 +361,7 @@
 
       END DO
 
+        PFDbott=PFD
 
 !!!---------------------------------------------------------------------
 !!!  Benthic interactions.
@@ -375,7 +379,7 @@
 !          input parameters
      &            (1,i,j           &   ! n: coral compartment; i,j: position
      &            ,dtc             &   ! Time step (sec)
-     &            ,PFD             &   ! Photon flux density (umol m-2 s-1)
+     &            ,PFDbott         &   ! Photon flux density (umol m-2 s-1)
      &            ,Tmp(1)          &   ! Temperature (oC)
      &            ,Sal(1)          &   ! Salinity (PSU)
      &            ,DIC(1)          &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -456,8 +460,9 @@
         CALL seagrass             &
 !          input parameters
      &            (1,i,j          &   ! n: seagrass compartment; i,j: position
-     &            ,PFD            &   ! Photon flux density (umol m-2 s-1)
+     &            ,PFDbott        &   ! Photon flux density (umol m-2 s-1)
      &            ,DIC(1)         &   ! DIC (umol kg-1)
+     &            ,DOx(1)         &   ! DO  (umol L-1)
 #if defined NUTRIENTS         
      &            ,NH4(1)         &   ! NH4 concentration (umol L-1)
 #endif
