@@ -102,6 +102,13 @@
       integer  :: iCl_R                       ! coral respiration rate
       integer  :: iClPn                       ! coral net photosynthesis rate
       integer  :: iCl_G                       ! coral calcification rate
+      integer  :: iCogC                       ! coral tissue organic carbon
+#ifdef CORAL_CARBON_ISOTOPE
+      integer  :: iC13t                       ! coral tissue carbon isotope ratio
+#endif
+#ifdef CORAL_ZOOXANTHELLAE
+      integer  :: iCzox                       ! coral zooxanthellae density
+#endif
       integer  :: iSgPg                       ! seagrass gross photosynthesis rate
       integer  :: iSg_R                       ! seagrass respiration rate
       integer  :: iSgPn                       ! seagrass net photosynthesis rate
@@ -261,21 +268,6 @@
 !  Initialize 2D biology indices.
 !
       ic=1     ! ic reset
-      iClPg=ic
-      ic=ic+1
-      iCl_R=ic
-      ic=ic+1
-      iClPn=ic
-      ic=ic+1
-      iCl_G=ic
-      ic=ic+1
-      iSgPg=ic
-      ic=ic+1
-      iSg_R=ic
-      ic=ic+1
-      iSgPn=ic
-
-      ic=ic+1
       ipHt_=ic
       ic=ic+1
       iWarg=ic
@@ -289,7 +281,32 @@
 
       ic=ic+1
       iPARb=ic
-      
+
+      ic=ic+1
+      iClPg=ic
+      ic=ic+1
+      iCl_R=ic
+      ic=ic+1
+      iClPn=ic
+      ic=ic+1
+      iCl_G=ic
+      ic=ic+1
+      iCogC=ic
+#ifdef CORAL_CARBON_ISOTOPE
+      ic=ic+1
+      iC13t=ic
+#endif
+#ifdef CORAL_ZOOXANTHELLAE
+      ic=ic+1
+      iCzox=ic
+#endif
+      ic=ic+1
+      iSgPg=ic
+      ic=ic+1
+      iSg_R=ic
+      ic=ic+1
+      iSgPn=ic
+
 #ifdef NUTRIENTS
       ic=ic+1
       iDNIT=ic

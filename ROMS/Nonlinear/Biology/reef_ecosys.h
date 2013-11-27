@@ -192,6 +192,7 @@
       
       USE mod_reef_ecosys  !!!<<<<<<<<<<<<<<<< Reef ecosystem model
       USE mod_geochem
+      USE mod_coral
 !
 !  Imported variable declarations.
 !
@@ -286,12 +287,15 @@
       real(r8) :: ssWarg    
       real(r8) :: ssCO2flux 
       real(r8) :: ssO2flux  
+      real(r8) :: PFDbott   
       real(r8) :: coral_Pg  
       real(r8) :: coral_R   
       real(r8) :: coral_Gn  
       real(r8) :: sgrass_Pg 
       real(r8) :: sgrass_R  
-      
+#ifdef CORAL_CARBON_ISOTOPE
+      real(r8) :: R13CH2O
+#endif
       real(r8) :: dtrc_dt(UBk,UBt)
 
 #include "set_bounds.h"
@@ -414,6 +418,7 @@
      &            ,ssWarg         &   ! sea surface aragonite saturation state
      &            ,ssCO2flux      &   ! sea surface CO2 flux (mmol m-2 s-1)
      &            ,ssO2flux       &   ! sea surface O2 flux (mmol m-2 s-1)
+     &            ,PFDbott        &   ! Bottom photon flux density (umol m-2 s-1)
      &            ,coral_Pg       &   ! Coral gross photosynthesis rate (nmol cm-2 s-1)
      &            ,coral_R        &   ! Coral respiration rate (nmol cm-2 s-1)
      &            ,coral_Gn       &   ! Coral calcification rate (nmol cm-2 s-1)
@@ -425,18 +430,28 @@
           END IF
 #endif
 
+            HisBio2d(i,j,ipHt_) = sspH
+            HisBio2d(i,j,iWarg) = ssWarg
+            HisBio2d(i,j,iCOfx) = ssCO2flux
+            HisBio2d(i,j,ipCO2) = ssfCO2
+            HisBio2d(i,j,iO2fx) = ssO2flux
+            HisBio2d(i,j,iPARb) = PFDbott
+
             HisBio2d(i,j,iClPg) = coral_Pg
             HisBio2d(i,j,iCl_R) = coral_R
             HisBio2d(i,j,iClPn) = coral_Pg-coral_R
             HisBio2d(i,j,iCl_G) = coral_Gn
+            HisBio2d(i,j,iCogC) = CH2O(1,i,j)
+#ifdef CORAL_CARBON_ISOTOPE
+            R13CH2O=c13CH2O(1,i,j)/CH2O(1,i,j)   !coral organism
+            HisBio2d(i,j,iC13t) = d13C_fromR13C(R13CH2O)
+#endif
+#ifdef CORAL_ZOOXANTHELLAE
+            HisBio2d(i,j,iCzox) = coral_Gn
+#endif
             HisBio2d(i,j,iSgPg) = sgrass_Pg
             HisBio2d(i,j,iSg_R) = sgrass_R
             HisBio2d(i,j,iSgPn) = sgrass_Pg-sgrass_R
-            HisBio2d(i,j,iO2fx) = ssO2flux
-            HisBio2d(i,j,iCOfx) = ssCO2flux
-            HisBio2d(i,j,ipHt_) = sspH
-            HisBio2d(i,j,iWarg) = ssWarg
-            HisBio2d(i,j,ipCO2) = ssfCO2
 
 !-----------------------------------------------------------------------
 !  Update global tracer variables: Add increment due to BGC processes

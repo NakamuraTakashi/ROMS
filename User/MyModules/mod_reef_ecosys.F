@@ -93,6 +93,7 @@
      &            ,ssWarg         &   ! sea surface aragonite saturation state
      &            ,ssCO2flux      &   ! sea surface CO2 flux (mmol m-2 s-1)
      &            ,ssO2flux       &   ! sea surface O2 flux (mmol m-2 s-1)
+     &            ,PFDbott        &   ! Bottom photon flux density (umol m-2 s-1)
      &            ,coral_Pg       &   ! Coral gross photosynthesis rate (nmol cm-2 s-1)
      &            ,coral_R        &   ! Coral respiration rate (nmol cm-2 s-1)
      &            ,coral_Gn       &   ! Coral calcification rate (nmol cm-2 s-1)
@@ -188,6 +189,7 @@
       real(8), intent(out) :: ssWarg    
       real(8), intent(out) :: ssCO2flux 
       real(8), intent(out) :: ssO2flux  
+      real(8), intent(out) :: PFDbott   
       real(8), intent(out) :: coral_Pg  
       real(8), intent(out) :: coral_R   
       real(8), intent(out) :: coral_Gn  
@@ -242,6 +244,7 @@
       ssWarg    = 4.0d0   ! sea surface aragonite saturation state
       ssCO2flux = 0.0d0   ! sea surface CO2 flux (mmol m-2 s-1)
       ssO2flux  = 0.0d0   ! sea surface O2 flux (mmol m-2 s-1)
+      PFDbott   = 0.0d0   ! Bottom photon flux density (umol m-2 s-1)
       coral_Pg  = 0.0d0   ! Coral gross photosynthesis rate (nmol cm-2 s-1)
       coral_R   = 0.0d0   ! Coral respiration rate (nmol cm-2 s-1)
       coral_Gn  = 0.0d0   ! Coral calcification rate (nmol cm-2 s-1)
@@ -358,6 +361,7 @@
 
       END DO
 
+        PFDbott=PFD
 
 !!!---------------------------------------------------------------------
 !!!  Benthic interactions.
@@ -375,7 +379,7 @@
 !          input parameters
      &            (1,i,j           &   ! n: coral compartment; i,j: position
      &            ,dtc             &   ! Time step (sec)
-     &            ,PFD             &   ! Photon flux density (umol m-2 s-1)
+     &            ,PFDbott         &   ! Photon flux density (umol m-2 s-1)
      &            ,Tmp(1)          &   ! Temperature (oC)
      &            ,Sal(1)          &   ! Salinity (PSU)
      &            ,DIC(1)          &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -456,7 +460,7 @@
         CALL seagrass             &
 !          input parameters
      &            (1,i,j          &   ! n: seagrass compartment; i,j: position
-     &            ,PFD            &   ! Photon flux density (umol m-2 s-1)
+     &            ,PFDbott        &   ! Photon flux density (umol m-2 s-1)
      &            ,DIC(1)         &   ! DIC (umol kg-1)
      &            ,DOx(1)         &   ! DO  (umol L-1)
 #if defined NUTRIENTS         
