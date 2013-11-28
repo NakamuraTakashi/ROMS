@@ -316,32 +316,29 @@
 
       DO k=N,1,-1
 
-#ifdef NUTRIENTS
+!!
+!!  Compute average light attenuation for each grid cell. To include
+!!  other attenuation contributions like suspended sediment or CDOM
+!!  modify AttFac.
+!        AttFac=0.0d0
 !
-!  Compute average light attenuation for each grid cell. To include
-!  other attenuation contributions like suspended sediment or CDOM
-!  modify AttFac.
-        AttFac=0.0d0
-
-        Att=(AttSW+                                         &
-     &       AttChl*Bio(i,k,iChlo)+                         &
-     &       AttFac)*dz(k)
-        ExpAtt=EXP(-Att)
-        Itop=PFD
-        PFD=Itop*(1.0d0-ExpAtt)/Att    ! average at cell center
+!        Att=(AttSW+                                         &
+!     &       AttChl*Bio(i,k,iChlo)+                         &
+!     &       AttFac)*dz(k)
+!        ExpAtt=EXP(-Att)
+!        Itop=PFD
+!        PFD=Itop*(1.0d0-ExpAtt)/Att    ! average at cell center
+!!
+!!  Compute Chlorophyll-a phytoplankton ratio, [mg Chla / (mg C)].
+!!
+!        cff=PhyCN(ng)*12.0d0
+!        Chl2C=MIN(Bio(i,k,iChlo)/(Bio(i,k,iPhyt)*cff+eps),      &
+!     &            Chl2C_m(ng))
 !
-!  Compute Chlorophyll-a phytoplankton ratio, [mg Chla / (mg C)].
-!
-        cff=PhyCN(ng)*12.0d0
-        Chl2C=MIN(Bio(i,k,iChlo)/(Bio(i,k,iPhyt)*cff+eps),      &
-     &            Chl2C_m(ng))
-
-#else
         Att= AttSW*dz(k) 
         ExpAtt=EXP(-Att)
         Itop=PFD
         PFD=Itop*(1.0d0-ExpAtt)/Att    ! average at cell center
-#endif
 
 !-----------------------------------------------------------------------
 ! Food web model.
