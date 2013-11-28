@@ -278,9 +278,6 @@
 
 #endif
 
-
-#ifdef TS_PSOURCE
-
 /*
 **  Biological tracers point Source/Sinks (river runoff).
 */
@@ -290,11 +287,11 @@
                 idRtrc(iTAlk)=varid
               CASE ('idRtrc(iOxyg)')
                 idRtrc(iOxyg)=varid
-# ifdef CARBON_ISOTOPE
+#ifdef CARBON_ISOTOPE
               CASE ('idRtrc(iT13C)')
                 idRtrc(iT13C)=varid
-# endif
-# ifdef NUTRIENTS
+#endif
+#ifdef NUTRIENTS
               CASE ('idRtrc(iNO3_)')
                 idRtrc(iNO3_)=varid
               CASE ('idRtrc(iNH4_)')
@@ -315,8 +312,6 @@
               CASE ('idRtrc(iSDeC)')
                 idRtrc(iSDeC)=varid
 
-# endif
 #endif
-
 
 

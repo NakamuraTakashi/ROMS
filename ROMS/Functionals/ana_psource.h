@@ -190,7 +190,7 @@
         IF (Master.and.DOMAIN(ng)%SouthWest_Test(tile)) THEN
           Nsrc(ng)=1
           SOURCES(ng)%Dsrc(1)=0.0_r8
-          SOURCES(ng)%Isrc(1)=1
+          SOURCES(ng)%Isrc(1)=9
           SOURCES(ng)%Jsrc(1)=58
         END IF
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
@@ -428,11 +428,11 @@
 # endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 #elif defined SHIRAHO_REEF
-      DO is=1,Nsrc
-        SOURCES(ng)%Qbar(is)=4.0d0   ! (m3/s)
-      END DO
+        DO is=1,Nsrc(ng)
+          SOURCES(ng)%Qbar(is)=4.0d0   ! (m3/s)
+        END DO
 # ifdef DISTRIBUTE
-        CALL mp_collect (ng, iNLM, Msrc, Pspv, SOURCES(ng)%Qbar)
+!        CALL mp_collect (ng, iNLM, Msrc, Pspv, SOURCES(ng)%Qbar)
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
@@ -491,8 +491,8 @@
         IF (DOMAIN(ng)%NorthEast_Test(tile)) THEN
           DO k=1,N(ng)
             DO is=1,Nsrc(ng)
-              SOURCES(ng)%Tsrc(is,k,itemp)=25.0_r8
-              SOURCES(ng)%Tsrc(is,k,isalt)= 0.0_r8
+              SOURCES(ng)%Tsrc(is,k,itemp)=50.0_r8
+              SOURCES(ng)%Tsrc(is,k,isalt)=50.0_r8
 #  ifdef SEDIMENT
               SOURCES(ng)%Tsrc(is,k,idmud(1))=1.0_r8  !(kg/m3 = g/L) commonly 0.1 g/L see Blanco et al. 2010
 #  endif

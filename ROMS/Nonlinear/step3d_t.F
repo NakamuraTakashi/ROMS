@@ -140,7 +140,7 @@
 # endif
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 # ifdef SGD_ON
-     &                          sgd_src                                 &
+     &                          sgd_src,                                &
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                          t)
@@ -552,14 +552,7 @@
 !  if any.
 !
           IF (.not.LwSrc(ng).and.ANY(LtracerSrc(:,ng))) THEN
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
-#  ifdef SGD_ON
-            DO is=1,Nsrc(ng)-1
-#  else
             DO is=1,Nsrc(ng)
-#  endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-!            DO is=1,Nsrc(ng)   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
               i=SOURCES(ng)%Isrc(is)
               j=SOURCES(ng)%Jsrc(is)
               IF (INT(SOURCES(ng)%Dsrc(is)).eq.0) THEN
@@ -875,17 +868,6 @@
 !  Apply mass point sources (volume vertical influx), if any.
 !
           IF (LwSrc(ng)) THEN
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-# ifdef SGD_ON
-!
-!  Apply mass point sources - Volume influx.
-!
-            DO i=I_RANGE
-              FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                         &
-     &                        SOURCES(ng)%Tsgd(itrc)*sgd_src(i,j)
-            END DO
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
             DO is=1,Nsrc(ng)
               i=SOURCES(ng)%Isrc(is)
 #  ifdef TS_MPDATA
@@ -907,6 +889,18 @@
               END IF
             END DO
           END IF
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+!
+!  Apply mass point sources - Volume influx.
+!
+          DO i=I_RANGE
+            FC(i,0)=FC(i,0)+SOURCES(ng)%Qsgd*                           &
+     &                      SOURCES(ng)%Tsgd(itrc)*sgd_src(i,j)
+          END DO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
           DO k=1,N(ng)
             DO i=I_RANGE

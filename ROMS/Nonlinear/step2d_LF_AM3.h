@@ -915,20 +915,6 @@
 !  Apply mass point sources (volume vertical influx), if any.
 !
       IF (LwSrc(ng)) THEN
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-# ifdef SGD_ON
-!
-!  Apply mass point sources - Volume influx.
-
-        DO j=Jstr,Jend
-          DO i=Istr,Iend
-            zeta(i,j,knew)=zeta(i,j,knew)+                              &
-     &                     SOURCES(ng)%Qsgd*pm(i,j)*pn(i,j)*            &
-     &                     dtfast(ng)*sgd_src(i,j)
-          END DO
-        END DO
-# endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         DO is=1,Nsrc(ng)
           i=SOURCES(ng)%Isrc(is)
           j=SOURCES(ng)%Jsrc(is)
@@ -940,6 +926,21 @@
           END IF
         END DO
       END IF
+
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef SGD_ON
+!
+!  Apply mass point sources - Volume influx.
+
+      DO j=Jstr,Jend
+        DO i=Istr,Iend
+          zeta(i,j,knew)=zeta(i,j,knew)+                                &
+     &                   SOURCES(ng)%Qsgd*pm(i,j)*pn(i,j)*              &
+     &                   dtfast(ng)*sgd_src(i,j)
+        END DO
+      END DO
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Set free-surface lateral boundary conditions.
 !
@@ -2476,14 +2477,7 @@
 !-----------------------------------------------------------------------
 !
       IF (LuvSrc(ng)) THEN
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
-#  ifdef SGD_ON
-        DO is=1,Nsrc(ng)-1
-#  else
         DO is=1,Nsrc(ng)
-#  endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-!        DO is=1,Nsrc(ng)  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
           i=SOURCES(ng)%Isrc(is)
           j=SOURCES(ng)%Jsrc(is)
           IF (((IstrR.le.i).and.(i.le.IendR)).and.                      &

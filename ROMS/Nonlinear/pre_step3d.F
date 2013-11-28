@@ -502,14 +502,7 @@
 !  if any.
 !
           IF (.not.LwSrc(ng).and.ANY(LtracerSrc(:,ng))) THEN
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
-#  ifdef SGD_ON
-            DO is=1,Nsrc(ng)-1
-#  else
             DO is=1,Nsrc(ng)
-#  endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-!            DO is=1,Nsrc(ng)
               i=SOURCES(ng)%Isrc(is)
               j=SOURCES(ng)%Jsrc(is)
               IF (LtracerSrc(itrc,ng).and.                              &

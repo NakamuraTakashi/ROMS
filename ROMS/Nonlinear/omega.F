@@ -192,18 +192,19 @@
               END DO
             END IF
           END DO
+        END IF
+!
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 # ifdef SGD_ON
 !
 !  Apply mass point sources - Volume influx.
 !
-          DO i=Istr,Iend
-            W(i,j,1)=W(i,j,1)+SOURCES(ng)%Qsgd*sgd_src(i,j)
-          END DO
+        DO i=Istr,Iend
+          W(i,j,1)=W(i,j,1)+SOURCES(ng)%Qsgd*sgd_src(i,j)
+        END DO
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
-        END IF
-!
+
         DO i=Istr,Iend
           wrk(i)=W(i,j,N(ng))/(z_w(i,j,N(ng))-z_w(i,j,0))
         END DO

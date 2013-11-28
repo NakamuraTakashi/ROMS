@@ -267,9 +267,6 @@
       DOsatu=O2satu(TmpK,Sal(N))
       ssO2flux = Flux_O2(DOx(N), DOsatu, U10, TmpK, Sal(N) )  ! sea to air is positive
 
-      dDOx_dt(N) = dDOx_dt(N) - ssO2flux  /dz(N)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
 !-----------------------------------------------------------------------
 !  Compute surface CO2 gas exchange.
 !-----------------------------------------------------------------------
@@ -286,10 +283,13 @@
 !----------- CO2 gas exchange rate (mmol m-2 s-1). -------------------
       ssCO2flux = Flux_CO2(ssfCO2, pCO2air, U10, TmpK, Sal(N) )  ! sea to air is positive 
 
+#if defined AIR_SEA_GAS_EXCHANGE
+      dDOx_dt(N) = dDOx_dt(N) - ssO2flux  /dz(N)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       dDIC_dt(N) = dDIC_dt(N) - ssCO2flux  /dz(N)   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#if defined CARBON_ISOTOPE
+# if defined CARBON_ISOTOPE
       R13C=R13C_fromd13C(-10.d0)
       dDI13C_dt(N) = dDI13C_dt(N)- ssCO2flux*R13C /dz(N) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# endif
 #endif
 
 
@@ -367,6 +367,8 @@
 !!!  Benthic interactions.
 !!!---------------------------------------------------------------------
 
+#ifdef CORAL_POLYP
+
 !-----------------------------------------------------------------------
 ! Compute coral polyp model.
 !-----------------------------------------------------------------------
@@ -379,13 +381,13 @@
 !          input parameters
      &            (1,i,j           &   ! n: coral compartment; i,j: position
      &            ,dtc             &   ! Time step (sec)
-     &            ,PFDbott         &   ! Photon flux density (umol m-2 s-1)
+     &            ,PFDbott          &   ! Photon flux density (umol m-2 s-1)
      &            ,Tmp(1)          &   ! Temperature (oC)
      &            ,Sal(1)          &   ! Salinity (PSU)
      &            ,DIC(1)          &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
      &            ,TA (1)          &   ! Total alkalinity (TA: umol kg-1)
      &            ,DOx(1)          &   ! Dissolved oxygen (umol L-1)
-#if defined CORAL_NUTRIENTS
+# if defined CORAL_NUTRIENTS
      &            ,NO3(1)          &   ! NO3 (umol L-1)
      &            ,NO2(1)          &   ! NO2 (umol L-1)
      &            ,NH4(1)          &   ! NH4 (umol L-1)
@@ -395,10 +397,10 @@
      &            ,DOP(1)          &   ! Dissolved organic phosporius (DOP: umol L-1)
      &            ,PHY(1)          &   ! phytoplankton (umol C L-1)
      &            ,ZOO(1)          &   ! zooplankton (umol C L-1)
-#endif
-#if defined CORAL_CARBON_ISOTOPE
+# endif
+# if defined CORAL_CARBON_ISOTOPE
      &            ,DI13C(1)        &   !13C of DIC (umol kg-1)
-#endif
+# endif
      &            ,tau             &   ! bottom shear stress (N m-2)
      &            ,0.0d0           &   ! sedimentation rate (??)
 !          output parameters
@@ -408,7 +410,7 @@
      &            ,DICuptake       &   ! DIC uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,TAuptake        &   ! TA  uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,DOuptake        &   ! DO  uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-#if defined CORAL_NUTRIENTS
+# if defined CORAL_NUTRIENTS
      &            ,NO3uptake       &   ! NO3 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,NO2uptake       &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,NH4uptake       &   ! NH4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
@@ -418,10 +420,10 @@
      &            ,DOPuptake       &   ! DOP uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
      &            ,PHYuptake       &   ! Phytoplankton ingestion rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,ZOOuptake       &   ! Zooplankton ingestion rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-#endif
-#if defined CORAL_CARBON_ISOTOPE
+# endif
+# if defined CORAL_CARBON_ISOTOPE
      &            ,DI13Cuptake     &   ! DI13C uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-#endif
+# endif
      &             )
 
         END DO
@@ -434,7 +436,7 @@
         dDIC_dt(1) = dDIC_dt(1) - DICuptake * cff/1.024d0
         dTA_dt (1) = dTA_dt (1) - TAuptake  * cff/1.024d0
         dDOx_dt(1) = dDOx_dt(1) - DOuptake  * cff
-#if defined NUTRIENTS
+# if defined NUTRIENTS
         dNO3_dt(1) = dNO3_dt(1) - NO3uptake * cff
         dNO2_dt(1) = dNO2_dt(1) - NO2uptake * cff
         dNH4_dt(1) = dNH4_dt(1) - NH4uptake * cff
@@ -444,12 +446,15 @@
         dDOP_dt(1) = dDOP_dt(1) - DOPuptake * cff
         dPHY_dt(1) = dPHY_dt(1) - PHYuptake * cff
         dZOO_dt(1) = dZOO_dt(1) - ZOOuptake * cff
-#endif
-#if defined CARBON_ISOTOPE
+# endif
+# if defined CARBON_ISOTOPE
         dDI13C_dt(1) = dDI13C_dt(1) - DI13Cuptake * cff/1.024d0
-#endif
+# endif
       END IF
+#endif
+
       
+#ifdef SEAGRASS
       
 !-----------------------------------------------------------------------
 ! Compute seagrass model.
@@ -460,28 +465,28 @@
         CALL seagrass             &
 !          input parameters
      &            (1,i,j          &   ! n: seagrass compartment; i,j: position
-     &            ,PFDbott        &   ! Photon flux density (umol m-2 s-1)
+     &            ,PFDbott         &   ! Photon flux density (umol m-2 s-1)
      &            ,DIC(1)         &   ! DIC (umol kg-1)
      &            ,DOx(1)         &   ! DO  (umol L-1)
-#if defined NUTRIENTS         
+# if defined NUTRIENTS         
      &            ,NH4(1)         &   ! NH4 concentration (umol L-1)
-#endif
-#if defined CARBON_ISOTOPE
+# endif
+# if defined CARBON_ISOTOPE
      &            ,DI13C(1)       &   ! 13C of DIC (umol kg-1)
-#endif
+# endif
 !          output parameters
      &            ,sgrass_Pg       &   ! Gross photosynthesis rate (mmol m-2 s-1)
      &            ,sgrass_R        &   ! Respiration rate (mmol m-2 s-1)
      &            ,DICuptake      &   ! DIC uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
      &            ,DOuptake       &   ! DO  uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-#if defined NUTRIENTS         
+# if defined NUTRIENTS         
      &            ,NO3uptake      &   ! NO3 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
      &            ,NH4uptake      &   ! NH4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
      &            ,PO4uptake      &   ! PO4 uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-#endif
-#if defined CARBON_ISOTOPE
+# endif
+# if defined CARBON_ISOTOPE
      &            ,DI13Cuptake    &   ! DI13C uptake rate (mmol m-2 s-1)  * direction of water column to coral is positive
-#endif
+# endif
      &             )
 
         ! 1 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
@@ -491,16 +496,19 @@
 
         dDIC_dt(1) = dDIC_dt(1) - DICuptake * cff/1.024d0
         dDOx_dt(1) = dDOx_dt(1) - DOuptake  * cff
-#if defined NUTRIENTS
+# if defined NUTRIENTS
         dNO3_dt(1) = dNO3_dt(1) - NO3uptake * cff
         dNH4_dt(1) = dNH4_dt(1) - NH4uptake * cff
         dPO4_dt(1) = dPO4_dt(1) - PO4uptake * cff
-#endif
-#if defined CARBON_ISOTOPE
+# endif
+# if defined CARBON_ISOTOPE
         dDI13C_dt(1) = dDI13C_dt(1) - DI13Cuptake * cff/1.024d0
-#endif
+# endif
 
       END IF
+#endif
+
+#ifdef ALGAE
 
 !-----------------------------------------------------------------------
 ! Compute algae model.
@@ -509,6 +517,7 @@
       IF(p_algae .gt. 0.0d0) THEN
        ! CALL algae model
       END IF            
+#endif
 
       RETURN
     END SUBROUTINE reef_ecosys

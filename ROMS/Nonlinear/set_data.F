@@ -74,6 +74,12 @@
 # ifdef SOLVE3D
       USE set_3dfld_mod
 # endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#ifdef REEF_ECOSYS
+      USE mod_biology
+      USE mod_geochem
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
       implicit none
 !
@@ -92,7 +98,7 @@
 # endif
 
       integer :: ILB, IUB, JLB, JUB
-      integer :: i, ic, itrc, j, k, my_tile
+      integer :: i, ic, itrc, j, k, my_tile, is !!!<<<<<<<<<<<<<<<<<<<TN: Add is
 
       real(r8) :: cff, cff1, cff2
 
@@ -785,6 +791,17 @@
           END IF
         END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:add
+#   ifdef REEF_ECOSYS
+#    ifdef CARBON_ISOTOPE
+        DO k=1,N(ng)
+          DO is=1,Nsrc(ng)
+            SOURCES(ng)%Tsrc(is,k,iT13C)=R13C_fromd13C(                 &
+     &                                 SOURCES(ng)%Tsrc(is,k,iT13C)     &
+     &                               )*SOURCES(ng)%Tsrc(is,k,iTIC_)
+          END DO
+        END DO
+#    endif
+#   endif
 #   ifdef SGD_ON
         DO itrc=1,NT(ng)
           SOURCES(ng)%Tsgd(itrc)=SOURCES(ng)%Tsrc(Nsrc(ng),1,itrc)  !!!!!!!!!!!!!!!!!!!!!!!!!!Test case
