@@ -1,42 +1,49 @@
 
-!!!=== ver 2013/05/15   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
+!!!=== ver 2013/11/29   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
 
 !!!**** Heat MODULE ************************************
 
-  module mod_heat
+  MODULE mod_heat
 
     implicit none
 
-    real(8), allocatable, save :: tg(:,:) 
+    TYPE T_HEAT
 
+      real(8), pointer :: tg(:,:) 
 
-  contains
+    END TYPE T_HEAT
+
+    TYPE (T_HEAT), allocatable :: HEAT(:)
+
+  CONTAINS
+
 !!! **********************************************************************
 !!!  set initial conditions for heat
 !!! **********************************************************************
 
-    subroutine initialize_heat(ng, LBi, UBi, LBj, UBj)
+    SUBROUTINE initialize_heat(ng, Ngrids, LBi, UBi, LBj, UBj)
 
       implicit none
 ! input parameters
-      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+      integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
       integer i,j,n
 
+      IF (ng.eq.1) allocate ( HEAT(Ngrids) )
 
-      allocate( tg(LBi:UBi,LBj:UBj)  )
+      allocate( HEAT(ng)%tg(LBi:UBi,LBj:UBj)  )
 
 !  Set initial conditions
       do j=LBj,UBj
         do i=LBi,UBi
-          tg(i,j)=29.1d0
+          HEAT(ng)%tg(i,j)=29.1d0
         enddo
       enddo
 
-      return
-    end subroutine initialize_heat
+      RETURN
+    END SUBROUTINE initialize_heat
 
 
 ! **********************************************************************
@@ -45,8 +52,8 @@
 
     SUBROUTINE heat_mass_balance  &
 !          input parameters
-     &            (N              &   ! Number of vertical grid (following ROMS vertical grid)
-     &            ,i,j            &   ! i,j: position
+     &            (ng, i, j       &   ! ng: nested grid number; i,j: position
+     &            ,N              &   ! Number of vertical grid (following ROMS vertical grid)
      &            ,dt             &   ! Time step (sec)
      &            ,dz             &   ! dz(N): vertical grid size (m)
      &            ,ssradi         &   ! Surface shortwave radiation (W m-2)
@@ -91,8 +98,8 @@
       implicit none
 
 ! input parameters
+      integer, intent(in) :: ng, i, j        
       integer, intent(in) :: N          
-      integer, intent(in) :: i,j        
       real(8), intent(in) :: dt         
       real(8), intent(in) :: dz(N)      
       real(8), intent(in) :: ssradi     
@@ -191,11 +198,11 @@
       
       Diff = 1.0d-3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       
-      Ftbot= Diff *(tg(i,j)-Tmp(1))/(dz(1)/2)
+      Ftbot= Diff *(HEAT(ng)%tg(i,j)-Tmp(1))/(dz(1)/2)
       dTmp_dt(1) = dTmp_dt(1) + Ftbot/dz(1)
 
-      tg(i,j)=tg(i,j)                                &
-     &         +(-1.0d0/(0.1*86400.)*(tg(i,j)-29.0)  &  ! 0.1 day relaxation time
+      HEAT(ng)%tg(i,j)=HEAT(ng)%tg(i,j)                                &
+     &         +(-1.0d0/(0.1*86400.)*(HEAT(ng)%tg(i,j)-29.0)  &  ! 0.1 day relaxation time
      &            -Ftbot                             &
      &            +(radi-radir)/3.0d6/0.1            &  ! â∑ìxÇÃè„Ç™ÇÈä‚î’ÇÃå˙Ç≥Ç0.2mÇ∆âºíË
      &           )*dt                                   ! ä‚î’ÇÃîMóeó 3.0e6 J m-3 K-1Ç∆âºíË
@@ -220,6 +227,7 @@
       end do
           
       RETURN
+
     END SUBROUTINE heat_mass_balance
 
 
@@ -444,6 +452,6 @@
     end function specific_humidity
     
     
-  end module mod_heat
+  END MODULE mod_heat
 
 

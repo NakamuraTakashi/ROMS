@@ -1,5 +1,5 @@
 
-!!!=== ver 2013/05/08   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
+!!!=== ver 2013/11/29   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -14,17 +14,17 @@
 !!!  Set initial conditions for reef ecosystem model
 !!! **********************************************************************
 
-    SUBROUTINE initialize_reef_ecosys(ng, LBi, UBi, LBj, UBj)
+    SUBROUTINE initialize_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
       
       USE mod_coral
       USE mod_seagrass
       
       implicit none
 
-      integer, intent(in) :: ng, LBi, UBi, LBj, UBj
+      integer, intent(in) :: ng, Ngrids, LBi, UBi, LBj, UBj
 
-      CALL initialize_coral(ng, LBi, UBi, LBj, UBj)
-      CALL initialize_seagrass(ng, LBi, UBi, LBj, UBj)
+      CALL initialize_coral(ng, Ngrids, LBi, UBi, LBj, UBj)
+      CALL initialize_seagrass(ng, Ngrids, LBi, UBi, LBj, UBj)
       
       RETURN
     END SUBROUTINE initialize_reef_ecosys
@@ -36,8 +36,8 @@
 
     SUBROUTINE reef_ecosys        &
 !          input parameters
-     &            (N              &   ! Number of vertical grid (following ROMS vertical grid)
-     &            ,i,j            &   ! i,j: position
+     &            (ng, i, j       &   ! ng: nested grid number; i,j: position
+     &            ,N              &   ! Number of vertical grid (following ROMS vertical grid)
      &            ,isplit         &   ! Internal loop counts of coral polyp model
      &            ,dt             &   ! Time step (sec)
      &            ,dz             &   ! dz(N): vertical grid size (m)
@@ -133,8 +133,8 @@
       implicit none
 
 ! input parameters
+      integer, intent(in) :: ng,i,j     
       integer, intent(in) :: N          
-      integer, intent(in) :: i,j        
       integer, intent(in) :: isplit     
       real(8), intent(in) :: dt         
       real(8), intent(in) :: dz(N)      
@@ -376,9 +376,9 @@
 
           CALL coral_polyp         &
 !          input parameters
-     &            (1,i,j           &   ! n: coral compartment; i,j: position
+     &            (ng, 1, i, j     &   ! ng: nested grid number; n: coral compartment; i,j: position
      &            ,dtc             &   ! Time step (sec)
-     &            ,PFDbott          &   ! Photon flux density (umol m-2 s-1)
+     &            ,PFDbott         &   ! Photon flux density (umol m-2 s-1)
      &            ,Tmp(1)          &   ! Temperature (oC)
      &            ,Sal(1)          &   ! Salinity (PSU)
      &            ,DIC(1)          &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -461,7 +461,7 @@
 
         CALL seagrass             &
 !          input parameters
-     &            (1,i,j          &   ! n: seagrass compartment; i,j: position
+     &            (ng, 1, i, j     &   ! ng: nested grid number; n: seagrass compartment; i,j: position
      &            ,PFDbott         &   ! Photon flux density (umol m-2 s-1)
      &            ,DIC(1)         &   ! DIC (umol kg-1)
      &            ,DOx(1)         &   ! DO  (umol L-1)

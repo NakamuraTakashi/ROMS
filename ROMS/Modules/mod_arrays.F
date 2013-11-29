@@ -148,7 +148,7 @@
 !!!  Initialize coral polyp model parameters
 !!!----------------------------------------------------------------------
 #ifdef REEF_ECOSYS
-          CALL initialize_reef_ecosys(ng, LBi, UBi, LBj, UBj)
+          CALL initialize_reef_ecosys(ng, Ngrids, LBi, UBi, LBj, UBj)
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           IF (LuvSrc(ng).or.LwSrc(ng).or.ANY(LtracerSrc(:,ng))) THEN

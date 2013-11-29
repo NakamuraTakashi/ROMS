@@ -361,15 +361,15 @@
 
             CALL reef_ecosys          &
 !          input parameters
-     &            (N(ng)              &   ! Number of vertical grid (following ROMS vertical grid)
-     &            ,i,j            &   ! i,j: position
+     &            (ng, i, j            &   ! ng: nested grid number; i,j: position
+     &            ,N(ng)               &   ! Number of vertical grid (following ROMS vertical grid)
      &            ,BioIter(ng)         &   ! Internal loop counts of coral polyp model
-     &            ,dt(ng)             &   ! Time step (sec)
-     &            ,Hz(i,j,:)      &   ! dz(N): vertical grid size (m)
-     &            ,PFDsurf        &   ! Sea surface photon flux density (umol m-2 s-1)
-     &            ,tau            &   ! bottom shear stress (N m-2)
-     &            ,pCO2air(ng)        &   ! Air CO2 pertial pressure (uatm)
-     &            ,u10            &   ! wind speed (m s-1)
+     &            ,dt(ng)              &   ! Time step (sec)
+     &            ,Hz(i,j,:)           &   ! dz(N): vertical grid size (m)
+     &            ,PFDsurf             &   ! Sea surface photon flux density (umol m-2 s-1)
+     &            ,tau                 &   ! bottom shear stress (N m-2)
+     &            ,pCO2air(ng)         &   ! Air CO2 pertial pressure (uatm)
+     &            ,u10                 &   ! wind speed (m s-1)
 
      &            ,p_coral(i,j)        &   ! Coral coverage (0-1)
      &            ,p_seagrass(i,j)     &   ! seagrass coverage (0-1)
@@ -441,9 +441,9 @@
             HisBio2d(i,j,iCl_R) = coral_R
             HisBio2d(i,j,iClPn) = coral_Pg-coral_R
             HisBio2d(i,j,iCl_G) = coral_Gn
-            HisBio2d(i,j,iCogC) = CH2O(1,i,j)
+            HisBio2d(i,j,iCogC) = CORAL(ng)%QC(1,i,j)
 #ifdef CORAL_CARBON_ISOTOPE
-            R13CH2O=c13CH2O(1,i,j)/CH2O(1,i,j)   !coral organism
+            R13CH2O = CORAL(ng)%Q13C(1,i,j) / CORAL(ng)%QC(1,i,j)   !coral organism
             HisBio2d(i,j,iC13t) = d13C_fromR13C(R13CH2O)
 #endif
 #ifdef CORAL_ZOOXANTHELLAE
