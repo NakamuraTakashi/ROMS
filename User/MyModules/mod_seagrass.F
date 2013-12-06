@@ -1,5 +1,5 @@
 
-!!!=== ver 2013/11/29   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
+!!!=== ver 2013/12/03   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -19,6 +19,10 @@
 #if defined CARBON_ISOTOPE
 !  13C isotope
       real(8), pointer :: Q13C(:,:,:)
+#endif
+#if defined NUTRIENTS         
+      real(8), pointer :: QN(:,:,:)
+      real(8), pointer :: QP(:,:,:)
 #endif
     END TYPE T_SGRASS
 
@@ -46,6 +50,10 @@
 #if defined CARBON_ISOTOPE
       allocate( SGRASS(ng)%Q13C(Nsg,LBi:UBi,LBj:UBj)   )
 #endif
+#if defined NUTRIENTS         
+      allocate( SGRASS(ng)%QN(Nsg,LBi:UBi,LBj:UBj)     )
+      allocate( SGRASS(ng)%QP(Nsg,LBi:UBi,LBj:UBj)     )
+#endif
 
 !------------------------------------------
 !  Set initial conditions
@@ -53,11 +61,15 @@
         do i=LBi,UBi
           do n=1,Nsg
 !        seagrass internal conditions
-            SGRASS(ng)%QC(n,i,j) = 15.d0 !450 ug/cm2 = 15 umol cm-2 -> 5.e6 umol kg-1 (çoí∞ì‡ïΩãœîZìxÇ∆ÇµÇΩÅj
+            SGRASS(ng)%QC(n,i,j) = 15.0d0  !!!ÇƒÇ´Ç∆Ç§
 #if defined CARBON_ISOTOPE
-            R13C = R13C_fromd13C(-15.d0)
+            R13C = R13C_fromd13C(-15.0d0)
 !          c13CH2O (n,i,j)=R13C/(1.+R13C)*CH2O(n,i,j)
             SGRASS(ng)%Q13C(n,i,j) = R13C * SGRASS(ng)%QC(n,i,j)
+#endif
+#if defined NUTRIENTS         
+            SGRASS(ng)%QN(n,i,j) = 1.5d0  !!!ÇƒÇ´Ç∆Ç§
+            SGRASS(ng)%QP(n,i,j) = 0.1d0  !!!ÇƒÇ´Ç∆Ç§
 #endif
           enddo
         enddo
@@ -174,37 +186,14 @@
       
 ! --- Nutrient fluxes between water column and coral -----
 #if defined NUTRIENTS         
-      npref= ninter(NH4amb)
-
-      NO3uptake=Pg*nc*npref         !Flux caliculated in Carbon assimilated by Photosynthesis times C:N:P ratio [mmol/m2/s]
-      NH4uptake=Pg*nc*(1.-npref)-R*nc
-      PO4uptake=(Pg-R)*pc
+!!! ñ¢äÆê¨
+      NO3uptake = 0.0d0
+      NH4uptake = 0.0d0
+      PO4uptake = 0.0d0
 #endif
       RETURN
     
     END SUBROUTINE seagrass
-
-!-----------------------------------------------------------------------
-#if defined NUTRIENTS
-
-!!!*********************************************************************
-!!!  Caliculate ammnomiun inhibitation on nitrate uptake
-!!!*********************************************************************
-         
-
-    real(8) function ninter(NH4amb)
-
-      implicit none
-      real(8), intent(in) :: NH4amb
-
-      ninter=0.15
-      if(NH4amb.lt.0.1e0) ninter=0.9
-
-      return
-    end function ninter
-
-#endif
-
 
   END MODULE mod_seagrass
 

@@ -381,8 +381,8 @@
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
 
         DO j=JstrP,JendP
-          BOUNDARY(ng)%ubar_east(j)=ubar(Iend,j,knew)*0.75_r8  !!! 0.75  No reason
-          BOUNDARY(ng)%vbar_east(j)=vbar(Iend,j,knew)*0.75_r8  !!! 0.75  No reason
+          BOUNDARY(ng)%ubar_east(j)=ubar(Iend,j,knew)
+          BOUNDARY(ng)%vbar_east(j)=vbar(Iend,j,knew)
         END DO
       END IF
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add

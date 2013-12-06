@@ -239,21 +239,36 @@
             BOUNDARY(ng)%t_east(j,k,iTIC_)=TIC_0(ng)
             BOUNDARY(ng)%t_east(j,k,iTAlk)=TAlk0(ng)
             BOUNDARY(ng)%t_east(j,k,iOxyg)=Oxyg0(ng)
-#   ifdef CARBON_ISOTOPE
-            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#   if defined ORGANIC_MATTER
+            BOUNDARY(ng)%t_east(j,k,iDOC_)=DOC_0(ng)     ! umolC L-1
+            BOUNDARY(ng)%t_east(j,k,iPOC_)=POC_0(ng)     ! umolC L-1
+            BOUNDARY(ng)%t_east(j,k,iPhyt)=Phyt0(ng)     ! umolC L-1
+            BOUNDARY(ng)%t_east(j,k,iZoop)=Zoop0(ng)     ! umolC L-1
 #   endif
-#   ifdef NUTRIENTS
-            BOUNDARY(ng)%t_east(j,k,iNO3_)=0.5_r8
-            BOUNDARY(ng)%t_east(j,k,iNO2_)=0.05_r8
-            BOUNDARY(ng)%t_east(j,k,iNH4_)=0.1_r8
-            BOUNDARY(ng)%t_east(j,k,iPO4_)=0.03_r8
-            BOUNDARY(ng)%t_east(j,k,iChlo)=0.02_r8
-            BOUNDARY(ng)%t_east(j,k,iPhyt)=0.08_r8
-            BOUNDARY(ng)%t_east(j,k,iZoop)=0.06_r8
-            BOUNDARY(ng)%t_east(j,k,iLDeC)=0.002_r8
-            BOUNDARY(ng)%t_east(j,k,iSDeC)=0.06_r8
-            BOUNDARY(ng)%t_east(j,k,iLDeN)=0.02_r8
-            BOUNDARY(ng)%t_east(j,k,iSDeN)=0.04_r8
+#   if defined CARBON_ISOTOPE
+            BOUNDARY(ng)%t_east(j,k,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#    if defined ORGANIC_MATTER
+            BOUNDARY(ng)%t_east(j,k,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+            BOUNDARY(ng)%t_east(j,k,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+            BOUNDARY(ng)%t_east(j,k,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+            BOUNDARY(ng)%t_east(j,k,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+#    endif
+#   endif
+#   if defined NUTRIENTS
+            BOUNDARY(ng)%t_east(j,k,iNO3_)=NO3_0(ng)     ! umol L-1
+            BOUNDARY(ng)%t_east(j,k,iNO2_)=NO2_0(ng)     ! umol L-1
+            BOUNDARY(ng)%t_east(j,k,iNH4_)=NH4_0(ng)     ! umol L-1
+            BOUNDARY(ng)%t_east(j,k,iPO4_)=PO4_0(ng)     ! umol L-1
+#    if defined ORGANIC_MATTER
+            BOUNDARY(ng)%t_east(j,k,iDON_)=DON_0(ng)     ! umolN L-1
+            BOUNDARY(ng)%t_east(j,k,iPON_)=PON_0(ng)     ! umolN L-1
+            BOUNDARY(ng)%t_east(j,k,iDOP_)=DOP_0(ng)     ! umolP L-1
+            BOUNDARY(ng)%t_east(j,k,iPOP_)=POP_0(ng)     ! umolP L-1
+#    endif
+#   endif
+#   if defined COT_STARFISH
+            BOUNDARY(ng)%t_east(j,k,iCOTe)=COTe0(ng)     ! umolC L-1
+            BOUNDARY(ng)%t_east(j,k,iCOTl)=COTl0(ng)     ! umolC L-1
 #   endif
 #  endif
 

@@ -1,5 +1,5 @@
 
-!!!=== ver 2013/11/29   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
+!!!=== ver 2013/12/03   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -55,38 +55,59 @@
      &            ,DIC            &   ! DIC(N): Total dissolved inorganic carbon (DIC: umol kg-1)
      &            ,TA             &   ! TA (N): Total alkalinity (TA: umol kg-1)
      &            ,DOx            &   ! DOx(N): Dissolved oxygen (umol L-1)
-#if defined NUTRIENTS            
-     &            ,NO3            &   ! NO3(N): NO3 (umol L-1)
-     &            ,NO2            &   ! NO2(N): NO2 (umol L-1)
-     &            ,NH4            &   ! NH4(N): NH4 (umol L-1)
-     &            ,PO4            &   ! PO4(N): PO4 (umol L-1)
+#if defined ORGANIC_MATTER
      &            ,DOC            &   ! DOC(N): Dissolved organic carbon (DOC: umol L-1)
-     &            ,DON            &   ! DON(N): Dissolved organic nitrogen (DON: umol L-1)
-     &            ,DOP            &   ! DOP(N): Dissolved organic phosporius (DOP: umol L-1)
+     &            ,POC            &   ! POC(N): Particulate organic carbon (DOC: umol L-1)
      &            ,PHY            &   ! PHY(N): phytoplankton (umol C L-1)
      &            ,ZOO            &   ! ZOO(N): zooplankton (umol C L-1)
 #endif
 #if defined CARBON_ISOTOPE
      &            ,DI13C          &   ! DI13C(N): 13C of DIC (umol kg-1)
 #endif
-
+#if defined NUTRIENTS            
+     &            ,NO3            &   ! NO3(N): NO3 (umol L-1)
+     &            ,NO2            &   ! NO2(N): NO2 (umol L-1)
+     &            ,NH4            &   ! NH4(N): NH4 (umol L-1)
+     &            ,PO4            &   ! PO4(N): PO4 (umol L-1)
+# if defined ORGANIC_MATTER
+     &            ,DON            &   ! DON(N): Dissolved organic nitrogen (DON: umol L-1)
+     &            ,PON            &   ! PON(N): Particulate organic nitrogen (PON: umol L-1)
+     &            ,DOP            &   ! DOP(N): Dissolved organic phosporius (DOP: umol L-1)
+     &            ,POP            &   ! POP(N): Particulate organic phosporius (POP: umol L-1)
+# endif
+#endif
+#if defined COT_STARFISH         
+     &            ,COTe           &   ! COTe(N): COT starfish egg (umol L-1)
+     &            ,COTl           &   ! COTl(N): COT starfish larvae (umol L-1)
+#endif
 !          output parameters
      &            ,dDIC_dt        &   ! dDIC_dt(N): dDIC/dt (umol kg-1 s-1)
      &            ,dTA_dt         &   ! dTA_dt (N): dTA/dt (umol kg-1 s-1)
      &            ,dDOx_dt        &   ! dDOx_dt(N): dDO/dt (umol L-1 s-1)
-#if defined NUTRIENTS          
-     &            ,dNO3_dt        &   ! dNO3_dt(N): dNO3/dt (umol L-1 s-1)
-     &            ,dNO2_dt        &   ! dNO2_dt(N): dNO2/dt (umol L-1 s-1)
-     &            ,dNH4_dt        &   ! dNH4_dt(N): dNH4/dt (umol L-1 s-1)
-     &            ,dPO4_dt        &   ! dPO4_dt(N): dPO4/dt (umol L-1 s-1)
+#if defined ORGANIC_MATTER
      &            ,dDOC_dt        &   ! dDOC_dt(N): dDOC/dt (umol L-1 s-1)
-     &            ,dDON_dt        &   ! dDON_dt(N): dDON/dt (umol L-1 s-1)
-     &            ,dDOP_dt        &   ! dDOP_dt(N): dDOP/dt (umol L-1 s-1)
+     &            ,dPOC_dt        &   ! dPOC_dt(N): dPOC/dt (umol L-1 s-1)
      &            ,dPHY_dt        &   ! dPHY_dt(N): dPHY/dt (umol C L-1 s-1)
      &            ,dZOO_dt        &   ! dZOO_dt(N): dZOO/dt (umol C L-1 s-1)
 #endif
 #if defined CARBON_ISOTOPE
      &            ,dDI13C_dt      &   ! dDI13C_dt(N): dDI13C/dt (umol kg-1 s-1)
+#endif
+#if defined NUTRIENTS          
+     &            ,dNO3_dt        &   ! dNO3_dt(N): dNO3/dt (umol L-1 s-1)
+     &            ,dNO2_dt        &   ! dNO2_dt(N): dNO2/dt (umol L-1 s-1)
+     &            ,dNH4_dt        &   ! dNH4_dt(N): dNH4/dt (umol L-1 s-1)
+     &            ,dPO4_dt        &   ! dPO4_dt(N): dPO4/dt (umol L-1 s-1)
+# if defined ORGANIC_MATTER
+     &            ,dDON_dt        &   ! dDON_dt(N): dDON/dt (umol L-1 s-1)
+     &            ,dPON_dt        &   ! dPON_dt(N): dPON/dt (umol L-1 s-1)
+     &            ,dDOP_dt        &   ! dDOP_dt(N): dDOP/dt (umol L-1 s-1)
+     &            ,dPOP_dt        &   ! dPOP_dt(N): dPOP/dt (umol L-1 s-1)
+# endif
+#endif
+#if defined COT_STARFISH         
+     &            ,dCOTe_dt       &   ! dCOTe/dt(N): (umol L-1 s-1)
+     &            ,dCOTl_dt       &   ! dCOTl/dt(N): (umol L-1 s-1)
 #endif
      &            ,sspH           &   ! sea surface pH
      &            ,ssfCO2         &   ! sea surface fCO2 (uatm)
@@ -129,6 +150,7 @@
       USE mod_coral
       USE mod_seagrass
       USE mod_geochem
+      USE mod_foodweb
       
       implicit none
 
@@ -152,37 +174,59 @@
       real(8), intent(in) :: DIC(N)        
       real(8), intent(in) :: TA (N)        
       real(8), intent(in) :: DOx(N)        
-#if defined NUTRIENTS            
-      real(8), intent(in) :: NO3(N)        
-      real(8), intent(in) :: NO2(N)        
-      real(8), intent(in) :: NH4(N)        
-      real(8), intent(in) :: PO4(N)        
+#if defined ORGANIC_MATTER
       real(8), intent(in) :: DOC(N)        
-      real(8), intent(in) :: DON(N)        
-      real(8), intent(in) :: DOP(N)        
+      real(8), intent(in) :: POC(N)        
       real(8), intent(in) :: PHY(N)        
       real(8), intent(in) :: ZOO(N)        
 #endif
 #if defined CARBON_ISOTOPE
       real(8), intent(in) :: DI13C(N)      
 #endif
+#if defined NUTRIENTS            
+      real(8), intent(in) :: NO3(N)        
+      real(8), intent(in) :: NO2(N)        
+      real(8), intent(in) :: NH4(N)        
+      real(8), intent(in) :: PO4(N)        
+#if defined ORGANIC_MATTER
+      real(8), intent(in) :: DON(N)        
+      real(8), intent(in) :: PON(N)        
+      real(8), intent(in) :: DOP(N)        
+      real(8), intent(in) :: POP(N)        
+# endif
+#endif
+#if defined COT_STARFISH         
+      real(8), intent(in) :: COTe(N)         ! COT starfish egg (umol L-1)
+      real(8), intent(in) :: COTl(N)         ! COT starfish larvae (umol L-1)
+#endif
 ! output parameters
       real(8), intent(out) :: dDIC_dt(N)     
       real(8), intent(out) :: dTA_dt(N)     
       real(8), intent(out) :: dDOx_dt(N)     
-#if defined NUTRIENTS           
-      real(8), intent(out) :: dNO3_dt(N)     
-      real(8), intent(out) :: dNO2_dt(N)     
-      real(8), intent(out) :: dNH4_dt(N)     
-      real(8), intent(out) :: dPO4_dt(N)     
+#if defined ORGANIC_MATTER
       real(8), intent(out) :: dDOC_dt(N)     
-      real(8), intent(out) :: dDON_dt(N)     
-      real(8), intent(out) :: dDOP_dt(N)     
+      real(8), intent(out) :: dPOC_dt(N)     
       real(8), intent(out) :: dPHY_dt(N)     
       real(8), intent(out) :: dZOO_dt(N)     
 #endif
 #if defined CARBON_ISOTOPE
       real(8), intent(out) :: dDI13C_dt(N)   
+#endif
+#if defined NUTRIENTS           
+      real(8), intent(out) :: dNO3_dt(N)     
+      real(8), intent(out) :: dNO2_dt(N)     
+      real(8), intent(out) :: dNH4_dt(N)     
+      real(8), intent(out) :: dPO4_dt(N)     
+# if defined ORGANIC_MATTER
+      real(8), intent(out) :: dDON_dt(N)     
+      real(8), intent(out) :: dPON_dt(N)     
+      real(8), intent(out) :: dDOP_dt(N)     
+      real(8), intent(out) :: dPOP_dt(N)     
+# endif
+#endif
+#if defined COT_STARFISH         
+      real(8), intent(out) :: dCOTe_dt(N)    ! dCOTe/dt (umol L-1 s-1)
+      real(8), intent(out) :: dCOTl_dt(N)    ! dCOTl/dt (umol L-1 s-1)
 #endif
       real(8), intent(out) :: sspH      
       real(8), intent(out) :: ssfCO2    
@@ -208,10 +252,39 @@
       real(8) :: PFD, Att, AttFac, ExpAtt, Itop, cff
 
       real(8) :: DICuptake, TAuptake,  DOuptake
-      real(8) :: NO3uptake, NO2uptake, NH4uptake, PO4uptake  
-      real(8) :: DOCuptake, DONuptake, DOPuptake    
+#if defined ORGANIC_MATTER
+      real(8) :: DOCuptake, POCuptake
       real(8) :: PHYuptake, ZOOuptake  
+#endif
+#if defined CARBON_ISOTOPE
       real(8) :: DI13Cuptake
+#endif
+#if defined NUTRIENTS           
+      real(8) :: NO3uptake, NO2uptake, NH4uptake, PO4uptake  
+# if defined ORGANIC_MATTER
+      real(8) :: DONuptake, PONuptake    
+      real(8) :: DOPuptake, POPuptake    
+# endif
+#endif
+
+      real(8) :: dDIC, dTA,  dDOx
+#if defined ORGANIC_MATTER
+      real(8) :: dDOC, dPOC
+      real(8) :: dPHY, dZOO  
+#endif
+#if defined CARBON_ISOTOPE
+      real(8) :: dDI13C
+#endif
+#if defined NUTRIENTS           
+      real(8) :: dNO3, dNO2, dNH4, dPO4
+# if defined ORGANIC_MATTER
+      real(8) :: dDON, dPON
+      real(8) :: dDOP, dPOP
+# endif
+#endif
+#if defined COT_STARFISH         
+      real(8) :: dCOTe, dCOTl
+#endif
 
 
 !-----------------------------------------------------------------------
@@ -224,19 +297,26 @@
         dDIC_dt(k) = 0.0d0
         dTA_dt(k)  = 0.0d0
         dDOx_dt(k) = 0.0d0
-#if defined NUTRIENTS            
-        dNO3_dt(k) = 0.0d0
-        dNO2_dt(k) = 0.0d0
-        dNH4_dt(k) = 0.0d0
-        dPO4_dt(k) = 0.0d0
+#if defined ORGANIC_MATTER
         dDOC_dt(k) = 0.0d0
-        dDON_dt(k) = 0.0d0
-        dDOP_dt(k) = 0.0d0
+        dPOC_dt(k) = 0.0d0
         dPHY_dt(k) = 0.0d0
         dZOO_dt(k) = 0.0d0
 #endif
 #if defined CARBON_ISOTOPE
         dDI13C_dt(k) = 0.0d0
+#endif
+#if defined NUTRIENTS            
+        dNO3_dt(k) = 0.0d0
+        dNO2_dt(k) = 0.0d0
+        dNH4_dt(k) = 0.0d0
+        dPO4_dt(k) = 0.0d0
+# if defined ORGANIC_MATTER
+        dDON_dt(k) = 0.0d0
+        dPON_dt(k) = 0.0d0
+        dDOP_dt(k) = 0.0d0
+        dPOP_dt(k) = 0.0d0
+# endif
 #endif
       END DO
       sspH      = 8.0d0   ! sea surface pH
@@ -260,7 +340,7 @@
 !  Compute surface O2 gas exchange.
 !-----------------------------------------------------------------------
 
-      TmpK = tmp(N)+273.15d0
+      TmpK = Tmp(N)+273.15d0
 
 !----------- O2 gas exchange rate (mmol m-2 s-1). -------------------
       
@@ -340,16 +420,96 @@
         Itop=PFD
         PFD=Itop*(1.0d0-ExpAtt)/Att    ! average at cell center
 
+
+#if defined FOODWEB
 !-----------------------------------------------------------------------
 ! Food web model.
 !-----------------------------------------------------------------------
 
+        CALL foodweb              &
+!          input parameters
+     &            (ng, 1, i, j    &   ! ng: nested grid number; n: coral compartment; i,j: position
+     &            ,dt             &   ! Time step (sec)
+     &            ,PFD            &   ! Photon flux density (umol m-2 s-1)
+     &            ,Tmp(k)         &   ! Temperature (oC)
+     &            ,Sal(k)         &   ! Salinity (PSU)
+     &            ,DIC(k)         &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
+     &            ,TA (k)         &   ! Total alkalinity (TA: umol kg-1)
+     &            ,DOx(k)         &   ! Dissolved oxygen (umol L-1)
+     &            ,DOC(k)         &   ! Dissolved organic carbon (DOC: umol L-1)
+     &            ,POC(k)         &   ! Particulate organic carbon (DOC: umol L-1)
+     &            ,PHY(k)         &   ! phytoplankton (umol C L-1)
+     &            ,ZOO(k)         &   ! zooplankton (umol C L-1)
+# if defined CARBON_ISOTOPE
+     &            ,DI13C(k)       &   !13C of DIC (umol kg-1)
+# endif
+# if defined NUTRIENTS         
+     &            ,NO3(k)         &   ! NO3 (umol L-1)
+     &            ,NO2(k)         &   ! NO2 (umol L-1)
+     &            ,NH4(k)         &   ! NH4 (umol L-1)
+     &            ,PO4(k)         &   ! PO4 (umol L-1)
+     &            ,DON(k)         &   ! Dissolved organic nitrogen (DON: umol L-1)
+     &            ,PON(k)         &   ! Particulate organic nitrogen (PON: umol L-1)
+     &            ,DOP(k)         &   ! Dissolved organic phosporius (DOP: umol L-1)
+     &            ,POP(k)         &   ! Particulate organic phosporius (POP: umol L-1)
+# endif
+#if defined COT_STARFISH
+     &            ,COTe(k)        &   ! COT starfish egg (umol L-1)
+     &            ,COTl(k)        &   ! COT starfish larvae (umol L-1)
+#endif
+!          output parameters
+     &            ,dDIC           &   ! dDIC/dt  (umol kg-1 s-1)  1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
+     &            ,dTA            &   ! dTA/dt   (umol kg-1 s-1) 
+     &            ,dDOx           &  ! dDOx/dt  (umol L-1 s-1) 
+     &            ,dDOC           &   ! dDOC/dt  (umol L-1 s-1) 
+     &            ,dPOC           &   ! dPOC/dt  (umol L-1 s-1) 
+     &            ,dPHY           &   ! dPHY/dt  (umol L-1 s-1)  
+     &            ,dZOO           &   ! dZOO/dt  (umol L-1 s-1)  
+# if defined CARBON_ISOTOPE
+     &            ,dDI13C         &   ! dDI13C/dt (umol kg-1 s-1)
+# endif
+# if defined NUTRIENTS
+     &            ,dNO3           &   ! dNO3/dt (umol L-1 s-1)
+     &            ,dNO2           &   ! dNO2/dt (umol L-1 s-1)
+     &            ,dNH4           &   ! dNH4/dt (umol L-1 s-1)
+     &            ,dPO4           &   ! dPO4/dt (umol L-1 s-1)
+     &            ,dDON           &   ! dDON/dt (umol L-1 s-1)
+     &            ,dPON           &   ! dPON/dt (umol L-1 s-1)
+     &            ,dDOP           &   ! dDOP/dt (umol L-1 s-1)
+     &            ,dPOP           &   ! dPOP/dt (umol L-1 s-1)
+# endif                                
+#if defined COT_STARFISH
+     &            ,dCOTe          &   ! dCOTe/dt (umol L-1 s-1)
+     &            ,dCOTl          &   ! dCOTl/dt (umol L-1 s-1)
+#endif
+     &             )
 
-!!! Add food web reaction !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        dDIC_dt(k) = dDIC_dt(k) + dDIC
+        dTA_dt (k) = dTA_dt (k) + dTA
+        dDOx_dt(k) = dDOx_dt(k) + dDOx
+        dDOC_dt(k) = dDOC_dt(k) + dDOC
+        dPOC_dt(k) = dPOC_dt(k) + dPOC
+        dPHY_dt(k) = dPHY_dt(k) + dPHY
+        dZOO_dt(k) = dZOO_dt(k) + dZOO
+# if defined CARBON_ISOTOPE
+        dDI13C_dt(k) = dDI13C_dt(k) + dDI13C
+# endif
+# if defined NUTRIENTS
+        dNO3_dt(k) = dNO3_dt(k) + dNO3
+        dNO2_dt(k) = dNO2_dt(k) + dNO2
+        dNH4_dt(k) = dNH4_dt(k) + dNH4
+        dPO4_dt(k) = dPO4_dt(k) + dPO4
+        dDON_dt(k) = dDON_dt(k) + dDON
+        dPON_dt(k) = dPON_dt(k) + dPON
+        dDOP_dt(k) = dDOP_dt(k) + dDOP
+        dPOP_dt(k) = dPOP_dt(k) + dPOP
+# endif
+#if defined COT_STARFISH
+        dCOTe_dt(k) = dCOTe_dt(k) + dCOTe
+        dCOTl_dt(k) = dCOTl_dt(k) + dCOTl
+#endif
 
-
-
-
+#endif                                
 
 !  Light attenuation at the bottom of the grid cell. It is the starting
 !  PFD value for the next (deeper) vertical grid cell.
@@ -364,8 +524,7 @@
 !!!  Benthic interactions.
 !!!---------------------------------------------------------------------
 
-#ifdef CORAL_POLYP
-
+#if defined CORAL_POLYP
 !-----------------------------------------------------------------------
 ! Compute coral polyp model.
 !-----------------------------------------------------------------------
@@ -384,19 +543,18 @@
      &            ,DIC(1)          &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
      &            ,TA (1)          &   ! Total alkalinity (TA: umol kg-1)
      &            ,DOx(1)          &   ! Dissolved oxygen (umol L-1)
-# if defined CORAL_NUTRIENTS
-     &            ,NO3(1)          &   ! NO3 (umol L-1)
-     &            ,NO2(1)          &   ! NO2 (umol L-1)
-     &            ,NH4(1)          &   ! NH4 (umol L-1)
-     &            ,PO4(1)          &   ! PO4 (umol L-1)
-     &            ,DOC(1)          &   ! Dissolved organic carbon (DOC: umol L-1)
-     &            ,DON(1)          &   ! Dissolved organic nitrogen (DON: umol L-1)
-     &            ,DOP(1)          &   ! Dissolved organic phosporius (DOP: umol L-1)
+# if defined CORAL_INGESTION
      &            ,PHY(1)          &   ! phytoplankton (umol C L-1)
      &            ,ZOO(1)          &   ! zooplankton (umol C L-1)
 # endif
 # if defined CORAL_CARBON_ISOTOPE
      &            ,DI13C(1)        &   !13C of DIC (umol kg-1)
+# endif
+# if defined CORAL_NUTRIENTS
+     &            ,NO3(1)          &   ! NO3 (umol L-1)
+     &            ,NO2(1)          &   ! NO2 (umol L-1)
+     &            ,NH4(1)          &   ! NH4 (umol L-1)
+     &            ,PO4(1)          &   ! PO4 (umol L-1)
 # endif
      &            ,tau             &   ! bottom shear stress (N m-2)
      &            ,0.0d0           &   ! sedimentation rate (??)
@@ -407,52 +565,69 @@
      &            ,DICuptake       &   ! DIC uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,TAuptake        &   ! TA  uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,DOuptake        &   ! DO  uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-# if defined CORAL_NUTRIENTS
-     &            ,NO3uptake       &   ! NO3 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-     &            ,NO2uptake       &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-     &            ,NH4uptake       &   ! NH4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-     &            ,PO4uptake       &   ! PO4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+# if defined CORAL_MUCUS
      &            ,DOCuptake       &   ! DOC uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
-     &            ,DONuptake       &   ! DON uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
-     &            ,DOPuptake       &   ! DOP uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+     &            ,POCuptake       &   ! POC uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+# endif
+# if defined CORAL_INGESTION
      &            ,PHYuptake       &   ! Phytoplankton ingestion rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,ZOOuptake       &   ! Zooplankton ingestion rate (nmol cm-2 s-1)  * direction of water column to coral is positive
 # endif
 # if defined CORAL_CARBON_ISOTOPE
      &            ,DI13Cuptake     &   ! DI13C uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
 # endif
+# if defined CORAL_NUTRIENTS
+     &            ,NO3uptake       &   ! NO3 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+     &            ,NO2uptake       &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+     &            ,NH4uptake       &   ! NH4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+     &            ,PO4uptake       &   ! PO4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+#  if defined CORAL_MUCUS
+     &            ,DONuptake       &   ! DON uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+     &            ,PONuptake       &   ! PON uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+     &            ,DOPuptake       &   ! DOP uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+     &            ,POPuptake       &   ! POP uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+#  endif
+# endif
      &             )
 
         END DO
 
       ! 1 nmol cm-2 s-1 = 0.01 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
-      ! cff: convaert [nmol cm-2 s-1] to [umol L-1]
+      ! cff: convaert [nmol cm-2 s-1] to [umol L-1 s-1]
 
-        cff=0.01d0 /dz(1) * p_coral*10.0d0  !!!*40.0d0 ‚Ä‚«‚Æ‚¤ convert projected area to coral surface area
+        cff=0.01d0 /dz(1) * p_coral*10.0d0  !!!*10.0d0 ‚Ä‚«‚Æ‚¤ convert projected area to coral surface area
          
         dDIC_dt(1) = dDIC_dt(1) - DICuptake * cff/1.024d0
         dTA_dt (1) = dTA_dt (1) - TAuptake  * cff/1.024d0
         dDOx_dt(1) = dDOx_dt(1) - DOuptake  * cff
-# if defined NUTRIENTS
+# if defined CORAL_MUCUS
+        dDOC_dt(1) = dDOC_dt(1) - DOCuptake * cff
+        dPOC_dt(1) = dPOC_dt(1) - POCuptake * cff
+# endif
+# if defined CORAL_INGESTION
+        dPHY_dt(1) = dPHY_dt(1) - PHYuptake * cff
+        dZOO_dt(1) = dZOO_dt(1) - ZOOuptake * cff
+# endif
+# if defined CORAL_CARBON_ISOTOPE
+        dDI13C_dt(1) = dDI13C_dt(1) - DI13Cuptake * cff/1.024d0
+# endif
+# if defined CORAL_NUTRIENTS
         dNO3_dt(1) = dNO3_dt(1) - NO3uptake * cff
         dNO2_dt(1) = dNO2_dt(1) - NO2uptake * cff
         dNH4_dt(1) = dNH4_dt(1) - NH4uptake * cff
         dPO4_dt(1) = dPO4_dt(1) - PO4uptake * cff
-        dDOC_dt(1) = dDOC_dt(1) - DOCuptake * cff
+#  if defined CORAL_MUCUS
         dDON_dt(1) = dDON_dt(1) - DONuptake * cff
+        dPON_dt(1) = dPON_dt(1) - PONuptake * cff
         dDOP_dt(1) = dDOP_dt(1) - DOPuptake * cff
-        dPHY_dt(1) = dPHY_dt(1) - PHYuptake * cff
-        dZOO_dt(1) = dZOO_dt(1) - ZOOuptake * cff
-# endif
-# if defined CARBON_ISOTOPE
-        dDI13C_dt(1) = dDI13C_dt(1) - DI13Cuptake * cff/1.024d0
+        dPOP_dt(1) = dPOP_dt(1) - POPuptake * cff
+#  endif
 # endif
       END IF
 #endif
 
       
-#ifdef SEAGRASS
-      
+#if defined SEAGRASS
 !-----------------------------------------------------------------------
 ! Compute seagrass model.
 !-----------------------------------------------------------------------
@@ -487,7 +662,7 @@
      &             )
 
         ! 1 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
-        ! cff: convaert [nmol cm-2 s-1] to [umol L-1]
+        ! cff: convaert [mmol m-2 s-1] to [umol L-1 s-1]
 
         cff = 1.0d0/dz(1) * p_sgrass
 

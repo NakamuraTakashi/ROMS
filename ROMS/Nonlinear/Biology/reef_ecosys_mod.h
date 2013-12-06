@@ -76,42 +76,63 @@
       integer :: iTIC_                  ! Total inorganic carbon
       integer :: iTAlk                  ! Total alkalinity
       integer :: iOxyg                  ! Dissolved oxygen concentration
-#ifdef CARBON_ISOTOPE
-      integer :: iT13C                  ! Corbon 13 of total inorganic carbon
-#endif
-#ifdef NUTRIENTS
-      integer :: iNO3_                  ! Nitrate concentration
-      integer :: iNO2_                  ! Nitrate concentration
-      integer :: iNH4_                  ! Ammonium concentration
-      integer :: iPO4_                  ! Ammonium concentration
-      integer :: iChlo                  ! Chlorophyll concentration
+#if defined ORGANIC_MATTER
+      integer :: iDOC_                  ! Dissolved organic C-concentration
+      integer :: iPOC_                  ! Particulate organic C-concentration
       integer :: iPhyt                  ! Phytoplankton concentration
       integer :: iZoop                  ! Zooplankton concentration
-      integer :: iLDeC                  ! Large detritus C-concentration
-      integer :: iSDeC                  ! Small detritus C-concentration
-      integer :: iLDeN                  ! Large detritus N-concentration
-      integer :: iSDeN                  ! Small detritus N-concentration
-      integer :: iLDeP                  ! Large detritus P-concentration
-      integer :: iSDeP                  ! Small detritus P-concentration
+#endif
+#if defined CARBON_ISOTOPE
+      integer :: iT13C                  ! Corbon 13 of total inorganic carbon
+# if defined ORGANIC_MATTER
+      integer :: iDO13                  ! Dissolved organic 13C-concentration
+      integer :: iPO13                  ! Particulate organic 13C-concentration
+      integer :: iPh13                  ! Phytoplankton 13C-concentration
+      integer :: iZo13                  ! Zooplankton 13C-concentration
+# endif
+#endif
+#if defined NUTRIENTS
+      integer :: iNO3_                  ! Nitrate concentration
+      integer :: iNO2_                  ! Nitrite concentration
+      integer :: iNH4_                  ! Ammonium concentration
+      integer :: iPO4_                  ! Ammonium concentration
+# if defined ORGANIC_MATTER
+      integer :: iDON_                  ! Dissolved organic N-concentration
+      integer :: iPON_                  ! Particulate organic N-concentration
+      integer :: iDOP_                  ! Dissolved organic P-concentration
+      integer :: iPOP_                  ! Particulate organic P-concentration
+# endif
+#endif
+#if defined COT_STARFISH
+      integer :: iCOTe                  ! Eggs of crown-of-thorns starfish
+      integer :: iCOTl                  ! Larvae of crown-of-thorns starfish
 #endif
 !
 !  Biological 2D Histrory variable IDs.
 !
       integer, allocatable :: iHbio2(:)       ! 2D biological terms
+#ifdef CORAL_POLYP
       integer  :: iClPg                       ! coral gross photosynthesis rate
       integer  :: iCl_R                       ! coral respiration rate
       integer  :: iClPn                       ! coral net photosynthesis rate
       integer  :: iCl_G                       ! coral calcification rate
       integer  :: iCogC                       ! coral tissue organic carbon
-#ifdef CORAL_CARBON_ISOTOPE
+# ifdef CORAL_CARBON_ISOTOPE
       integer  :: iC13t                       ! coral tissue carbon isotope ratio
-#endif
-#ifdef CORAL_ZOOXANTHELLAE
+# endif
+# ifdef CORAL_ZOOXANTHELLAE
       integer  :: iCzox                       ! coral zooxanthellae density
+# endif
+# ifdef CORAL_SIZE_DYNAMICS
+      integer  :: iCmrt                       ! coral mortality
+      integer  :: iCgrw                       ! coral growth rate
+# endif
 #endif
+#ifdef SEAGRASS
       integer  :: iSgPg                       ! seagrass gross photosynthesis rate
       integer  :: iSg_R                       ! seagrass respiration rate
       integer  :: iSgPn                       ! seagrass net photosynthesis rate
+#endif
       integer  :: ipHt_                       ! sea surface pH (total scale)
       integer  :: iWarg                       ! sea surface aragonite saturation state
 
@@ -119,9 +140,9 @@
       integer  :: ipCO2                       ! partial pressure of CO2
       integer  :: iO2fx                       ! air-sea O2 flux
       integer  :: iPARb                       ! bottom photon flux density (umol m-2 s-1)
-#ifdef NUTRIENTS
-      integer  :: iDNIT                       ! denitrification flux
-#endif
+!
+!  Biological 3D Histrory variable IDs.
+!
       integer, allocatable :: iHbio3(:)       ! 3D biological terms
       integer  :: iPPro                       ! primary productivity
 #ifdef CARBON_ISOTOPE
@@ -178,7 +199,37 @@
       real(r8), allocatable :: TAlk0(:)              ! umol/kg
       real(r8), allocatable :: TIC_0(:)              ! umol/kg
       real(r8), allocatable :: Oxyg0(:)              ! umol/L
-      real(r8), allocatable :: d13C0(:)              ! per mill
+#if defined ORGANIC_MATTER
+      real(r8), allocatable :: DOC_0(:)              ! umol/L
+      real(r8), allocatable :: POC_0(:)              ! umol/L
+      real(r8), allocatable :: Phyt0(:)              ! umol/L
+      real(r8), allocatable :: Zoop0(:)              ! umol/L
+#endif
+#if defined CARBON_ISOTOPE
+      real(r8), allocatable :: d13C_TIC0(:)          ! permil (VPDB)
+# if defined ORGANIC_MATTER
+      real(r8), allocatable :: d13C_DOC0(:)          ! permil (VPDB)
+      real(r8), allocatable :: d13C_POC0(:)          ! permil (VPDB)
+      real(r8), allocatable :: d13C_Phy0(:)          ! permil (VPDB)
+      real(r8), allocatable :: d13C_Zoo0(:)          ! permil (VPDB)
+# endif
+#endif
+#if defined NUTRIENTS
+      real(r8), allocatable :: NO3_0(:)              ! umol/L
+      real(r8), allocatable :: NO2_0(:)              ! umol/L
+      real(r8), allocatable :: NH4_0(:)              ! umol/L
+      real(r8), allocatable :: PO4_0(:)              ! umol/L
+# if defined ORGANIC_MATTER
+      real(r8), allocatable :: DON_0(:)              ! umolN/L
+      real(r8), allocatable :: PON_0(:)              ! umolN/L
+      real(r8), allocatable :: DOP_0(:)              ! umolP/L
+      real(r8), allocatable :: POP_0(:)              ! umolP/L
+# endif
+#endif
+#if defined COT_STARFISH
+      real(r8), allocatable :: COTe0(:)              ! umolC/L
+      real(r8), allocatable :: COTl0(:)              ! umolC/L
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       CONTAINS
 
@@ -209,11 +260,21 @@
       iTAlk=ic+i
       i=i+1
       iOxyg=ic+i  !  4
-#ifdef CARBON_ISOTOPE
+#if defined ORGANIC_MATTER
+      i=i+1
+      iDOC_=ic+i
+      i=i+1
+      iPOC_=ic+i
+      i=i+1
+      iPhyt=ic+i
+      i=i+1
+      iZoop=ic+i
+#endif
+#if defined CARBON_ISOTOPE
       i=i+1
       iT13C=ic+i  ! +1
 #endif
-#ifdef NUTRIENTS
+#if defined NUTRIENTS
       i=i+1
       iNO3_=ic+i
       i=i+1
@@ -222,24 +283,22 @@
       iNH4_=ic+i
       i=i+1
       iPO4_=ic+i
+# if defined ORGANIC_MATTER
       i=i+1
-      iChlo=ic+i
+      iDON_=ic+i
       i=i+1
-      iPhyt=ic+i
+      iPON_=ic+i
       i=i+1
-      iZoop=ic+i
+      iDOP_=ic+i
       i=i+1
-      iLDeC=ic+i
+      iPOP_=ic+i
+# endif
+#endif
+#if defined COT_STARFISH
       i=i+1
-      iSDeC=ic+i
+      iCOTe=ic+i
       i=i+1
-      iLDeN=ic+i
-      i=i+1
-      iSDeN=ic+i
-      i=i+1
-      iLDeP=ic+i
-      i=i+1
-      iSDeP=ic+i ! +13
+      iCOTl=ic+i
 #endif
 
 !-----------------------------------------------------------------------
@@ -282,6 +341,7 @@
       ic=ic+1
       iPARb=ic
 
+#ifdef CORAL_POLYP
       ic=ic+1
       iClPg=ic
       ic=ic+1
@@ -292,25 +352,30 @@
       iCl_G=ic
       ic=ic+1
       iCogC=ic
-#ifdef CORAL_CARBON_ISOTOPE
+# ifdef CORAL_CARBON_ISOTOPE
       ic=ic+1
       iC13t=ic
-#endif
-#ifdef CORAL_ZOOXANTHELLAE
+# endif
+# ifdef CORAL_ZOOXANTHELLAE
       ic=ic+1
       iCzox=ic
+# endif
+# ifdef CORAL_SIZE_DYNAMICS
+      ic=ic+1
+      iCmrt=ic
+      ic=ic+1
+      iCgrw=ic
+# endif
 #endif
+#ifdef SEAGRASS
       ic=ic+1
       iSgPg=ic
       ic=ic+1
       iSg_R=ic
       ic=ic+1
       iSgPn=ic
-
-#ifdef NUTRIENTS
-      ic=ic+1
-      iDNIT=ic
 #endif
+
 !  Set number of 2D history terms.
 !
       NHbio2d=ic
@@ -467,9 +532,75 @@
       IF (.not.allocated(Oxyg0)) THEN
         allocate ( Oxyg0(Ngrids) )
       END IF
-      IF (.not.allocated(d13C0)) THEN
-        allocate ( d13C0(Ngrids) )
+#if defined ORGANIC_MATTER
+      IF (.not.allocated(DOC_0)) THEN
+        allocate ( DOC_0(Ngrids) )
       END IF
+      IF (.not.allocated(POC_0)) THEN
+        allocate ( POC_0(Ngrids) )
+      END IF
+      IF (.not.allocated(Phyt0)) THEN
+        allocate ( Phyt0(Ngrids) )
+      END IF
+      IF (.not.allocated(Zoop0)) THEN
+        allocate ( Zoop0(Ngrids) )
+      END IF
+#endif
+#if defined CARBON_ISOTOPE
+      IF (.not.allocated(d13C_TIC0) THEN
+        allocate ( d13C_TIC0(Ngrids) )
+      END IF
+# if defined ORGANIC_MATTER
+      IF (.not.allocated(d13C_DOC0)) THEN
+        allocate ( d13C_DOC0(Ngrids) )
+      END IF
+      IF (.not.allocated(d13C_POC0)) THEN
+        allocate ( d13C_POC0(Ngrids) )
+      END IF
+      IF (.not.allocated(d13C_Phy0)) THEN
+        allocate ( d13C_Phy0(Ngrids) )
+      END IF
+      IF (.not.allocated(d13C_Zoo0)) THEN
+        allocate ( d13C_Zoo0(Ngrids) )
+      END IF
+# endif
+#endif
+#if defined NUTRIENTS
+      IF (.not.allocated(NO3_0)) THEN
+        allocate ( NO3_0(Ngrids) )
+      END IF
+      IF (.not.allocated(NO2_0)) THEN
+        allocate ( NO2_0(Ngrids) )
+      END IF
+      IF (.not.allocated(NH4_0)) THEN
+        allocate ( NH4_0(Ngrids) )
+      END IF
+      IF (.not.allocated(PO4_0)) THEN
+        allocate ( PO4_0(Ngrids) )
+      END IF
+# if defined ORGANIC_MATTER
+      IF (.not.allocated(DON_0)) THEN
+        allocate ( DON_0(Ngrids) )
+      END IF
+      IF (.not.allocated(PON_0)) THEN
+        allocate ( PON_0(Ngrids) )
+      END IF
+      IF (.not.allocated(DOP_0)) THEN
+        allocate ( DOP_0(Ngrids) )
+      END IF
+      IF (.not.allocated(POP_0)) THEN
+        allocate ( POP_0(Ngrids) )
+      END IF
+# endif
+#endif
+#if defined COT_STARFISH
+      IF (.not.allocated(COTe0)) THEN
+        allocate ( COTe0(Ngrids) )
+      END IF
+      IF (.not.allocated(COTl0)) THEN
+        allocate ( COTl0(Ngrids) )
+      END IF
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
       RETURN

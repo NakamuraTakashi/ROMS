@@ -1,5 +1,5 @@
 
-!!!=== ver 2013/11/29   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
+!!!=== ver 2013/12/03   Copyright (c) 2012-2013 Takashi NAKAMURA  =====
 
 #include "cppdefs.h"
 
@@ -42,9 +42,11 @@
 #if defined CORAL_ZOOXANTHELLAE
       real(8), pointer :: ROS(:,:,:)
 # endif
-!      real(8), pointer :: g_coral(:,:,:)
-!      real(8), pointer :: m_coral(:,:,:)
+#if defined CORAL_SIZE_DYNAMICS
+      real(8), pointer :: growth(:,:,:)  ! growth rate
+      real(8), pointer :: mort(:,:,:)  ! mortaliny rate
 !      real(8), pointer :: dsed_coral(:,:,:)
+# endif
     END TYPE T_CORAL
 
     TYPE (T_CORAL), allocatable :: CORAL(:)
@@ -120,6 +122,10 @@
 #if defined CORAL_ZOOXANTHELLAE
       allocate( CORAL(ng)%ROS(Ncl,LBi:UBi,LBj:UBj)  )
 #endif
+#if defined CORAL_SIZE_DYNAMICS
+      allocate( CORAL(ng)%growth(Ncl,LBi:UBi,LBj:UBj)   )
+      allocate( CORAL(ng)%mort(Ncl,LBi:UBi,LBj:UBj)   )
+# endif
 
 #if defined CORAL_ZOOXANTHELLAE
       IF (ng.eq.1) allocate ( ZOOX(Ngrids) )
@@ -151,7 +157,7 @@
 !!   Zooxanthellae minimum cell quota      
 !      data QC0zoox   /8.d0 / !(pmolC/cell)  100 pg cell-1 ~ 10 pmol cell-1 = (Verde & McCloskey 1998)
 !      data QN0zoox   /1.1d0/ !(pmolN/cell)  calculated from C:N:P = 116:16:1
-!      data QP0zoox   /0.07d0/ !(pmolP/cell) 
+!      data QP0   /0.07d0/ !(pmolP/cell) 
 !      
 !      data V_zoox    / 5.d-10/ ! Volume of zooxanthellae (cm3/cells)
 !                               ! ~500 um3 =5.e-10 cm3 (e.g. Jone 1997; Jones and Yellowlees 1997)
@@ -167,7 +173,7 @@
             CORAL(ng)%TAcoe (n,i,j)=2200.d0
             CORAL(ng)%DICcal (n,i,j)=2100.d0
             CORAL(ng)%DICcoe (n,i,j)=2100.d0
-            CORAL(ng)%DOcoe (n,i,j)=10.d0 !(umol/kg)
+            CORAL(ng)%DOcoe (n,i,j)=10.d0 !(umol/L)
 !            CORAL(ng)%QC (n,i,j)=3.d5 !450 ug/cm2 = 15 umol cm-2 -> 5.e6 umol kg-1 (腔腸内平均濃度とした）
             CORAL(ng)%QC (n,i,j)=15.d0 !450 ug/cm2 = 15 umol cm-2 -> 5.e6 umol kg-1 (腔腸内平均濃度とした）
 
@@ -200,6 +206,10 @@
 #if defined CORAL_ZOOXANTHELLAE
             CORAL(ng)%ROS(n,i,j) = 0.0d0
 #endif
+#if defined CORAL_SIZE_DYNAMICS
+            CORAL(ng)%growth(n,i,j) = 0.0d0
+            CORAL(ng)%mort(n,i,j) = 0.0d0
+# endif
 
 
 #if defined CORAL_ZOOXANTHELLAE
@@ -240,19 +250,18 @@
      &            ,DICamb         &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
      &            ,TAamb          &   ! Total alkalinity (TA: umol kg-1)
      &            ,DOamb          &   ! Dissolved oxygen (umol L-1)
-#if defined CORAL_NUTRIENTS         
-     &            ,NO3amb         &   ! NO3 (umol L-1)
-     &            ,NO2amb         &   ! NO2 (umol L-1)
-     &            ,NH4amb         &   ! NH4 (umol L-1)
-     &            ,PO4amb         &   ! PO4 (umol L-1)
-     &            ,DOCamb         &   ! Dissolved organic carbon (DOC: umol L-1)
-     &            ,DONamb         &   ! Dissolved organic nitrogen (DON: umol L-1)
-     &            ,DOPamb         &   ! Dissolved organic phosporius (DOP: umol L-1)
+#if defined CORAL_INGESTION
      &            ,PHYamb         &   ! phytoplankton (umol C L-1)
      &            ,ZOOamb         &   ! zooplankton (umol C L-1)
 #endif
 #if defined CORAL_CARBON_ISOTOPE
      &            ,DI13Camb       &   !13C of DIC (umol kg-1)
+#endif
+#if defined CORAL_NUTRIENTS         
+     &            ,NO3amb         &   ! NO3 (umol L-1)
+     &            ,NO2amb         &   ! NO2 (umol L-1)
+     &            ,NH4amb         &   ! NH4 (umol L-1)
+     &            ,PO4amb         &   ! PO4 (umol L-1)
 #endif
      &            ,tau_amb        &   ! bottom shear stress (N m-2)
      &            ,Fsed           &   ! sedimentation rate (??)
@@ -263,19 +272,28 @@
      &            ,DICuptake      &   ! DIC uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,TAuptake       &   ! TA  uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,DOuptake       &   ! DO  uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-#if defined CORAL_NUTRIENTS
-     &            ,NO3uptake      &   ! NO3 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-     &            ,NO2uptake      &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-     &            ,NH4uptake      &   ! NH4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
-     &            ,PO4uptake      &   ! PO4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+#if defined CORAL_MUCUS
      &            ,DOCuptake      &   ! DOC uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
-     &            ,DONuptake      &   ! DON uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
-     &            ,DOPuptake      &   ! DOP uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+     &            ,POCuptake      &   ! POC uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+#endif
+#if defined CORAL_INGESTION
      &            ,PHYuptake      &   ! Phytoplankton ingestion rate (nmol cm-2 s-1)  * direction of water column to coral is positive
      &            ,ZOOuptake      &   ! Zooplankton ingestion rate (nmol cm-2 s-1)  * direction of water column to coral is positive
 #endif
 #if defined CORAL_CARBON_ISOTOPE
      &            ,DI13Cuptake    &   ! DI13C uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+#endif
+#if defined CORAL_NUTRIENTS
+     &            ,NO3uptake      &   ! NO3 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+     &            ,NO2uptake      &   ! NO2 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+     &            ,NH4uptake      &   ! NH4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+     &            ,PO4uptake      &   ! PO4 uptake rate (nmol cm-2 s-1)  * direction of water column to coral is positive
+# if defined CORAL_MUCUS
+     &            ,DONuptake      &   ! DON uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+     &            ,PONuptake      &   ! PON uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+     &            ,DOPuptake      &   ! DOP uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+     &            ,POPuptake      &   ! POP uptake rate (nmol cm-2 s-1) * direction of water column to coral is positive
+# endif
 #endif
      &             )
 
@@ -294,19 +312,18 @@
       real(8), intent(in) :: DICamb   
       real(8), intent(in) :: TAamb    
       real(8), intent(in) :: DOamb    
-#if defined CORAL_NUTRIENTS
-      real(8), intent(in) :: NO3amb   
-      real(8), intent(in) :: NO2amb   
-      real(8), intent(in) :: NH4amb   
-      real(8), intent(in) :: PO4amb   
-      real(8), intent(in) :: DOCamb   
-      real(8), intent(in) :: DONamb   
-      real(8), intent(in) :: DOPamb   
+#if defined CORAL_INGESTION
       real(8), intent(in) :: PHYamb   
       real(8), intent(in) :: ZOOamb   
 #endif
 #if defined CORAL_CARBON_ISOTOPE
       real(8), intent(in) :: DI13Camb 
+#endif
+#if defined CORAL_NUTRIENTS
+      real(8), intent(in) :: NO3amb   
+      real(8), intent(in) :: NO2amb   
+      real(8), intent(in) :: NH4amb   
+      real(8), intent(in) :: PO4amb   
 #endif
       real(8), intent(in) :: tau_amb  
       real(8), intent(in) :: Fsed
@@ -317,19 +334,28 @@
       real(8), intent(out) :: DICuptake
       real(8), intent(out) :: TAuptake 
       real(8), intent(out) :: DOuptake 
-#if defined CORAL_NUTRIENTS
-      real(8), intent(out) :: NO3uptake
-      real(8), intent(out) :: NO2uptake
-      real(8), intent(out) :: NH4uptake
-      real(8), intent(out) :: PO4uptake
+#if defined CORAL_MUCUS
       real(8), intent(out) :: DOCuptake
-      real(8), intent(out) :: DONuptake
-      real(8), intent(out) :: DOPuptake
+      real(8), intent(out) :: POCuptake
+#endif
+#if defined CORAL_INGESTION
       real(8), intent(out) :: PHYuptake
       real(8), intent(out) :: ZOOuptake
 #endif
 #if defined CORAL_CARBON_ISOTOPE
       real(8), intent(out) :: DI13Cuptake
+#endif
+#if defined CORAL_NUTRIENTS
+      real(8), intent(out) :: NO3uptake
+      real(8), intent(out) :: NO2uptake
+      real(8), intent(out) :: NH4uptake
+      real(8), intent(out) :: PO4uptake
+# if defined CORAL_MUCUS
+      real(8), intent(out) :: DONuptake
+      real(8), intent(out) :: PONuptake
+      real(8), intent(out) :: DOPuptake
+      real(8), intent(out) :: POPuptake
+# endif
 #endif
 
 !!!------------Set parameters  ----------------------------------
@@ -341,8 +367,8 @@
 
 !----- Coral basic parameters ----------------------------------------
 
-      real(8), parameter :: coe_tick=0.3d0    !Tickness of coral tissue (cm) 3000 um Reviewer's suggestion: 1000-5000 um
-      real(8), parameter :: cal_tick=0.0005d0 !Tickness of coral calcifying fluid (cm) 5um Reviewer's suggestion: 5 um
+      real(8), parameter :: hcoe=0.3d0    !Tickness of coral tissue (cm) 3000 um Reviewer's suggestion: 1000-5000 um
+      real(8), parameter :: hcal=0.0005d0 !Tickness of coral calcifying fluid (cm) 5um Reviewer's suggestion: 5 um
 
 !----- for gross photosynthesi -------------------
 
@@ -351,7 +377,7 @@
 
 !      Pg=Pgmax(n)*tanh(PFDsurf/Ik(n))*(1-Br(i,j))
 !     &       *cHCO3coe/(K_HCO3+cHCO3coe)
-!     &       *coe_tick
+!     &       *hcoe
 
       real(8), parameter :: Pgmax(Ncl)=  0.73d0 !0.73d0*    !0.91d0    !Maximum photosynthesis rate (nmol O2 cm-2 s-1) Kuhl et al. (1995) *Tuned
       real(8), parameter :: Ik(Ncl)=     275.d0    !(275 uEin m-2 s-1) * refference value
@@ -380,7 +406,9 @@
 !      R= k_R(n)*CORAL(ng)%QC(n,i,j)/(K_QC(n)+CORAL(ng)%QC(n,i,j))
 !     &    *CORAL(ng)%DOcoe(n,i,j)/(K_DO(n)+CORAL(ng)%DOcoe(n,i,j))
 
-      real(8), parameter :: Rmax(Ncl) = 0.53d0 !0.53*/0.37/ !Maximum respiration rate (nmol O2 cm-2 s-1) *Tuned using Kuhl et al (1995), Al-Horani et al. (2003) data
+                                               !!! * Nakamura et al. 2013 setting; ** New setting
+
+      real(8), parameter :: Rmax(Ncl) = 0.37d0 !!!0.53d0*  0.37d0** !Maximum respiration rate (nmol O2 cm-2 s-1) *Tuned using Kuhl et al (1995), Al-Horani et al. (2003) data
       real(8), parameter :: K_QC(Ncl) = 5.d0   !umol cm-2!!!*適当
       real(8), parameter :: K_DO(Ncl) = 46.d0  ! ca. 46 (umol kg-1) Newton & Atkinson (1991)
 
@@ -402,63 +430,106 @@
       real(8), parameter :: k_TA   = 3.0d-3 !!! 3.0d-5**  5.0d-5 !3.0d-3* !conductivity of TA through the leak pass (cm s-1) *Tuned
       real(8), parameter :: k_DIC  = 3.0d-3 !!! 3.0d-5**  5.0d-5 !3.0d-3* !conductivity of DIC through the leak pass (cm s-1) *Tuned
 
-!----- for carbon isotope ------------------------
-
 #if defined CORAL_CARBON_ISOTOPE
+!----- for carbon isotope ------------------------
       real(8), parameter :: a_phot = -20.0d-3 + 1.0d0!!!!!!!!!!!!!!!!!!適当
       real(8), parameter :: a_resp =   0.0d-3 + 1.0d0
       real(8), parameter :: a_calc =   2.7d-3 + 1.0d0 
       real(8), parameter :: a_co2  =  -7.0d-3 + 1.0d0!!!!!!!!!!!!!!!!!!適当-8-4.4
 #endif
+#if ( defined CORAL_ZOOXANTHELLAE || defined CORAL_MUCUS || defined CORAL_SIZE_DYNAMICS )
+!----- Coral minimum quota ------------------------
+      real(8), parameter :: QC0(Ncl) = 2.0d0    ! Minimum quota (mmol cm-2)  !!!!!!!!!!!!!!!!!!適当
+# if defined CORAL_NUTRIENTS
+      real(8), parameter :: QN0(Ncl) =  0.20d0    ! Minimum quota (mmol cm-2)  
+      real(8), parameter :: QP0(Ncl) =  0.02d0   ! Minimum quota (mmol cm-2) 
+# endif
+#endif
+#if defined CORAL_SIZE_DYNAMICS
+      real(8), parameter :: g_max(Ncl) = 1.0d-2  ! Maximum growth rate (nmol cm-2 s-1)  !!!!!!!!!!!!!!!!!!適当!!!!!!!!!!!!!!
+      real(8), parameter :: km_CNP = 1.0d-12     ! (s-1)!!!!!!!!!!!!!!!!!!適当!!!!!!!!!!!!!!
+      real(8), parameter :: am_CNP = 1.0d0       ! (no dimension)!!!!!!!!!!!!!!!!!!適当!!!!!!!!!!!!!!
+      real(8), parameter :: km_dam = 1.0d-5     ! (s-1)!!!!!!!!!!!!!!!!!!適当!!!!!!!!!!!!!!
+#endif
 
 !--- Other variables ----------------------------------------------
-      real(8) Pn
-      real(8) Si   !Mass transfer coefficient (cm s-1)
-      real(8) TKamb   !Temperature (K)
+      real(8) :: Pn, Rc
+      real(8) :: Si   !Mass transfer coefficient (cm s-1)
+      real(8) :: TKamb   !Temperature (K)
 !----- for CO2 system dynamics -------------------
-      real(8) pHcal,fCO2cal,cHCO3cal,cCO3cal,Wargcal
-      real(8) pHcoe,fCO2coe,cHCO3coe,cCO3coe
-      real(8) pHamb,fCO2amb,cCO2aqamb,cHCO3amb,cCO3amb,Wargamb  !!!!!不要：アウトプット用
+      real(8) :: pHcal,fCO2cal,cHCO3cal,cCO3cal,Wargcal
+      real(8) :: pHcoe,fCO2coe,cHCO3coe,cCO3coe
+      real(8) :: pHamb,fCO2amb,cCO2aqamb,cHCO3amb,cCO3amb,Wargamb  !!!!!不要：アウトプット用
 #if defined CORAL_NONE_CO2_EQ
-      real(8) cHcoe,cOHcoe
-      real(8) cHcal,cOHcal
-      real(8) leak_CO2aq, CO2aquptake
-      real(8) kp1,km1,kp4,km4
+      real(8) :: cHcoe,cOHcoe
+      real(8) :: cHcal,cOHcal
+      real(8) :: Fpp_CO2aq, CO2aquptake
+      real(8) :: kp1,km1,kp4,km4
 #endif
 !----- for gross photosynthesis -------------------
-      real(8) PFDsurf
+      real(8) :: PFDsurf
 !       Temperature related factor
-      real(8) f_temp
+      real(8) :: f_temp
 !----- for calcification ------------------------
-      real(8) E_tot,E_ca,F_H,F_CO2
-      real(8) leak_TA,leak_DIC
-!      real(8) leak_CO2aq,leak_HCO3,leak_CO3
+      real(8) :: E_tot,E_ca,F_H,F_CO2
+      real(8) :: Fpp_TA,Fpp_DIC
+!      real(8) :: Fpp_CO2aq,Fpp_HCO3,Fpp_CO3
 
 !----- for nutrients dynamics -------------------
 
 !----- for cabon isotope calculation -------------------
 
-      real(8) d13C_DICcoe,d13C_DICcal,d13C_QC,d13C_DICamb,d13C_arg
+      real(8) :: d13C_DICcoe,d13C_DICcal,d13C_QC,d13C_DICamb,d13C_arg
 #if defined CORAL_CARBON_ISOTOPE
-      real(8) R13Ccoe,R13Ccal,RQ13C,R13Camb,R13Carg
-      real(8) R13Cleak,R13Cfco2,R13Cuptake
-      real(8) F_13CO2,k_13CO2i
-      real(8) leak_DI13C
-      real(8) cH13CO3coe, c13CO3coe
-      real(8) cH13CO3cal, c13CO3cal
-      real(8) leak_13CO2aq, leak_H13CO3, leak_13CO3
-      real(8) c13CO2aquptake
-      real(8) R13C_HCO3cal
-      real(8) c13CO2aqamb
+      real(8) :: R13Ccoe,R13Ccal,RQ13C,R13Camb,R13Carg
+      real(8) :: R13CFpp,R13Cfco2,R13Cuptake
+      real(8) :: F_13CO2,k_13CO2i
+      real(8) :: Fpp_DI13C
+      real(8) :: cH13CO3coe, c13CO3coe
+      real(8) :: cH13CO3cal, c13CO3cal
+      real(8) :: Fpp_13CO2aq, Fpp_H13CO3, Fpp_13CO3
+      real(8) :: c13CO2aquptake
+      real(8) :: R13C_HCO3cal
+      real(8) :: c13CO2aqamb
 #endif
-      real(8) d11Barg
 
 #if defined CORAL_ZOOXANTHELLAE
-      real(8) C_excre
-      real(8) Expul
-      real(8) F_ROS
-      real(8) Rz
-      real(8) C_waste
+      real(8) :: F_Cexcr
+      real(8) :: F_Cwaste
+      real(8) :: F_Zexpul
+      real(8) :: F_ROS
+      real(8) :: Rz
+      real(8) :: F_detox
+      real(8) :: F_damage
+      real(8) :: Damage
+# if defined CORAL_NUTRIENTS
+      real(8) :: F_Nexcr
+      real(8) :: F_Nwaste
+      real(8) :: F_Pexcr
+      real(8) :: F_Pwaste
+# endif
+#endif
+
+#if defined CORAL_MUCUS
+      real(8) :: F_Cmucus
+# if defined CORAL_NUTRIENTS
+      real(8) :: F_Nmucus
+      real(8) :: F_Pmucus
+# endif
+#endif
+#if defined CORAL_INGESTION
+      real(8) :: F_Cingest
+# if defined CORAL_NUTRIENTS
+      real(8) :: F_Ningest
+      real(8) :: F_Pingest
+# endif
+#endif
+#if defined CORAL_SIZE_DYNAMICS
+      real(8) :: F_Cgrowth
+# if defined CORAL_NUTRIENTS
+      real(8) :: F_Ngrowth
+      real(8) :: F_Pgrowth
+# endif
 #endif
 
 #if defined CORAL_TESTMODE
@@ -473,7 +544,7 @@
       real(8), save :: S_QC_dt    = 0.d0
       real(8), save :: dsec         = 0.d0 !sec
       real(8), save :: dday         = 1.d0 !day
-
+      real(8) d11Barg
       real(8), save :: S_d11BargxGn_dt = 0.d0
 #endif
 
@@ -520,11 +591,11 @@
 !      PO4uptake=7.4*100./86400.*cPO4*1.023
 
 
-      NH4uptake=Si*NH4amb*1.023d0
+      NH4uptake=Si*NH4amb
 ! NO3 uptake
-      NO3uptake=Si*NO3amb*1.023d0
+      NO3uptake=Si*NO3amb
 ! PO4 uptake
-      PO4uptake=Si*PO4amb*1.023d0
+      PO4uptake=Si*PO4amb
 
 ! Coral carbon cell quoto
 
@@ -605,30 +676,57 @@
       PFDsurf=PFD!*exp(-lamb*dsed)
 
 #if defined CORAL_ZOOXANTHELLAE
-      CALL zooxanthellae                     &
+
+!---------- ROS related fluxes (nmol cm-2 s-1) ----------------------------
+
+!     V_detoxは余剰の栄養素の関数
+!
+!      V_detox=k_detox(n)*exp(
+!     &                     min(  1.-QP0coral(n)/QPcoral(n,i,j)  ,
+!     &                       min(1.-QN0coral(n)/QNcoral(n,i,j),
+!     &                           1.-QC0coral(n)/QCcoral(n,i,j) ) )
+!     &                       )
+!
+!
+!      F_detox=V_detox(n)*ROS(n,i,j)/(K_ROS(n)+ROS(n,i,j))
+!      F_detox = 0.15d0 * CORAL(ng)%ROS(n,i,j) * hcoe  !(s-1) * (umol L-1) * (cm)*0.001(n/u)=(nmol cm-2 s-1)
+             !0.15
+!      F_detox=0.02*ROS(n,i,j)/(K_ROS(n)+ROS(n,i,j))
+      F_detox = 3.5d-2 * CORAL(ng)%ROS(n,i,j)/(1.0d-1 + CORAL(ng)%ROS(n,i,j))
+    
+!      F_damage=k_damage(n)*ROS(n,i,j)
+      F_damage = 0.016d0 * CORAL(ng)%ROS(n,i,j)
+
+!  Zooxanthellae release rate by host coral (individual cm-2 s-1)
+!      Damage=exp(F_damage + 3.*F_ONOO)-1.   !Damage by ROS (F_damage) and peroxynitrite (F_ONOO)
+!      Damage=exp(F_damage + F_ONOO)-1.   !Damage by ROS (F_damage) and peroxynitrite (F_ONOO)
+      Damage = exp( F_damage ) - 1.0d0   !Damage by ROS (F_damage)
+      F_Zexpul  = 2.0d1 * Damage
+
+
+      CALL zooxanthellae                              &
 !          input parameters
-     &            (ng, n, i, j                     &
-     &            ,dt                              &
-     &            ,PFDsurf                         &
-     &            ,TKamb                           &      !Temperature (K)
-     &            ,CORAL(ng)%cCO2aqcoe(n,i,j), cHCO3coe      &
-     &            ,Expul                           & ! Zooxanthellae release rate by host coral (individual cm-2 s-1)
-     &            ,C_excre                         & ! Organic C excretion controled by host coral (nmol cm-2 s-1)
-# if defined CORAL_NUTRIENTS
-     &            ,N_excre                         & ! Organic N excretion controled by host coral (nmol cm-2 s-1)
-     &            ,P_excre                         & ! Organic P excretion controled by host coral (nmol cm-2 s-1)
-# endif
+     &            (ng, n, i, j                        &
+     &            ,dt                                 &
+     &            ,PFDsurf                            &
+     &            ,TKamb                              &      !Temperature (K)
+     &            ,CORAL(ng)%cCO2aqcoe(n,i,j)         &
+     &            ,cHCO3coe                           &
+     &            ,F_Zexpul                           & ! Zooxanthellae release rate by host coral (individual cm-2 s-1)
 !          output parameters
-     &            ,Pg                              & ! Gross photosynthesis rate (nmol cm-2 s-1)
-     &            ,Rz                              & ! Zooxanthellae respiration rate (nmol cm-2 s-1)
-     &            ,C_waste                         & ! Waste organic C (nmol cm-2 s-1)
-     &            ,F_ROS                           & ! Flux of Reactive Oxygen Species  (nmol cm-2 s-1)
+     &            ,Pg                                 & ! Gross photosynthesis rate (nmol cm-2 s-1)
+     &            ,Rz                                 & ! Zooxanthellae respiration rate (nmol cm-2 s-1)
+     &            ,F_Cexcr                            & ! Organic C excretion controled by host coral (nmol cm-2 s-1)
+     &            ,F_Cwaste                           & ! Waste organic C (nmol cm-2 s-1)
+     &            ,F_ROS                              & ! Flux of Reactive Oxygen Species  (nmol cm-2 s-1)
 # if defined CORAL_NUTRIENTS
-     &            ,N_waste                         & ! Waste organic N (nmol cm-2 s-1)
-     &            ,P_waste                         & ! Waste organic P (nmol cm-2 s-1)
-     &            ,NO3_trans, NO2_trans, NH4_trans & ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
-     &            ,PO4_trans                       & ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
-     &            ,F_ONOO                          & ! Flux of peroxynitrite  (nmol cm-2 s-1)
+     &            ,F_Nexcr                            & ! Organic N excretion controled by host coral (nmol cm-2 s-1)
+     &            ,F_Nwaste                           & ! Waste organic N (nmol cm-2 s-1)
+     &            ,F_Pexcr                            & ! Organic P excretion controled by host coral (nmol cm-2 s-1)
+     &            ,F_Pwaste                           & ! Waste organic P (nmol cm-2 s-1)
+     &            ,NO3_trans, NO2_trans, NH4_trans    & ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
+     &            ,PO4_trans                          & ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
+     &            ,F_ONOO                             & ! Flux of peroxynitrite  (nmol cm-2 s-1)
 # endif
      &             )
 
@@ -658,10 +756,22 @@
       f_temp=1.d0
 !      f_temp=exp(Eact(n)*(TKamb-298.)/298./Rgas/TKamb)
 
+#if defined CORAL_ZOOXANTHELLAE
 !   Respilation rate (nmolO2 cm-2 s-1) 
-      R= Rmax(n)*f_temp                                            &
-     &   *CORAL(ng)%QC(n,i,j)/(K_QC(n)+CORAL(ng)%QC(n,i,j))        &
-     &   *CORAL(ng)%DOcoe(n,i,j)/(K_DO(n)+CORAL(ng)%DOcoe(n,i,j))
+      Rc = Rmax(n)*f_temp                                            &
+     &     *CORAL(ng)%QC(n,i,j)**2.0d0                               &  ! Hill equation
+     &        /(QC0(n)+CORAL(ng)%QC(n,i,j)**2.0d0)                   &  !  Half saturation constant: QC0
+     &     *CORAL(ng)%DOcoe(n,i,j)/(K_DO(n)+CORAL(ng)%DOcoe(n,i,j))
+
+      R = Rc + Rz
+#else
+!   Respilation rate (nmolO2 cm-2 s-1) 
+      Rc = Rmax(n)*f_temp                                            &
+     &     *CORAL(ng)%QC(n,i,j)/(K_QC(n)+CORAL(ng)%QC(n,i,j))        & !  Michaelis-Menten equation
+     &     *CORAL(ng)%DOcoe(n,i,j)/(K_DO(n)+CORAL(ng)%DOcoe(n,i,j))
+
+      R = Rc
+#endif
 
 !----- Calcification rate (nmol cm-2 s-1) ------------------------------------
 
@@ -680,7 +790,7 @@
 !  C6H12O6 + 6 O2 + 38 ADP + 38 Pi -> 6 CO2 + 6 H2O + 38 ATP  dG=-2873.4 kJ/mol
 !  ATP + H2O -> ADP + Pi  dG=-7.3kcal/mol=-30.5kJ/mol
 
-      E_tot=30.5d3 * 38.0d0/6.0d0 * R  !nJ cm-2 s-1
+      E_tot=30.5d3 * 38.0d0/6.0d0 * Rc  !nJ cm-2 s-1
       E_ca=E_tot-E_other
       E_ca=max(E_ca,0.d0) !Error handring
 
@@ -693,12 +803,54 @@
 !      F_H=max(F_H,0.) !Error handring
 !      F_H=E_ca/50000.*2.
 
-#if defined CORAL_NUTRIENTS
+
+
+#if defined CORAL_MUCUS
 !
-!----- Plankton predation --------------------------
+!----- Coral mucus release rate (nmol cm-2 s-1)--------------------------
+!
+      F_Cmucus = 0.0d0  !!!!てきとう
+      
+# if defined CORAL_ZOOXANTHELLAE
+      DOCuptake = -F_Cmucus - F_Cwaste
+      POCuptake = 0.0d0
+# else
+      DOCuptake = -F_Cmucus
+      POCuptake = 0.0d0
+# endif
+
+# if defined CORAL_NUTRIENTS
+      F_Nmucus = ???
+      F_Pmucus = ???
+#  if defined CORAL_ZOOXANTHELLAE
+      DONuptake = -F_Nmucus - F_Nwaste
+      PONuptake = 0.0d0
+      DOPuptake = -F_Pmucus - F_Pwaste
+      POPuptake = 0.0d0
+#  else
+      DONuptake = -F_Nmucus
+      PONuptake = 0.0d0
+      DOPuptake = -F_Pmucus
+      POPuptake = 0.0d0
+#  endif
+# endif
+!----- END CORAL_MUCUS --------------------------
+#endif
+
+#if defined CORAL_INGESTION
+!
+!----- Plankton ingestion (nmol cm-2 s-1)--------------------------
+!
 !      PHYuptake=Si(nPHY)*cPHY*1.023d0
-      PHYuptake=0.d0
-      ZOOuptake=Si*ZOOamb*1.023d0
+      PHYuptake = 0.0d0
+      ZOOuptake = Si*ZOOamb
+      
+      F_Cingest = PHYuptake+ZOOuptake
+# if defined CORAL_NUTRIENTS
+      F_Ningest = ???
+      F_Pingest = ???
+# endif
+!----- END CORAL_INGESTION --------------------------
 #endif
 !---------- Other fluxes (nmol cm-2 s-1) ----------------------------
 
@@ -707,26 +859,75 @@
       F_CO2=k_CO2i*(CORAL(ng)%cCO2aqcoe(n,i,j)-CORAL(ng)%cCO2aqcal(n,i,j))*1.023d0
       
 !   Leak flux (nmol cm-2 s-1) 
-      leak_TA =k_TA *(CORAL(ng)%TAcoe(n,i,j)-CORAL(ng)%TAcal(n,i,j))*1.023d0
-      leak_DIC=k_DIC*(CORAL(ng)%DICcoe(n,i,j)-CORAL(ng)%DICcal(n,i,j))*1.023d0
+      Fpp_TA =k_TA *(CORAL(ng)%TAcoe(n,i,j)-CORAL(ng)%TAcal(n,i,j))*1.023d0
+      Fpp_DIC=k_DIC*(CORAL(ng)%DICcoe(n,i,j)-CORAL(ng)%DICcal(n,i,j))*1.023d0
       
-!      leak_TA =k_TA *(TAamb-CORAL(ng)%TAcal(n,i,j))*1.023
-!      leak_DIC=k_DIC*(DICamb-CORAL(ng)%DICcal(n,i,j))*1.023
+!      Fpp_TA =k_TA *(TAamb-CORAL(ng)%TAcal(n,i,j))*1.023
+!      Fpp_DIC=k_DIC*(DICamb-CORAL(ng)%DICcal(n,i,j))*1.023
 
 !   DIC and TA uptake (nmol cm-2 s-1)
       DICuptake=Si*(DICamb-CORAL(ng)%DICcoe(n,i,j))*1.023d0
       TAuptake =Si*(TAamb-CORAL(ng)%TAcoe(n,i,j))*1.023d0
 
 !   DO uptake (nmol cm-2 s-1)
-      DOuptake =Si*(DOamb-CORAL(ng)%DOcoe(n,i,j))*1.023d0
+      DOuptake =Si*(DOamb-CORAL(ng)%DOcoe(n,i,j))
 
 #if defined CORAL_NONE_CO2_EQ
-      leak_CO2aq=k_DIC*(CORAL(ng)%cCO2aqcoe(n,i,j)-CORAL(ng)%cCO2aqcal(n,i,j))*1.023d0
+      Fpp_CO2aq=k_DIC*(CORAL(ng)%cCO2aqcoe(n,i,j)-CORAL(ng)%cCO2aqcal(n,i,j))*1.023d0
       CO2aquptake=Si*(cCO2aqamb-CORAL(ng)%cCO2aqcoe(n,i,j))*1.023d0
 #endif
 
-!!! ----- Isotope calculation ----------------------------------------------------
+#if defined CORAL_SIZE_DYNAMICS
+!
+!---------- Coral growth (nmol cm-2 s-1) ------------
+!
+!    Droop model (1973) + Liebig's minimum law
+
+# if defined CORAL_NUTRIENTS
+
+      F_Cgrowth = g_max(n)*min( 1.0d0 - QC0(n)/CORAL(ng)%QC(n,i,j) ,    &
+     &                      min(1.0d0 - QN0(n)/CORAL(ng)%QN(n,i,j),     &
+     &                          1.0d0 - QP0(n)/CORAL(ng)%QP(n,i,j) ) )  &
+      F_Cgrowth = max(F_Cgrowth, 0.0d0)
+      
+      F_Ngrowth = F_Cgrowth*CORAL(ng)%QN(n,i,j)/CORAL(ng)%QC(n,i,j)
+      F_Pgrowth = F_Cgrowth*CORAL(ng)%QP(n,i,j)/CORAL(ng)%QC(n,i,j)
+
+# else
+      F_Cgrowth = g_max(n) * (1.0d0 - QC0(n)/CORAL(ng)%QC(n,i,j) )
+      F_Cgrowth = max(F_Cgrowth, 0.0d0)
+
+# endif
+!
+!----- Convert internal conditions to size dynamics parameters
+!
+!---------- Coral growth rate (cm cm-2 s-1) ------------
+!
+      CORAL(ng)%growth(n,i,j) = F_Cgrowth/CORAL(ng)%QC(n,i,j)*1.0d-3  ! growth rate (cm2 cm-2 s-1)
+!     (cm2 cm-2 s-1)=(nmol cm-2 s-1)/(umol cm-2)*1.d-3
+
+!
+!---------- Coral mortality (cm cm-2 s-1) ------------
+!
+# if defined CORAL_NUTRIENTS
+
+      CORAL(ng)%mort(n,i,j) = km_CNP                                   &   ! mortality (cm2 cm-2 s-1) 
+     &                *exp(-am_CNP*                                    &  !* 足りない栄養素に依存（要検討!!!）
+     &                    min( 1.0d0 - QC0(n)/CORAL(ng)%QC(n,i,j) ,    &
+     &                     min(1.0d0 - QN0(n)/CORAL(ng)%QN(n,i,j),     &
+     &                         1.0d0 - QP0(n)/CORAL(ng)%QP(n,i,j) )))  & 
+     &               +km_dam * Damage                                !* ダメージ依存（要検討!!!）
+# else
+      CORAL(ng)%mort(n,i,j) = km_CNP                               &   ! mortality (cm2 cm-2 s-1) 
+     &                *exp(-am_CNP*                                &
+     &                    ( 1.0d0 - QC0(n)/CORAL(ng)%QC(n,i,j) ))  &
+     &               +km_dam * Damage                                !* ダメージ依存（要検討!!!）
+# endif
+!-----------END CORAL_SIZE_DYNAMICS ------------------------------------
+#endif
+
 #if defined CORAL_CARBON_ISOTOPE  
+!!! ----- Isotope calculation ----------------------------------------------------
 
 # if defined CORAL_NONE_CO2_EQ
 !----------- CO2 system in calcified fulid -------------------
@@ -783,12 +984,12 @@
 ! Carbon isotope fluxes
       F_13CO2=k_CO2i/1.0007d0*(CORAL(ng)%c13CO2aqcoe(n,i,j)-CORAL(ng)%c13CO2aqcal(n,i,j))*1.023d0
       DI13Cuptake=Si *(DI13Camb-CORAL(ng)%DI13Ccoe(n,i,j))*1.023d0
-      leak_DI13C=k_DIC*(CORAL(ng)%DI13Ccoe(n,i,j)-CORAL(ng)%DI13Ccal(n,i,j))*1.023d0
+      Fpp_DI13C=k_DIC*(CORAL(ng)%DI13Ccoe(n,i,j)-CORAL(ng)%DI13Ccal(n,i,j))*1.023d0
                     
 # if defined CORAL_NONE_CO2_EQ
 ! Carbon isotope fluxes
       c13CO2aquptake=Si *(c13CO2aqamb-CORAL(ng)%c13CO2aqcoe(n,i,j))*1.023d0
-      leak_13CO2aq=k_DIC*(CORAL(ng)%c13CO2aqcoe(n,i,j)-CORAL(ng)%c13CO2aqcal(n,i,j))*1.023d0
+      Fpp_13CO2aq=k_DIC*(CORAL(ng)%c13CO2aqcoe(n,i,j)-CORAL(ng)%c13CO2aqcal(n,i,j))*1.023d0
 # endif
 
 #endif /* End isotope calculation */
@@ -797,9 +998,22 @@
 
 !     CORAL(ng)%QC (umol cm-2)
 !     Pg,R: nmol cm-2 s-1
-      CORAL(ng)%QC (n,i,j)=CORAL(ng)%QC (n,i,j)                   &
-!     &         +(Pg-R)/coe_tick/1.023 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
-     &         +(Pg-R)*1.d-3 *dt    !nmol cm-2 =1.e-3 umol cm-2
+      CORAL(ng)%QC (n,i,j)=CORAL(ng)%QC (n,i,j)+(              &
+#if defined CORAL_ZOOXANTHELLAE
+               F_Cexcr-Rc                                      &
+#else
+     &         Pg-R                                            &
+#endif
+#if defined CORAL_MUCUS
+     &         -F_Cmucus                                       &
+#endif
+#if defined CORAL_INGESTION
+     &         +F_Cingest                                      &
+#endif
+#if defined CORAL_SIZE_DYNAMICS
+     &         -F_Cgrowth                                      &
+#endif
+     &         )*1.d-3 *dt    !nmol cm-2 =1.e-3 umol cm-2
       CORAL(ng)%QC(n,i,j)=max(CORAL(ng)%QC(n,i,j),0.d0) !Error handring
 
 !    DIC & TA (umol kg-1) in calcified fulid
@@ -807,16 +1021,16 @@
      &            +(-Gn                          &
      &              +R*(1.-ratio(n))             & !!!!Test: add R*(1.-ratio(n))
      &              +F_CO2                       &
-     &              +leak_DIC                    &
-     &             )/cal_tick/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &              +Fpp_DIC                    &
+     &             )/hcal/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
       CORAL(ng)%DICcal(n,i,j)=max(CORAL(ng)%DICcal(n,i,j),0.d0) !Error handring
       CORAL(ng)%DICcal(n,i,j)=min(CORAL(ng)%DICcal(n,i,j),100000.d0) !Error handring
 
       CORAL(ng)%TAcal (n,i,j)=CORAL(ng)%TAcal (n,i,j)               &
      &     +(-2.d0*Gn                           &
      &       +F_H                               &
-     &       +leak_TA                           &
-     &      )/cal_tick/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &       +Fpp_TA                            &
+     &      )/hcal/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
       CORAL(ng)%TAcal(n,i,j)=max(CORAL(ng)%TAcal(n,i,j),0.d0) !Error handring
       CORAL(ng)%TAcal(n,i,j)=min(CORAL(ng)%TAcal(n,i,j),100000.d0) !Error handring
 
@@ -827,16 +1041,16 @@
      &              +R*ratio(n)                & !!!!Test: add  *ratio(n)
      &              +DICuptake                 &
      &              -F_CO2                     &
-     &              -leak_DIC                  &
-     &             )/coe_tick/1.023d0 *dt   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &              -Fpp_DIC                   &
+     &             )/hcoe/1.023d0 *dt   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
       CORAL(ng)%DICcoe(n,i,j)=max(CORAL(ng)%DICcoe(n,i,j),0.d0) !Error handring
       CORAL(ng)%DICcoe(n,i,j)=min(CORAL(ng)%DICcoe(n,i,j),100000.d0) !Error handring
 
       CORAL(ng)%TAcoe (n,i,j)=CORAL(ng)%TAcoe (n,i,j)             &
      &     +(-F_H                             &
      &        +TAuptake                       &
-     &        -leak_TA                        &
-     &      )/coe_tick/1.023d0 *dt   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &        -Fpp_TA                        &
+     &      )/hcoe/1.023d0 *dt   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
       CORAL(ng)%TAcoe(n,i,j)=max(CORAL(ng)%TAcoe(n,i,j),0.d0) !Error handring
       CORAL(ng)%TAcoe(n,i,j)=min(CORAL(ng)%TAcoe(n,i,j),100000.d0) !Error handring
 
@@ -845,7 +1059,7 @@
       CORAL(ng)%DOcoe (n,i,j)=CORAL(ng)%DOcoe (n,i,j)             &
      &            +(Pg-R                      &
      &              +DOuptake                 &
-     &             )/coe_tick/1.023d0 *dt   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &             )/hcoe *dt   !nmol cm-3 s-1 = 1. umol L-1 s-1
       CORAL(ng)%DOcoe (n,i,j)=max( CORAL(ng)%DOcoe (n,i,j),0.d0) !Error handring
 
 #if defined CORAL_NONE_CO2_EQ
@@ -866,8 +1080,8 @@
      &            +( R *ratio(n)                        & !!!!Test: add  *ratio(n)
      &              +CO2aquptake                        &
      &              -F_CO2                              &
-     &              -leak_CO2aq                         &
-     &             )/coe_tick/1.023d0 *dt               &   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &              -Fpp_CO2aq                         &
+     &             )/hcoe/1.023d0 *dt               &   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
 !       kinetics of CO2 system
      &            +( (km1*cHcoe+km4)*cHCO3coe           & ! umol kg-1 s-1
      &              -(kp1+kp4*cOHcoe)*CORAL(ng)%cCO2aqcoe(n,i,j)  & ! umol kg-1 s-1
@@ -880,8 +1094,8 @@
       CORAL(ng)%cCO2aqcal(n,i,j)=CORAL(ng)%cCO2aqcal(n,i,j)                 &
      &            +(R *(1.-ratio(n))                    & !!!!Test: add R*ratio(n)
      &              +F_CO2                              &
-     &              +leak_CO2aq                         &
-     &             )/cal_tick/1.023d0 *dt               &!nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &              +Fpp_CO2aq                         &
+     &             )/hcal/1.023d0 *dt               &!nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
 !       kinetics of CO2 system
      &            +( (km1*cHcal+km4)*cHCO3cal           &! umol kg-1 s-1
      &              -(kp1+kp4*cOHcal)*CORAL(ng)%cCO2aqcal(n,i,j)  &! umol kg-1 s-1
@@ -889,13 +1103,31 @@
 !      CORAL(ng)%cCO2aqcal(n,i,j)=max(CORAL(ng)%cCO2aqcal(n,i,j),0.d0) !Error handring
 !      CORAL(ng)%cCO2aqcal(n,i,j)=min(CORAL(ng)%cCO2aqcal(n,i,j),1000.d0) !Error handring
 
-!      write(60,*) CORAL(ng)%cCO2aqcal(n,i,j),F_CO2,leak_CO2aq,(km1*cHcal+km4)*cHCO3cal,(kp1+kp4*cOHcal)*CORAL(ng)%cCO2aqcal(n,i,j) !!!!!!!!!for Debug
+!      write(60,*) CORAL(ng)%cCO2aqcal(n,i,j),F_CO2,Fpp_CO2aq,(km1*cHcal+km4)*cHCO3cal,(kp1+kp4*cOHcal)*CORAL(ng)%cCO2aqcal(n,i,j) !!!!!!!!!for Debug
 
 #endif
 
-!!! ----- Isotope calculation ----------------------------------------------------
-#if defined CORAL_CARBON_ISOTOPE
+#if defined CORAL_ZOOXANTHELLAE
+!!!
+!!! ----- Zooxanthellae interaction ----------------------------------------------------
+!!!
+!    ROS (umol/L) mass balance
 
+      CORAL(ng)%ROS(n,i,j)=CORAL(ng)%ROS(n,i,j)        &
+     &         +( F_ROS                                &
+     &           -F_detox                              &
+     &           -F_damage                             &
+!     &           -F_ONOO                               &
+     &           -Si * CORAL(ng)%ROS(n,i,j)            &
+     &          )/hcoe *dt            !umol L-1
+      CORAL(ng)%ROS(n,i,j)=max(CORAL(ng)%ROS(n,i,j),0.d0) !Error handring
+
+#endif
+
+#if defined CORAL_CARBON_ISOTOPE
+!!!
+!!! ----- Isotope calculation ----------------------------------------------------
+!!!
 !      a_calc=exp((3.-0.140*Gn/0.011098)/1000.)    ! kinetic effect calcualtion: 1 mm y-1 
                    ! -> (10cm*1.4g/cm) /(365*24*60*60s*40g/mol)* 10**6 = 0.011098 umol cm-2 s-1
 
@@ -904,7 +1136,7 @@
 !     &           -R*RQ13C*a_resp/(1.+RQ13C*a_resp)  &
      &         +(Pg*R13Ccoe*a_phot                      &
      &           -R*RQ13C*a_resp                      &
-!     &          )/coe_tick/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+!     &          )/hcoe/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
      &          )*1.e-3 *dt    !nmol cm-2 =1.e-3 umol cm-2
 
       CORAL(ng)%DI13Ccoe (n,i,j)=CORAL(ng)%DI13Ccoe (n,i,j)                     &
@@ -914,8 +1146,8 @@
      &              +R*RQ13C*a_resp *ratio(n)             & !!!!Test: add  *ratio(n)
      &              +DI13Cuptake                            &
      &              -F_13CO2                                &
-     &              -leak_DI13C                             &
-     &             )/coe_tick/1.023d0 *dt   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &              -Fpp_DI13C                             &
+     &             )/hcoe/1.023d0 *dt   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
 
       CORAL(ng)%DI13Ccal (n,i,j)=CORAL(ng)%DI13Ccal (n,i,j)                     &
 !     &            +(-Gn*R13Ccal*a_calc/(1.+R13Ccal*a_calc)  &
@@ -923,8 +1155,8 @@
      &            +(-Gn*R13C_HCO3cal*a_calc                 &
      &              +R*RQ13C*a_resp *(1.-ratio(n))        & !!!!Test: add R*(1.-ratio(n))
      &              +F_13CO2                                &
-     &              +leak_DI13C                             &
-     &             )/cal_tick/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &              +Fpp_DI13C                             &
+     &             )/hcal/1.023d0 *dt    !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
 
 
 # if defined CORAL_NONE_CO2_EQ
@@ -945,8 +1177,8 @@
      &            +( R *RQ13C*a_resp*ratio(n)             &!!!!Test: add *ratio(n)
      &              +c13CO2aquptake                        &
      &              -F_13CO2                              &
-     &              -leak_13CO2aq                         &
-     &             )/coe_tick/1.023d0 *dt               &   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &              -Fpp_13CO2aq                         &
+     &             )/hcoe/1.023d0 *dt               &   !nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
 !       kinetics of CO2 system
      &            +( (km1*cHcoe+km4)*cH13CO3coe           & ! umol kg-1 s-1
      &              -(kp1+kp4*cOHcoe)*CORAL(ng)%c13CO2aqcoe(n,i,j)  & ! umol kg-1 s-1
@@ -959,8 +1191,8 @@
       CORAL(ng)%c13CO2aqcal(n,i,j)=CORAL(ng)%c13CO2aqcal(n,i,j)                 &
      &            +( R *RQ13C*a_resp*(1.-ratio(n))      &!!!!Test: add R*(1.-ratio(n))
      &              +F_13CO2                              &
-     &              +leak_13CO2aq                         &
-     &             )/cal_tick/1.023d0 *dt               &!nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
+     &              +Fpp_13CO2aq                         &
+     &             )/hcal/1.023d0 *dt               &!nmol cm-3 s-1 = 1./1.023 umol kg-1 s-1
 !       kinetics of CO2 system
      &            +( (km1*cHcal+km4)*cH13CO3cal           &! umol kg-1 s-1
      &              -(kp1+kp4*cOHcal)*CORAL(ng)%c13CO2aqcal(n,i,j)  &! umol kg-1 s-1
@@ -968,7 +1200,7 @@
 !      CORAL(ng)%cCO2aqcal(n,i,j)=max(CORAL(ng)%cCO2aqcal(n,i,j),0.d0) !Error handring
 !      CORAL(ng)%cCO2aqcal(n,i,j)=min(CORAL(ng)%cCO2aqcal(n,i,j),1000.d0) !Error handring
 
-!      write(60,*) CORAL(ng)%cCO2aqcal(n,i,j),F_CO2,leak_CO2aq,(km1*cHcal+km4)*cHCO3cal,(kp1+kp4*cOHcal)*CORAL(ng)%cCO2aqcal(n,i,j) !!!!!!!!!for Debug
+!      write(60,*) CORAL(ng)%cCO2aqcal(n,i,j),F_CO2,Fpp_CO2aq,(km1*cHcal+km4)*cHCO3cal,(kp1+kp4*cOHcal)*CORAL(ng)%cCO2aqcal(n,i,j) !!!!!!!!!for Debug
 
 # endif
 
@@ -985,14 +1217,15 @@
 
 #endif  /* End isotope calculation */
 
-#if defined CORAL_BORON_ISOTOPE
-      d11Barg = d11B_BOH4_frompHd11BT(pHcal, 39.5d0, TKamb, Samb)
-#endif
 
 
 #if defined CORAL_TESTMODE
 !------------------------------------------------------------------------
 ! Print section
+
+# if defined CORAL_BORON_ISOTOPE
+      d11Barg = d11B_BOH4_frompHd11BT(pHcal, 39.5d0, TKamb, Samb)
+# endif
 
       time = time +dt  ! sec
       
@@ -1007,15 +1240,17 @@
      &   ,pHcal,pHcoe,pHamb,Wargcal,Wargamb,fCO2cal,fCO2coe,fCO2amb &
      &   ,d13C_DICamb,d13C_DICcoe,d13C_QC,d13C_DICcal,d13C_arg    &
      &   ,DOamb,d13C_arg*Gn                                         &
-     &   ,d13C_fromR13C(CORAL(ng)%c13CO2aqcal(n,i,j)/CORAL(ng)%cCO2aqcal(n,i,j))        &
-     &   ,d13C_fromR13C(cH13CO3cal/cHCO3cal),d13C_fromR13C(c13CO3cal/cCO3cal) &
-     &   ,d13C_fromR13C(CORAL(ng)%c13CO2aqcoe(n,i,j)/CORAL(ng)%cCO2aqcoe(n,i,j))                  &
-     &   ,d13C_fromR13C(cH13CO3coe/cHCO3coe),d13C_fromR13C(c13CO3coe/cCO3coe) &
+!     &   ,d13C_fromR13C(CORAL(ng)%c13CO2aqcal(n,i,j)/CORAL(ng)%cCO2aqcal(n,i,j))        &
+!     &   ,d13C_fromR13C(cH13CO3cal/cHCO3cal),d13C_fromR13C(c13CO3cal/cCO3cal) &
+!     &   ,d13C_fromR13C(CORAL(ng)%c13CO2aqcoe(n,i,j)/CORAL(ng)%cCO2aqcoe(n,i,j))                  &
+!     &   ,d13C_fromR13C(cH13CO3coe/cHCO3coe),d13C_fromR13C(c13CO3coe/cCO3coe) &
      &   ,CORAL(ng)%cCO2aqcal(n,i,j),cHCO3cal,cCO3cal &
      &   ,CORAL(ng)%cCO2aqcoe(n,i,j),cHCO3coe,cCO3coe &
-     &   ,CORAL(ng)%c13CO2aqcal(n,i,j),cH13CO3cal,c13CO3cal &
-     &   ,CORAL(ng)%c13CO2aqcoe(n,i,j),cH13CO3coe,c13CO3coe &
-     &   ,d11Barg
+!     &   ,CORAL(ng)%c13CO2aqcal(n,i,j),cH13CO3cal,c13CO3cal &
+!     &   ,CORAL(ng)%c13CO2aqcoe(n,i,j),cH13CO3coe,c13CO3coe &
+     &   ,d11Barg  &
+     &   ,DOCuptake, ZOOuptake, F_Cgrowth & 
+     &   ,CORAL(ng)%growth(n,i,j), CORAL(ng)%mort(n,i,j), Damage
      
       dsec=dsec+10.*60.  !!!!!!!!!!!!!!! print 10 min interval 
 !      dsec=dsec+60.*60.  !!!!!!!!!!!!!!! print 1 hour interval 
@@ -1031,7 +1266,6 @@
       S_Pg_dt        =S_Pg_dt+Pg*dt
       S_R_dt         =S_R_dt +R *dt
       S_QC_dt      =S_QC_dt+CORAL(ng)%QC(n,i,j)*dt
-      
       S_d11BargxGn_dt=S_d11BargxGn_dt+d11Barg*Gn*dt
 
       if((time/86400.).ge.dday) then
@@ -1075,30 +1309,29 @@
 !!!  Zooxanthellae population dynamics
 !!! **********************************************************************
 
-    SUBROUTINE zooxanthellae                       &
+    SUBROUTINE zooxanthellae                          &
 !          input parameters
-     &            (ng, n, i, j                     &   ! ng: nested grid number; n: coral compartment; i,j: position
-     &            ,dt                              &
-     &            ,PFDsurf                         &
-     &            ,TKamb                           &      !Temperature (K)
-     &            ,cCO2aqcoe, cHCO3coe             &
-     &            ,Expul                           & ! Zooxanthellae release rate by host coral (individual cm-2 s-1)
-     &            ,C_excre                         & ! Organic C excretion controled by host coral (nmol cm-2 s-1)
-# if defined CORAL_NUTRIENTS
-     &            ,N_excre                         & ! Organic N excretion controled by host coral (nmol cm-2 s-1)
-     &            ,P_excre                         & ! Organic P excretion controled by host coral (nmol cm-2 s-1)
-# endif
+     &            (ng, n, i, j                        &   ! ng: nested grid number; n: coral compartment; i,j: position
+     &            ,dt                                 &
+     &            ,PFDsurf                            &
+     &            ,TKamb                              &      !Temperature (K)
+     &            ,cCO2aqcoe                          &
+     &            ,cHCO3coe                           &
+     &            ,F_Zexpul                           & ! Zooxanthellae release rate by host coral (individual cm-2 s-1)
 !          output parameters
-     &            ,Pg                              & ! Gross photosynthesis rate (nmol cm-2 s-1)
-     &            ,Rz                              & ! Zooxanthellae respiration rate (nmol cm-2 s-1)
-     &            ,C_waste                         & ! Waste organic C (nmol cm-2 s-1)
-     &            ,F_ROS                           & ! Flux of Reactive Oxygen Species  (nmol cm-2 s-1)
+     &            ,Pg                                 & ! Gross photosynthesis rate (nmol cm-2 s-1)
+     &            ,Rz                                 & ! Zooxanthellae respiration rate (nmol cm-2 s-1)
+     &            ,F_Cexcr                            & ! Organic C excretion controled by host coral (nmol cm-2 s-1)
+     &            ,F_Cwaste                           & ! Waste organic C (nmol cm-2 s-1)
+     &            ,F_ROS                              & ! Flux of Reactive Oxygen Species  (nmol cm-2 s-1)
 # if defined CORAL_NUTRIENTS
-     &            ,N_waste                         & ! Waste organic N (nmol cm-2 s-1)
-     &            ,P_waste                         & ! Waste organic P (nmol cm-2 s-1)
-     &            ,NO3_trans, NO2_trans, NH4_trans & ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
-     &            ,PO4_trans                       & ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
-     &            ,F_ONOO                          & ! Flux of peroxynitrite  (nmol cm-2 s-1)
+     &            ,F_Nexcr                            & ! Organic N excretion controled by host coral (nmol cm-2 s-1)
+     &            ,F_Nwaste                           & ! Waste organic N (nmol cm-2 s-1)
+     &            ,F_Pexcr                            & ! Organic P excretion controled by host coral (nmol cm-2 s-1)
+     &            ,F_Pwaste                           & ! Waste organic P (nmol cm-2 s-1)
+     &            ,NO3_trans, NO2_trans, NH4_trans    & ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
+     &            ,PO4_trans                          & ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
+     &            ,F_ONOO                             & ! Flux of peroxynitrite  (nmol cm-2 s-1)
 # endif
      &             )
 !-----------------------------------------------------------------------
@@ -1111,20 +1344,18 @@
       real(8), intent(in) :: PFDsurf                         
       real(8), intent(in) :: TKamb                            !Temperature (K)
       real(8), intent(in) :: cCO2aqcoe, cHCO3coe             
-      real(8), intent(in) :: Expul                            ! Zooxanthellae release rate by host coral (individual cm-2 s-1)
-      real(8), intent(in) :: C_excre                          ! Organic C excretion controled by host coral (nmol cm-2 s-1)
-# if defined CORAL_NUTRIENTS
-      real(8), intent(in) :: N_excre                          ! Organic N excretion controled by host coral (nmol cm-2 s-1)
-      real(8), intent(in) :: P_excre                          ! Organic P excretion controled by host coral (nmol cm-2 s-1)
-# endif
+      real(8), intent(in) :: F_Zexpul                            ! Zooxanthellae release rate by host coral (individual cm-2 s-1)
 !          output parameters
       real(8), intent(out) :: Pg                               ! Gross photosynthesis rate (nmol cm-2 s-1)
       real(8), intent(out) :: Rz                               ! Zooxanthellae respiration rate (nmol cm-2 s-1)
-      real(8), intent(out) :: C_waste                          ! Waste organic C (nmol cm-2 s-1)
+      real(8), intent(out) :: F_Cexcr                          ! Organic C excretion controled by host coral (nmol cm-2 s-1)
+      real(8), intent(out) :: F_Cwaste                          ! Waste organic C (nmol cm-2 s-1)
       real(8), intent(out) :: F_ROS                            ! Flux of Reactive Oxygen Species  (nmol cm-2 s-1)
 # if defined CORAL_NUTRIENTS
-      real(8), intent(out) :: N_waste                          ! Waste organic N (nmol cm-2 s-1)
-      real(8), intent(out) :: P_waste                          ! Waste organic P (nmol cm-2 s-1)
+      real(8), intent(out) :: F_Nexcr                          ! Organic N excretion controled by host coral (nmol cm-2 s-1)
+      real(8), intent(out) :: F_Nwaste                          ! Waste organic N (nmol cm-2 s-1)
+      real(8), intent(out) :: F_Pexcr                          ! Organic P excretion controled by host coral (nmol cm-2 s-1)
+      real(8), intent(out) :: F_Pwaste                          ! Waste organic P (nmol cm-2 s-1)
       real(8), intent(out) :: NO3_trans, NO2_trans, NH4_trans  ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
       real(8), intent(out) :: PO4_trans                        ! Nutrients transport rate from host to Zooxanthellae (nmol cm-2 s-1)
       real(8), intent(out) :: F_ONOO                           ! Flux of peroxynitrite  (nmol cm-2 s-1)
@@ -1142,11 +1373,11 @@
 !
 !      Pg=Pgmax(n)*tanh(PFDsurf/Ik(n))*(1-Br(i,j))
 !     &       *cHCO3coe/(K_HCO3+cHCO3coe)
-!     &       *coe_tick
+!     &       *hcoe
 
       real(8), parameter :: lamb = 1000.d0 !*適当(未使用）
 
-      real(8), parameter :: Pgmax(Ncl) = 1.d-3 !1.0 (nmol cm-2 -s)=1.0/dens=1.0e-6 (nmol cell-1 s-1) =1.0e-3 (pmol cell-1 s-1)
+      real(8), parameter :: Pgmax(Ncl) = 1.0d-3 !1.0 (nmol cm-2 -s)=1.0/dens=1.0e-6 (nmol cell-1 s-1) =1.0e-3 (pmol cell-1 s-1)
       real(8), parameter :: Ik(Ncl)    = 275.d0    !(275 uEin m-2 s-1) * refference value
 
 !------ Goreau et al. (1996)------------------------------------------   
@@ -1174,10 +1405,15 @@
       real(8), parameter :: K_QC = 8.d0 ! (pmol cell-1) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*適当
       real(8), parameter :: K_DO = 5.d0 ! ca. 10 (umol kg-1) Shick et al. (1990) *Tuned value
 
-      real(8), parameter :: QC0zoox = 8.0d0  ! (pmolC/cell)  100 pg cell-1 ~ 10 pmol cell-1 = (Verde & McCloskey 1998)
+!----- Zooxanthellar physica condition ---------------------------
+
+      real(8), parameter :: V_zoox = 5.0d-10   ! Volume of zooxanthellae (cm3/cells)
+                               ! ~500 um3 =5.e-10 cm3 (e.g. Jone 1997; Jones and Yellowlees 1997)
+
+      real(8), parameter :: QC0 = 8.0d0  ! (pmolC/cell)  100 pg cell-1 ~ 10 pmol cell-1 = (Verde & McCloskey 1998)
 # if defined CORAL_NUTRIENTS
-      real(8), parameter :: QN0zoox = 1.1d0  ! (pmolN/cell)  calculated from C:N:P = 116:16:1
-      real(8), parameter :: QP0zoox = 0.07d0 ! (pmolP/cell) 
+      real(8), parameter :: QN0 = 1.1d0  ! (pmolN/cell)  calculated from C:N:P = 116:16:1
+      real(8), parameter :: QP0 = 0.07d0 ! (pmolP/cell) 
 # endif
 
 # if defined CORAL_NUTRIENTS
@@ -1212,7 +1448,7 @@
 
 !----- Population dynamics parameters -------------------
 
-      real(8), parameter :: u_max  = 2.d-5 !Maximum reproduction rate (pmol cell-1 s-1)  !!!!!!!!!!!!!!!!!!適当!!!!!!!!!!!!!!
+      real(8), parameter :: u_max  = 5.d-5 !Maximum reproduction rate (pmol cell-1 s-1)  !!!!!!!!!!!!!!!!!!適当!!!!!!!!!!!!!!
       
       real(8), parameter :: km_CNP = 1.d-8 ! (cell cm-2 s-1)  適当!!!!!!!!!!!!!!
       real(8), parameter :: am_CNP = 1.d0
@@ -1221,31 +1457,31 @@
 
 !----- for gross photosynthesi -------------------
 !      Temperature related factor
-      real(8)  f_temp
+      real(8) ::  f_temp
 
 !----- Respiration parameters -------------------
-      real(8)  SQC
+      real(8) ::  SQC
 
 # if defined CORAL_NUTRIENTS
 !----- Nutrients related parameters -------------------
-      real(8) N_dissim       ! Nitrogen dissimilation rate (pmol cell-1 s-1)
-      real(8) N_assim        ! Nitrogen assimilation rate (pmol cell-1 s-1)
-!      real(8) P_dissim       ! P dissimilation rate (pmol cell-1 s-1)
-      real(8) P_assim        ! P assimilation rate (pmol cell-1 s-1)
-      real(8) NO3_reduc      ! NO3 reductance rate (pmol cell-1 s-1)
-      real(8) NO2_reduc      ! NO2 reductance rate (pmol cell-1 s-1)
+      real(8) :: N_dissim       ! Nitrogen dissimilation rate (pmol cell-1 s-1)
+      real(8) :: N_assim        ! Nitrogen assimilation rate (pmol cell-1 s-1)
+!      real(8) :: P_dissim       ! P dissimilation rate (pmol cell-1 s-1)
+      real(8) :: P_assim        ! P assimilation rate (pmol cell-1 s-1)
+      real(8) :: NO3_reduc      ! NO3 reductance rate (pmol cell-1 s-1)
+      real(8) :: NO2_reduc      ! NO2 reductance rate (pmol cell-1 s-1)
 # endif
                                          
 !----- Metabolic parameters -------------------
-      real(8)  C_repro
+      real(8) ::  C_repro
 # if defined CORAL_NUTRIENTS
-      real(8)  N_repro
-      real(8)  P_repro
+      real(8) ::  N_repro
+      real(8) ::  P_repro
 # endif
 
 !----- Population dynamics parameters -------------------
-      real(8)  mortality
-      real(8)  Repro, Death
+      real(8) ::  Morta
+      real(8) ::  Repro, Death
 
 
 # if defined CORAL_TESTMODE
@@ -1288,7 +1524,7 @@
       Rz= Rmax*ZOOX(ng)%QC(n,i,j)/(K_QC+ZOOX(ng)%QC(n,i,j)) & ! Respilation rate (pmol cell-1 s-1)
      &         *CORAL(ng)%DOcoe(n,i,j)/(K_DO+CORAL(ng)%DOcoe(n,i,j))
 
-!      SQC=ZOOX(ng)%QC(n,i,j)-QC0zoox
+!      SQC=ZOOX(ng)%QC(n,i,j)-QC0
 
 !      Rz= Rmax*SQC/(K_QC+SQC)
 !     &         *CORAL(ng)%DOcoe(n,i,j)/(K_DO+CORAL(ng)%DOcoe(n,i,j))
@@ -1334,47 +1570,58 @@
 
 # endif
 
-!----- interaction between zooxanthellae and coral -----------------
+!!!----- interaction between zooxanthellae and coral -----------------
+
+!------ Organic matter excretion controled by host coral (pmol cell-1 s-1) -----
+
+      F_Cexcr = 2.0d-5 * ZOOX(ng)%QC(n,i,j) 
+
+# if defined CORAL_NUTRIENTS
+      F_Nexcr = k_excre(n)*(
+     &                  QNzoox(n,i,j)/QN0zoox
+     &                 -QNcoral(n,i,j)/QN0coral(n)
+     &                 )*DENSzoox(n,i,j)
+      
+      F_Pexcr = k_excre(n)*(
+     &                  QPzoox(n,i,j)/QP0zoox
+     &                 -QPcoral(n,i,j)/QP0coral(n)
+     &                 )*DENSzoox(n,i,j)
+# endif
 
 !----- Reproduction rate (pmol cell-1 s-1) ----------------------------
 # if defined CORAL_NUTRIENTS
 
-      C_repro=u_max*min(    1.-QP0zoox/ZOOX(ng)%QP(n,i,j)  ,   &
-     &                  min(1.-QN0zoox/ZOOX(ng)%QN(n,i,j),     &
-     &                      1.-QC0zoox/ZOOX(ng)%QC(n,i,j) ) )
-     
-      if(C_repro .lt. 0.) then
-        C_repro =0.
-      end if
+      C_repro=u_max*min(    1.0d0-QP0/ZOOX(ng)%QP(n,i,j)  ,   &
+     &                  min(1.0d0-QN0/ZOOX(ng)%QN(n,i,j),     &
+     &                      1.0d0-QC0/ZOOX(ng)%QC(n,i,j) ) )
+      C_repro = max(C_repro, 0.0d0)
       
       N_repro=C_repro*ZOOX(ng)%QN(n,i,j)/ZOOX(ng)%QC(n,i,j)
-      
       P_repro=C_repro*ZOOX(ng)%QP(n,i,j)/ZOOX(ng)%QC(n,i,j)
 
 # else
-      C_repro=u_max*(1.d0 - QC0zoox/ZOOX(ng)%QC(n,i,j))
+      C_repro = u_max*(1.0d0 - QC0/ZOOX(ng)%QC(n,i,j))        &
+     &         *((2.0d6 - ZOOX(ng)%dens(n,i,j))/2.0d6)       !!! Logistic reproduction
+      C_repro = max(C_repro, 0.0d0)
 # endif
 
 !----- Convert cell conditions to population dynamics parameters
 
-      Repro=C_repro/ZOOX(ng)%QC(n,i,j)*ZOOX(ng)%dens(n,i,j)  ! Reproduction rate (cell cm-2 s-1)
+      Repro = C_repro/ZOOX(ng)%QC(n,i,j)  ! Reproduction rate (s-1)
 
 # if defined CORAL_NUTRIENTS
 
-      mortality= km_CNP                                  & ! mortality (s-1) 
-     &            *exp(-am_CNP*                          &             !* 足りない栄養素に依存（要検討!!!）
-     &                min(  1.-QP0zoox/ZOOX(ng)%QP(n,i,j)  ,  &
-     &                  min(1.-QN0zoox/ZOOX(ng)%QN(n,i,j),    &
-     &                      1.-QC0zoox/ZOOX(ng)%QC(n,i,j) ) ) &
+      Morta= km_CNP                                       & ! mortality (s-1) 
+     &            *exp(-am_CNP*                           &             !* 足りない栄養素に依存（要検討!!!）
+     &                min(  1.-QP0/ZOOX(ng)%QP(n,i,j)  ,  &
+     &                  min(1.-QN0/ZOOX(ng)%QN(n,i,j),    &
+     &                      1.-QC0/ZOOX(ng)%QC(n,i,j) ) ) &
      &             )
 !     &          +km_ROS * CORAL(ng)%ROS(n,i,j)                                !* ROS濃度依存（要検討!!!）  今のところゼロにしている
 !     &          +km_min                                    !* 定数
 # else
-      mortality= km_CNP * (1.-QC0zoox/ZOOX(ng)%QC(n,i,j) )!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      Morta= km_CNP * (1.0d0 - QC0/ZOOX(ng)%QC(n,i,j) )!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # endif
-
-      Death=mortality*ZOOX(ng)%dens(n,i,j)              ! Death rate (cell cm-2 s-1)
-
 
 !--------Time step progressing ------------------------
 
@@ -1421,7 +1668,7 @@
       ZOOX(ng)%QC(n,i,j)=ZOOX(ng)%QC(n,i,j)                     &
      &              +(                                &
      &                 Pg-Rz                          &
-     &                -C_excre/ZOOX(ng)%dens(n,i,j)*1.d3   &   !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
+     &                -F_Cexcr                        &   !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
      &                -C_repro                        &
      &               )*dt
       ZOOX(ng)%QC(n,i,j)=max(ZOOX(ng)%QC(n,i,j),0.d0) !Error handring
@@ -1434,17 +1681,17 @@
      &                -N_dissim                        &
 !     &                 NO3uptake/ZOOX(ng)%dens(n,i,j)*1.e3  &  !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
 !     &                +NH4uptake/ZOOX(ng)%dens(n,i,j)*1.e3  &  !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
-     &                -N_excre/ZOOX(ng)%dens(n,i,j)*1.d3    &  !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
+     &                -F_Nexcr/ZOOX(ng)%dens(n,i,j)*1.d3    &  !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
      &                -N_repro                         &
      &               )*dt
       ZOOX(ng)%QN(n,i,j)=max(ZOOX(ng)%QN(n,i,j),0.d0) !Error handring     
       
-      ZOOX(ng)%QP(n,i,j)=ZOOX(ng)%QP(n,i,j)                       &
-     &              +(                                  &
+      ZOOX(ng)%QP(n,i,j)=ZOOX(ng)%QP(n,i,j)                  &
+     &              +(                                       &
 !     &                 PO4uptake/ZOOX(ng)%dens(n,i,j)*1.e3   &  !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
-     &                 P_assim                          &
-     &                -P_excre/ZOOX(ng)%dens(n,i,j)*1.d3     &   !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
-     &                -P_repro                          &
+     &                 P_assim                               &
+     &                -F_Pexcr/ZOOX(ng)%dens(n,i,j)*1.d3     &   !(nmol cm-2 s-1)/(cell cm-2)*1.e3=(pmol cell-1 s-1)
+     &                -P_repro                               &
      &               )*dt
       ZOOX(ng)%QP(n,i,j)=max(ZOOX(ng)%QP(n,i,j),0.d0) !Error handring
 # endif
@@ -1454,10 +1701,10 @@
 !     ZOOX(ng)%dens ~ 1.e6 cells cm-2  (e.g. Higuchi et al., 2012)
 
       ZOOX(ng)%dens(n,i,j)=ZOOX(ng)%dens(n,i,j) &
-     &             +(                 &
-     &                Repro           & ! Reproduction
-     &               -Death           & ! Death
-     &               -Expul           & ! Expulsion by host coral
+     &             +(                                       &
+     &                Repro * ZOOX(ng)%dens(n,i,j)          & ! Reproduction
+     &               -Morta * ZOOX(ng)%dens(n,i,j)          & ! Death
+     &               -F_Zexpul                              & ! Expulsion by host coral
      &              )*dt
       ZOOX(ng)%dens(n,i,j)=max(ZOOX(ng)%dens(n,i,j),0.d0) !Error handring
 
@@ -1474,10 +1721,10 @@
 
 !      F_ROS=(0.000354*PFDsurf+0.0672)*exp(0.0643*(TKamb-273.15))   ! (fmol min-1 cell-1)
 
-      F_ROS=(0.000354*PFDsurf+0.0672)*exp(0.4*(TKamb-273.15))*2.d-4   ! (fmol min-1 cell-1)
+      F_ROS = (0.000354*PFDsurf+0.0672)*exp(0.4*(TKamb-273.15))*2.d-4   ! (fmol min-1 cell-1)
 
       
-      F_ROS=F_ROS*ZOOX(ng)%dens(n,i,j)/60.*1.d-6   ! (nmol cm-2 s-1)
+      F_ROS = F_ROS * ZOOX(ng)%dens(n,i,j)/60.0d0 * 1.0d-6   ! (nmol cm-2 s-1)
       
 !----- peroxynitrite (ONOO-) flux (nmol cm-2 s-1)------------------------------------
 !
@@ -1510,7 +1757,7 @@
      &   ,N_assim,N_dissim &
      &   ,ZOOX(ng)%PO4(n,i,j),PO4_trans,P_assim &
 #  endif
-     &   ,Repro,Death,Expul, F_ROS
+     &   ,Repro,Morta,F_Zexpul, F_ROS
 
       dsec=dsec+10.*60.  !!!!!!!!!!!!!!! print 10 min interval 
 !      dsec=dsec+60.*60.  !!!!!!!!!!!!!!! print 1 hour interval 
@@ -1524,20 +1771,22 @@
 
 !----- Outoput for coral internal system model (nmol cm-2 s-1)------------------------------------
 
-      Pg=Pg*ZOOX(ng)%dens(n,i,j)*1.d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
-      Rz=Rz*ZOOX(ng)%dens(n,i,j)*1.d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      Pg=Pg*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      Rz=Rz*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+
+      F_Cexcr = F_Cexcr*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      F_Cwaste = (Death+F_Zexpul)*ZOOX(ng)%QC(n,i,j)*1.0d-3  !=(cell cm-2 s-1)*(pmol cell-1)*1.e-3=(nmol cm-2 s-1)
 
 # if defined CORAL_NUTRIENTS
-      NO3_trans=NO3_trans*ZOOX(ng)%dens(n,i,j)*1.d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
-      NO2_trans=NO2_trans*ZOOX(ng)%dens(n,i,j)*1.d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
-      NH4_trans=NH4_trans*ZOOX(ng)%dens(n,i,j)*1.d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
-      PO4_trans=PO4_trans*ZOOX(ng)%dens(n,i,j)*1.d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
-# endif
+      F_Nexcr = F_Nexcr*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      F_Pexcr = F_Pexcr*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      F_Nwaste = (Death+F_Zexpul)*ZOOX(ng)%QN(n,i,j)*1.0d-3
+      F_Pwaste = (Death+F_Zexpul)*ZOOX(ng)%QP(n,i,j)*1.0d-3
 
-      C_waste = (Death+Expul)*ZOOX(ng)%QC(n,i,j)*1.d-3  !=(cell cm-2 s-1)*(pmol cell-1)*1.e-3=(nmol cm-2 s-1)
-# if defined CORAL_NUTRIENTS
-      N_waste = (Death+Expul)*ZOOX(ng)%QN(n,i,j)*1.d-3
-      P_waste = (Death+Expul)*ZOOX(ng)%QP(n,i,j)*1.d-3
+      NO3_trans=NO3_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      NO2_trans=NO2_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      NH4_trans=NH4_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
+      PO4_trans=PO4_trans*ZOOX(ng)%dens(n,i,j)*1.0d-3  !=(pmol cell-1 s-1)*(cell cm-1)*1.e-3=(nmol cm-2 s-1)
 # endif
 
 !---------------------------------------------------------------------

@@ -144,8 +144,56 @@
               Npts=load_r(Nval, Rval, Ngrids, TIC_0)
             CASE ('Oxyg0')
               Npts=load_r(Nval, Rval, Ngrids, Oxyg0)
-            CASE ('d13C0')
-              Npts=load_r(Nval, Rval, Ngrids, d13C0)
+#if defined ORGANIC_MATTER
+            CASE ('DOC_0')
+              Npts=load_r(Nval, Rval, Ngrids, DOC_0)
+            CASE ('POC_0')
+              Npts=load_r(Nval, Rval, Ngrids, POC_0)
+            CASE ('Phyt0')
+              Npts=load_r(Nval, Rval, Ngrids, Phyt0)
+            CASE ('Zoop0')
+              Npts=load_r(Nval, Rval, Ngrids, Zoop0)
+#endif
+#if defined CARBON_ISOTOPE
+            CASE ('d13C_TIC0')
+              Npts=load_r(Nval, Rval, Ngrids, d13C_TIC0)
+# if defined ORGANIC_MATTER
+            CASE ('d13C_DOC0')
+              Npts=load_r(Nval, Rval, Ngrids, d13C_DOC0)
+            CASE ('d13C_POC0')
+              Npts=load_r(Nval, Rval, Ngrids, d13C_POC0)
+            CASE ('d13C_Phy0')
+              Npts=load_r(Nval, Rval, Ngrids, d13C_Phy0)
+            CASE ('d13C_Zoo0')
+              Npts=load_r(Nval, Rval, Ngrids, d13C_Zoo0)
+# endif
+#endif
+#if defined NUTRIENTS
+            CASE ('NO3_0')
+              Npts=load_r(Nval, Rval, Ngrids, NO3_0)
+            CASE ('NO2_0')
+              Npts=load_r(Nval, Rval, Ngrids, NO2_0)
+            CASE ('NH4_0')
+              Npts=load_r(Nval, Rval, Ngrids, NH4_0)
+            CASE ('PO4_0')
+              Npts=load_r(Nval, Rval, Ngrids, PO4_0)
+# if defined ORGANIC_MATTER
+            CASE ('DON_0')
+              Npts=load_r(Nval, Rval, Ngrids, DON_0)
+            CASE ('PON_0')
+              Npts=load_r(Nval, Rval, Ngrids, PON_0)
+            CASE ('DOP_0')
+              Npts=load_r(Nval, Rval, Ngrids, DOP_0)
+            CASE ('POP_0')
+              Npts=load_r(Nval, Rval, Ngrids, POP_0)
+# endif
+#endif
+#if defined COT_STARFISH
+            CASE ('COTe0')
+              Npts=load_r(Nval, Rval, Ngrids, COTe0)
+            CASE ('COTl0')
+              Npts=load_r(Nval, Rval, Ngrids, COTl0)
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
             CASE ('TNU2')
               Npts=load_r(Nval, Rval, NBT*Ngrids, Rbio)
@@ -527,8 +575,56 @@
      &            'Total dissolved inorganic carbon (umol/kg).'
             WRITE (out,80) Oxyg0(ng), 'Oxyg0',                          &
      &            'Dissolved oxygen (umol/L).'
-            WRITE (out,80) d13C0(ng), 'd13C0',                          &
-     &            'd13C in DIC (per mill).'
+#if defined ORGANIC_MATTER
+            WRITE (out,80) DOC_0(ng), 'DOC_0',                          &
+     &            'Dissolved organic carbon (umolC/L).'
+            WRITE (out,80) POC_0(ng), 'POC_0',                          &
+     &            'Particulate organic carbon (umolC/L).'
+            WRITE (out,80) Phyt0(ng), 'Phyt0',                          &
+     &            'Phytoplankton (umolC/L).'
+            WRITE (out,80) Zoop0(ng), 'Zoop0',                          &
+     &            'Zooplankton (umolC/L).'
+#endif
+#if defined CARBON_ISOTOPE
+            WRITE (out,80) d13C_TIC0(ng), 'd13C_TIC0',                      &
+     &            'd13C of DIC (permil VPDB).'
+# if defined ORGANIC_MATTER
+            WRITE (out,80) d13C_DOC0(ng), 'd13C_DOC0',                      &
+     &            'd13C of DOC (permil VPDB).'
+            WRITE (out,80) d13C_POC0(ng), 'd13C_POC0',                      &
+     &            'd13C of POC (permil VPDB).'
+            WRITE (out,80) d13C_Phy0(ng), 'd13C_Phy0',                      &
+     &            'd13C of phytoplankton (permil VPDB).'
+            WRITE (out,80) d13C_Zoo0(ng), 'd13C_Zoo0',                      &
+     &            'd13C of zooplankton (permil VPDB).'
+# endif
+#endif
+#if defined NUTRIENTS
+            WRITE (out,80) NO3_0(ng), 'NO3_0',                          &
+     &            'NO3 (umol/L).'
+            WRITE (out,80) NO2_0(ng), 'NO2_0',                          &
+     &            'NO2 (umol/L).'
+            WRITE (out,80) NH4_0(ng), 'NH4_0',                          &
+     &            'NH4 (umol/L).'
+            WRITE (out,80) PO4_0(ng), 'PO4_0',                          &
+     &            'PO4 (umol/L).'
+# if defined ORGANIC_MATTER
+            WRITE (out,80) DON_0(ng), 'DON_0',                          &
+     &            'DON (umolN/L).'
+            WRITE (out,80) PON_0(ng), 'PON_0',                          &
+     &            'PON (umolN/L).'
+            WRITE (out,80) DOP_0(ng), 'DOP_0',                          &
+     &            'DOP (umolP/L).'
+            WRITE (out,80) POP_0(ng), 'POP_0',                          &
+     &            'POP (umolP/L).'
+# endif
+#endif
+#if defined COT_STARFISH
+            WRITE (out,80) COTe0(ng), 'COTe0',                          &
+     &            'Eggs of crown-of thorns starfish (umolC/L).'
+            WRITE (out,80) COTl0(ng), 'COTl0',                          &
+     &            'Larvae of crown-of thorns starfish (umol/L).'
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #ifdef TS_DIF2
             DO itrc=1,NBT
@@ -632,11 +728,7 @@
             IF (Hout(idAlga,ng)) WRITE (out,120) Hout(idAlga,ng),         &
      &         'Hout(idAlga)',                                            &
      &         'Write out time-dependent algal coverage.'
-#ifdef CARBON_ISOTOPE
-            IF (Hout(idd13C,ng)) WRITE (out,120) Hout(idd13C,ng),         &
-     &         'Hout(idd13C)',                                            &
-     &         'Write out time-dependent d13C of DIC.'
-#endif
+
             IF (NHbio2d.gt.0) THEN
               DO itrc=1,NHbio2d
                 i=iHbio2(itrc)

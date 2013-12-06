@@ -397,24 +397,42 @@
             t(i,j,k,1,iTIC_)=TIC_0(ng)     ! umol kg-1
             t(i,j,k,1,iTAlk)=TAlk0(ng)     ! umol kg-1
             t(i,j,k,1,iOxyg)=Oxyg0(ng)     ! umol L-1
-# ifdef CARBON_ISOTOPE
-            t(i,j,k,1,iT13C)=R13C_fromd13C( d13C0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+# if defined ORGANIC_MATTER
+            t(i,j,k,1,iDOC_)=DOC_0(ng)     ! umolC L-1
+            t(i,j,k,1,iPOC_)=POC_0(ng)     ! umolC L-1
+            t(i,j,k,1,iPhyt)=Phyt0(ng)     ! umolC L-1
+            t(i,j,k,1,iZoop)=Zoop0(ng)     ! umolC L-1
 # endif
-# ifdef NUTRIENTS            
-            t(i,j,k,1,iNO3_)=0.5_r8
-            t(i,j,k,1,iNO2_)=0.05_r8
-            t(i,j,k,1,iNH4_)=0.1_r8
-            t(i,j,k,1,iPO4_)=0.03_r8
-            t(i,j,k,1,iChlo)=0.02_r8
-            t(i,j,k,1,iPhyt)=0.08_r8
-            t(i,j,k,1,iZoop)=0.06_r8
-            t(i,j,k,1,iLDeC)=0.002_r8
-            t(i,j,k,1,iSDeC)=0.06_r8
-            t(i,j,k,1,iLDeN)=0.02_r8
-            t(i,j,k,1,iSDeN)=0.04_r8
+# if defined CARBON_ISOTOPE
+            t(i,j,k,1,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
+#  if defined ORGANIC_MATTER
+            t(i,j,k,1,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+            t(i,j,k,1,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+            t(i,j,k,1,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+            t(i,j,k,1,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+#  endif
 # endif
+# if defined NUTRIENTS
+            t(i,j,k,1,iNO3_)=NO3_0(ng)     ! umol L-1
+            t(i,j,k,1,iNO2_)=NO2_0(ng)     ! umol L-1
+            t(i,j,k,1,iNH4_)=NH4_0(ng)     ! umol L-1
+            t(i,j,k,1,iPO4_)=PO4_0(ng)     ! umol L-1
+#  if defined ORGANIC_MATTER
+            t(i,j,k,1,iDON_)=DON_0(ng)     ! umolN L-1
+            t(i,j,k,1,iPON_)=PON_0(ng)     ! umolN L-1
+            t(i,j,k,1,iDOP_)=DOP_0(ng)     ! umolP L-1
+            t(i,j,k,1,iPOP_)=POP_0(ng)     ! umolP L-1
+#  endif
+# endif
+# if defined COT_STARFISH
+            t(i,j,k,1,iCOTe)=COTe0(ng)     ! umolC L-1
+            t(i,j,k,1,iCOTl)=COTl0(ng)     ! umolC L-1
+# endif
+
             HisBio3d(i,j,k,iPPro) = 0.0_r8
-            HisBio3d(i,j,k,id13C) = d13C0(ng)
+# if defined CARBON_ISOTOPE
+            HisBio3d(i,j,k,id13C) = d13C_TIC0(ng)
+# endif
 
           END DO
         END DO
@@ -426,14 +444,18 @@
           TmpK = t(i,j,N(ng),1,iTemp)+273.15_r8
           Salt = t(i,j,N(ng),1,iSalt)
 
+# if defined CORAL_POLYP
           HisBio2d(i,j,iClPg) = 0.0_r8
           HisBio2d(i,j,iCl_R) = 0.0_r8
           HisBio2d(i,j,iClPn) = 0.0_r8
           HisBio2d(i,j,iCl_G) = 0.0_r8
+# endif
+# if defined SEAGRASS
           HisBio2d(i,j,iSgPg) = 0.0_r8
           HisBio2d(i,j,iSg_R) = 0.0_r8
           HisBio2d(i,j,iSgPn) = 0.0_r8
-          
+# endif
+
           DOsatu=O2satu(TmpK,Salt)
           ssO2flux = Flux_O2(Oxyg0(ng), DOsatu, 0.0d0, TmpK, Salt )  ! sea to air is positive
           HisBio2d(i,j,iO2fx) = ssO2flux
