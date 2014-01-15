@@ -1198,7 +1198,7 @@
 !    sg_ustarcdef  Default bottom stress (m/s).
 !    sg_z100       Depth (m), 100 cm above bottom.
 !    sg_z1p        Nondimensional closure constant.
-!    sg_zrmin      Minimum allowed height (m) of current above bed.
+!    sg_z1min      Minimum allowed height (m) of current above bed.
 !                    Otherwise, logarithmic interpolation is used.
 !    sg_znotcdef   Default apparent hydraulic roughness (m).
 !

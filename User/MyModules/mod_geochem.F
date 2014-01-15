@@ -8,6 +8,43 @@
     real(8), parameter :: R11B_SRM951 = 80.173d0/19.827d0  !NIST SRM 951 boric acid standard
     
     contains
+!!!***********************************************************************
+!!!   Physical parameters of seawater
+!!!*********************************************************************** 
+
+! Density of seawater (g/cm^3) or (kg/l)
+    real(8) function densSW(temp, S)
+      real(8), intent(in) :: temp    ! Temperature (oC)
+      real(8), intent(in) :: S       ! Salinity (psu)
+      real(8) :: dSMOW               ! Density of SMOW (kg/m^3)
+
+      dSMOW = 999.842594d0 + 6.793952d-2*temp                         &
+     & - 9.09529d-3*temp**2.0d0 + 1.001685d-4*temp**3.0d0             &
+     & - 1.120083d-6*temp**4.0d0 + 6.536332d-9*temp**5.0d0
+
+      densSW = dSMOW                                                  &
+     &  + S*(0.824493d0 - 4.0899d-3*temp + 7.6438d-5*temp**2.0d0      &
+     &       - 8.2467d-7*temp**3.0d0 + 5.3875d-9*temp**4.0d0)         &
+     &  + S**1.5d0 * (-5.72466d-3 + 1.0227d-4*temp                    &
+     &       - 1.6546d-6*temp**2.0d0)                                 &
+     &  + S**2.0d0 * 4.8314d-4
+
+      densSW = densSW*1.0d-3  !kg/m3 -> g/cm3
+      return
+    end function densSW
+
+!-----------------------------------------------------------------------
+
+!  Density of water (g/cm^3) or (kg/l)
+    real(8) function densW(temp)
+      real(8), intent(in) :: temp    ! Temperature (oC)
+
+      densW = 999.84847d0 + 6.337563d-2*temp - 8.523829d-3*temp**2.0d0 &
+     &  + 6.943248d-5*temp**3.0d0 - 3.821216d-7*temp**4.0d0
+     
+      densW = densW*1.0d-3  !kg/m3 -> g/cm3
+      return
+    end function densW
 
 !!!***********************************************************************
 !!!   CO2system functions
@@ -438,6 +475,10 @@
 ! --- CO2 Exchange Parameters (Wanninkhof 1992) ------------------------
       
       t_oC=T-273.15d0
+      IF(t_oC >= 30.0d0) THEN  !!! Error handling
+        t_oC = 30.0d0
+      ENDIF
+
       rhoref =1023.0d0
 
       Sc=Acoef - Bcoef*t_oC + Ccoef*t_oC**2.0d0 - Dcoef*t_oC**3.0d0   !Schmidt number for seawater for temperature ranging from 0 to 50 degrees celsius
@@ -478,6 +519,9 @@
 ! --- O2 Exchange Parameters (Wanninkhof 1992) ------------------------
       
       t_oC=T-273.15d0
+      IF(t_oC >= 30.0d0) THEN  !!! Error handling
+        t_oC = 30.0d0
+      ENDIF
 
       Sc=Acoef - Bcoef*t_oC + Ccoef*t_oC**2.0d0 - Dcoef*t_oC**3.0d0   !Schmidt number for seawater for temperature ranging from 0 to 50 degrees celsius
       kvex=0.31d0*u10**2.d0*(Sc/660.d0)**(-0.5d0) !Gas transfer velocity for O2;Wanninkhof(1992)  (cm/hr)

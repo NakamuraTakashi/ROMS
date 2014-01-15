@@ -301,6 +301,7 @@
 #include "set_bounds.h"
 
           
+!$acc kernels
 !-----------------------------------------------------------------------
       DO j=Jstr,Jend
 
@@ -363,7 +364,8 @@
 !          input parameters
      &            (ng, i, j            &   ! ng: nested grid number; i,j: position
      &            ,N(ng)               &   ! Number of vertical grid (following ROMS vertical grid)
-     &            ,BioIter(ng)         &   ! Internal loop counts of coral polyp model
+     &            ,CrlIter(ng)         &   ! Internal loop counts of coral polyp model
+     &            ,SedIter(ng)         &   ! Internal loop counts of sediment ecosystem model
      &            ,dt(ng)              &   ! Time step (sec)
      &            ,Hz(i,j,:)           &   ! dz(N): vertical grid size (m)
      &            ,PFDsurf             &   ! Sea surface photon flux density (umol m-2 s-1)
@@ -374,6 +376,7 @@
      &            ,p_coral(i,j)        &   ! Coral coverage (0-1)
      &            ,p_seagrass(i,j)     &   ! seagrass coverage (0-1)
      &            ,p_algae(i,j)        &   ! algal coverage (0-1)
+     &            ,1.0_r8              &   ! sediment coverage (0-1)
 
      &            ,t(i,j,:,nstp,iTemp)     &   ! Tmp(N): Temperature (oC)
      &            ,t(i,j,:,nstp,iSalt)     &   ! Sal(N): Salinity (PSU)
@@ -523,7 +526,9 @@
           END DO
 
         END DO
-      END DO 
+      END DO
+!-----------------------------------------------------------------------
+!$acc end kernels
 
       RETURN
       END SUBROUTINE biology_tile

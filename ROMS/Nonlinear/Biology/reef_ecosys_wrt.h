@@ -14,10 +14,15 @@
 !
 !  Write out Fennel et al. (2006) ecosystem model parameters.
 !
-      CALL netcdf_put_ivar (ng, model, ncname, 'BioIter',               &
-     &                      BioIter(ng), (/0/), (/0/),                  &
-     &                      ncid = ncid)
-      IF (exit_flag.ne.NoError) RETURN
+!      CALL netcdf_put_ivar (ng, model, ncname, 'CrlIter',               &
+!     &                      CrlIter(ng), (/0/), (/0/),                  &
+!     &                      ncid = ncid)
+!      IF (exit_flag.ne.NoError) RETURN
+!
+!      CALL netcdf_put_ivar (ng, model, ncname, 'SedIter',               &
+!     &                      SedIter(ng), (/0/), (/0/),                  &
+!     &                      ncid = ncid)
+!      IF (exit_flag.ne.NoError) RETURN
 
       CALL netcdf_put_fvar (ng, model, ncname, 'AttSW',                 &
      &                      AttSW(ng), (/0/), (/0/),                    &

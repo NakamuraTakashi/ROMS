@@ -21,6 +21,7 @@
      &            (ng, n, i, j    &   ! ng: nested grid number; n: coral compartment; i,j: position
      &            ,dt             &   ! Time step (sec)
      &            ,PFD            &   ! Photon flux density (umol m-2 s-1)
+     &            ,rho_sw         &   ! Density of seawater (g cm-3)
      &            ,Tmp            &   ! Temperature (oC)
      &            ,Sal            &   ! Salinity (PSU)
      &            ,DIC            &   ! Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -82,6 +83,7 @@
       integer, intent(in) :: ng, n, i, j    ! ng: nested grid number; n: coral compartment; i,j: position
       real(8), intent(in) :: dt             ! Time step (sec)
       real(8), intent(in) :: PFD            ! Photon flux density (umol m-2 s-1)
+      real(8), intent(in) :: rho_sw         ! Density of seawater (g cm-3)
       real(8), intent(in) :: Tmp            ! Temperature (oC)
       real(8), intent(in) :: Sal            ! Salinity (PSU)
       real(8), intent(in) :: DIC            ! Total dissolved inorganic carbon (DIC: umol kg-1)
@@ -146,21 +148,18 @@
       real(8), parameter :: b_Mphy =  0.069d0             ! (degC-1)       Temperature coefficient for PHY mortality (Kawamiya et al., 1995)
       real(8), parameter :: k_Ephy =  0.135d0             ! (no dim.)      PHY ratio of extracellular excretion to production (Kawamiya et al., 1995)
 #if defined NUTRIENTS         
-      real(8), parameter :: Vmax_NH4 = 1.0d0   ! (s-1)      
-      real(8), parameter :: Vmax_NO3 = 1.0d0   ! (s-1)      
-      real(8), parameter :: Vmax_PO4 = 1.0d0   ! (s-1)      
-      real(8), parameter :: K_NH4 = 10.0d0   ! (s-1)         
-      real(8), parameter :: K_NO3 = 1.0d0   ! (s-1)         
-      real(8), parameter :: K_PO4 = 0.1d0   ! (s-1)         
+      real(8), parameter :: K_NH4 = 0.2d0   ! (s-1)         
+      real(8), parameter :: K_NO3 = 0.1d0   ! (s-1)         
+      real(8), parameter :: K_PO4 = 0.01d0   ! (s-1)         
       real(8), parameter :: psi =  0.01d0    !(s-1)          
 #endif
 !------- Zooplankton parameters ------------------------
       real(8), parameter :: k_Gphy2zoo = 0.3d0/86400.0d0 ! (s-1)          Maximum grazing rate of PHY by ZOO (0.3d0 d-1; Kawamiya et al., 1995)
       real(8), parameter :: b_Gphy2zoo = 0.063d0         ! (degC-1)       Temperature coefficient for ZOO grazing (Kawamiya et al., 1995)
       real(8), parameter :: e_Gphy2zoo = 0.7d0           ! (no dim.)      Assimilation efficiency of ZOO (Kawamiya et al., 1995)
-      real(8), parameter :: k_Rzoo = 0.023d0/86400.0d0   ! (s-1)          ZOO respiration rate at 0  oC  !!!(Tuning)
+      real(8), parameter :: k_Rzoo = 0.005d0/86400.0d0   !!! (s-1)          ZOO respiration rate at 0  oC  !!!(Tuning)
       real(8), parameter :: b_Rzoo = 0.0693d0            ! (degC-1)       Temperature coefficient for ZOO respiration rate (Kawamiya et al., 1995)
-      real(8), parameter :: k_Mzoo = 0.0088d0/86400.0d0  ! (umol-1 s-1)   ZOO mortality rate at 0 oC (0.0088d0 umol-1 d-1; Kawamiya et al., 1995)
+      real(8), parameter :: k_Mzoo = 3.0d-1!!!/86400.0d0  !!! (umol-1 s-1)   ZOO mortality rate at 0 oC (0.0088d0 umol-1 d-1; Kawamiya et al., 1995)
       real(8), parameter :: b_Mzoo = 0.0693d0            ! (degC-1)       Temperature coefficient for ZOO mortality (Kawamiya et al., 1995)
 !------- Microbial loop parameters --------------------
       real(8), parameter :: k_Gpoc2zoo = 0.0d0          ! (s-1)          PHY mortality rate at 0 oC (0.3d0 d-1; Kawamiya et al., 1995)
@@ -174,10 +173,10 @@
       real(8), parameter :: b_Dpoc = 0.0693d0           ! (degC-1)       Temperature coefficient for ZOO grazing (Kishi et al., 2001)
 !------- Physical parameters --------------------
 #if defined NUTRIENTS         
-      real(8), parameter :: rCNphy = 116.0d0/16.0d0   ! (no dim.) PHY C:N ratio (Redfield ratio)
-      real(8), parameter :: rCPphy = 116.0d0/1.0d0    ! (no dim.) PHY C:P ratio (Redfield ratio)
-      real(8), parameter :: rCNzoo = 116.0d0/16.0d0   ! (no dim.) ZOO C:N ratio (Redfield ratio)
-      real(8), parameter :: rCPzoo = 116.0d0/1.0d0    ! (no dim.) ZOO C:P ratio (Redfield ratio)
+      real(8), parameter :: rCNphy = 106.0d0/16.0d0   ! (no dim.) PHY C:N ratio (Redfield ratio)
+      real(8), parameter :: rCPphy = 106.0d0/1.0d0    ! (no dim.) PHY C:P ratio (Redfield ratio)
+      real(8), parameter :: rCNzoo = 106.0d0/16.0d0   ! (no dim.) ZOO C:N ratio (Redfield ratio)
+      real(8), parameter :: rCPzoo = 106.0d0/1.0d0    ! (no dim.) ZOO C:P ratio (Redfield ratio)
 #endif                                
 
 !------- Local variables --------------------
@@ -198,7 +197,7 @@
 
 !----- Gross photosynthetic rate (umolC L-1 s-1) -----------------
 !      Pphy = k_Pphy * exp(b_Pphy*Tmp) * PFD/Iphy*exp(1.0d0-PFD/Iphy) * PHY
-      Pphy = k_Pphy * exp(b_Pphy*Tmp) * tanh(PFD/Iphy)
+      Pphy = k_Pphy * exp(b_Pphy*Tmp) * tanh(PFD/Iphy) * PHY
       IF(DIC <= 0.d0) THEN !-----For Error handling
         Pphy = 0.d0
       ENDIF
@@ -206,17 +205,22 @@
 !----- Assimilation rate (umolC L-1 s-1) -----------------
 
 #if defined NUTRIENTS         
-      V_NH4 = Vmax_NH4 * NH4/(NH4+K_NH4)
-      V_NO3 = Vmax_NO3 * NO3/(NO3+K_NO3) * exp(-psi * NH4)
-      V_PO4 = Vmax_PO4 * PO4/(PO4+K_PO4)
+      V_NH4 = NH4/(NH4+K_NH4)
+      V_NO3 = NO3/(NO3+K_NO3) * exp(-psi * NH4)
+      V_PO4 = PO4/(PO4+K_PO4)
       
-      Aphy = MIN( MIN( Pphy, (V_NH4+V_NO3)*rCNphy ), V_PO4*rCPphy ) ! Assimilation rate
-      Pphy = Pphy * PHY
-      Aphy = Aphy * PHY
+      Aphy = MIN( V_NH4+V_NO3, V_PO4 ) ! Assimilation rate
+      Aphy = Aphy * Pphy
 #else
-      Pphy = Pphy * PHY
-      Aphy = Pphy ! Assimilation rate
-#endif                                
+      Aphy = (1.0d0-k_Ephy) * Pphy
+#endif
+
+!----- Excretion rate (umolC L-1 s-1) -----------------
+#if defined NUTRIENTS
+      Ephy = Pphy - Aphy
+#else
+      Ephy = k_Ephy * Pphy
+#endif
 
 !----- Respiration rate (umolC L-1 s-1) -----------------
       Rphy = k_Rphy * exp(b_Rphy*Tmp) * PHY
@@ -226,13 +230,7 @@
 
 !----- Mortality (umolC L-1 s-1) -----------------
       Mphy = k_Mphy * exp(b_Mphy*Tmp) * PHY*PHY
-
-!----- Excretion rate (umolC L-1 s-1) -----------------
-#if defined NUTRIENTS
-      Ephy = Pphy - Aphy
-#else
-      Ephy = k_Ephy * Pphy
-#endif
+!      Mphy = k_Mphy * exp(b_Mphy*Tmp) * PHY
 
 !!!------- Zooplankton reaction ------------------------
 
@@ -246,7 +244,9 @@
       ENDIF
 
 !----- Mortality (umolC L-1 s-1) -----------------
-      Mzoo = k_Mzoo * exp(b_Mzoo*Tmp) * ZOO*ZOO
+!      Mzoo = k_Mzoo * exp(b_Mzoo*Tmp) * ZOO*ZOO
+!      Mzoo = k_Mzoo * exp(b_Mzoo*Tmp) * ZOO
+      Mzoo = k_Mzoo * exp(b_Mzoo*Tmp) * Gphy2zoo
 
 !!!------- Microbial loop (inplicitly assumed) ---------------
 
@@ -260,23 +260,23 @@
 
 !----- Decomposition rate of DOC (umolC L-1 s-1) -----------------
 !      Ddoc = k_Ddoc * exp(b_Ddoc*Tmp) * DOC
-      Ddoc = k_Ddoc * exp(b_Ddoc*Tmp) * DOC**2.0d0/(60.0d0+DOC**2.0d0)
+      Ddoc = k_Ddoc * exp(b_Ddoc*Tmp) * DOC**2.0d0/(60.0d0**2.0d0+DOC**2.0d0)
       IF(DOx <= 0.d0) THEN !-----For Error handling
         Ddoc = 0.d0
       ENDIF
 #if defined NUTRIENTS
-      Ddon = k_Ddoc * exp(b_Ddoc*Tmp) * DON**2.0d0/(60.0d0+DON**2.0d0)
-      Ddop = k_Ddoc * exp(b_Ddoc*Tmp) * DOP**2.0d0/(60.0d0+DOP**2.0d0)
+      Ddon = k_Ddoc * exp(b_Ddoc*Tmp) * DON**2.0d0/(60.0d0**2.0d0+DON**2.0d0)
+      Ddop = k_Ddoc * exp(b_Ddoc*Tmp) * DOP**2.0d0/(60.0d0**2.0d0+DOP**2.0d0)
 #endif
 
 !----- Decomposition rate of POC (umolC L-1 s-1) -----------------
-      Dpoc = k_Dpoc * exp(b_Dpoc*Tmp) * POC
+      Dpoc = k_Dpoc * exp(b_Dpoc*Tmp) * POC**2.0d0/(60.0d0**2.0d0+POC**2.0d0)
       IF(DOx <= 0.d0) THEN !-----For Error handling
         Dpoc = 0.d0
       ENDIF
 #if defined NUTRIENTS
-      Dpon = k_Dpoc * exp(b_Dpoc*Tmp) * PON
-      Dpop = k_Dpoc * exp(b_Dpoc*Tmp) * POP
+      Dpon = k_Dpoc * exp(b_Dpoc*Tmp) * PON**2.0d0/(60.0d0**2.0d0+DOC**2.0d0)
+      Dpop = k_Dpoc * exp(b_Dpoc*Tmp) * POP**2.0d0/(60.0d0**2.0d0+DOC**2.0d0)
 #endif
 !----- Decomposition rate from POC to DOC (umolC L-1 s-1) -----------------
       Dpoc2doc = 0.d0 !!!
@@ -295,24 +295,24 @@
 #endif
 
       dDIC_dt = -Pphy + Rphy + Rzoo + Ddoc + Dpoc
-      dDIC_dt = dDIC_dt/1.024d0 !(umol L-1 s-1) -> (umol kg-1 s-1)
+      dDIC_dt = dDIC_dt/rho_sw !(umol L-1 s-1) -> (umol kg-1 s-1)
       dTA_dt  = 0.0d0
-      dTA_dt  = dTA_dt/1.024d0 !(umol L-1 s-1) -> (umol kg-1 s-1)
+      dTA_dt  = dTA_dt/rho_sw !(umol L-1 s-1) -> (umol kg-1 s-1)
       dDOC_dt = Ephy - Gdoc2zoo - Ddoc + Dpoc2doc
       dPOC_dt = Mphy + Gphy2zoo*(1.0d0-e_Gphy2zoo) + Mzoo - Gpoc2zoo - Dpoc - Dpoc2doc
 
 #if defined NUTRIENTS         
       dNO3_dt = -V_NO3/(V_NO3+V_NH4)*Aphy/rCNphy
       dNO2_dt = 0.0d0
-      dNH4_dt = (-V_NO3/(V_NO3+V_NH4)*Aphy + Rphy)/rCNphy
-      dPO4_dt = (-Aphy + Rphy)/rCPphy
+      dNH4_dt = (-V_NH4/(V_NO3+V_NH4)*Aphy + Rphy)/rCNphy + Rzoo/rCNzoo + Ddon + Dpon
+      dPO4_dt = (-Aphy + Rphy)/rCPphy + Rzoo/rCPzoo + Ddop + Dpop
 
-      dDON_dt = Ephy/rCNphy - Gdoc2zoo/rCNzoo - Ddon + Dpon2don
+      dDON_dt = - Gdoc2zoo/rCNzoo - Ddon + Dpon2don
       dPON_dt = (Mphy + Gphy2zoo*(1.0d0-e_Gphy2zoo))/rCNphy            &
      &         +(Mzoo - Gpon2zoo)/rCNzoo                               &
      &         - Dpon -Dpon2don
 
-      dDOP_dt = Ephy/rCPphy - Gdop2zoo/rCPzoo - Ddop + Dpop2dop
+      dDOP_dt = - Gdop2zoo/rCPzoo - Ddop + Dpop2dop
       dPOP_dt = (Mphy + Gphy2zoo*(1.0d0-e_Gphy2zoo))/rCPphy            &
      &         +(Mzoo - Gpop2zoo)/rCPzoo                               &
      &         - Dpop -Dpop2dop

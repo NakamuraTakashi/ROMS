@@ -69,8 +69,10 @@
           SELECT CASE (TRIM(KeyWord))
             CASE ('Lbiology')
               Npts=load_l(Nval, Cval, Ngrids, Lbiology)
-            CASE ('BioIter')
-              Npts=load_i(Nval, Rval, Ngrids, BioIter)
+            CASE ('CrlIter')
+              Npts=load_i(Nval, Rval, Ngrids, CrlIter)
+            CASE ('SedIter')
+              Npts=load_i(Nval, Rval, Ngrids, SedIter)
             CASE ('AttSW')
               Npts=load_r(Nval, Rval, Ngrids, AttSW)
             CASE ('AttChl')
@@ -493,7 +495,9 @@
         DO ng=1,Ngrids
           IF (Lbiology(ng)) THEN
             WRITE (out,60) ng
-            WRITE (out,70) BioIter(ng), 'BioIter',                      &
+            WRITE (out,70) CrlIter(ng), 'CrlIter',                      &
+     &            'Number of iterations for nonlinear convergence.'
+            WRITE (out,70) SedIter(ng), 'SedIter',                      &
      &            'Number of iterations for nonlinear convergence.'
             WRITE (out,80) AttSW(ng), 'AttSW',                          &
      &            'Light attenuation of seawater (m-1).'

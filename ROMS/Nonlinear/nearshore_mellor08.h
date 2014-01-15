@@ -365,6 +365,9 @@
 !  Compute total depth.
 !
           Dstp(i,j)=zeta(i,j,1)+h(i,j)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+          Dstp(i,j)=MAX(Dstp(i,j), 0.1d0)  !!! for Error handring
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Compute wave numbers and wave energy.
 !

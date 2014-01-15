@@ -416,10 +416,10 @@
 !
           DO k=1,Nbed
              bed(i,j,k,iaged)=time(ng)
-             bed(i,j,k,ithck)=0.d0!10.0_r8
+             bed(i,j,k,ithck)=0.0_r8   !10.0_r8
              bed(i,j,k,iporo)=0.50_r8
              DO ised=1,NST
-               bed_frac(i,j,k,ised)=1.0_r8/FLOAT(NST)
+               bed_frac(i,j,k,ised)=1.0_r8/REAL(NST,r8)
              ENDDO
           END DO
 !

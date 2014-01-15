@@ -87,6 +87,7 @@
 !          input parameters
      &            (ng, n, i, j    &   ! ng: nested grid number; n: seagrass compartment; i,j: position
      &            ,PFD            &   ! Photon flux density (umol m-2 s-1)
+     &            ,rho_sw         &   ! Density of seawater (g cm-3)
      &            ,DICamb         &   ! DIC (umol kg-1)
      &            ,DOamb          &   ! DO (umol L-1)
 #if defined NUTRIENTS         
@@ -118,6 +119,7 @@
 ! input parameters
       integer, intent(in) :: ng, n, i, j    ! ng: nested grid number; n: seagrass compartment; i,j: position
       real(8), intent(in) :: PFD
+      real(8), intent(in) :: rho_sw   
       real(8), intent(in) :: DICamb
       real(8), intent(in) :: DOamb
 #if defined NUTRIENTS         

@@ -158,7 +158,8 @@
 !
 !  Biological parameters.
 !
-      integer, allocatable :: BioIter(:)
+      integer, allocatable :: CrlIter(:)
+      integer, allocatable :: SedIter(:)
 
       real(r8), allocatable :: AttSW(:)              ! 1/m
       real(r8), allocatable :: AttChl(:)             ! 1/(mg_Chl m2)
@@ -414,8 +415,11 @@
 !  Allocate various module variables.
 !-----------------------------------------------------------------------
 !
-      IF (.not.allocated(BioIter)) THEN
-        allocate ( BioIter(Ngrids) )
+      IF (.not.allocated(CrlIter)) THEN
+        allocate ( CrlIter(Ngrids) )
+      END IF
+      IF (.not.allocated(SedIter)) THEN
+        allocate ( SedIter(Ngrids) )
       END IF
       IF (.not.allocated(AttSW)) THEN
         allocate ( AttSW(Ngrids) )

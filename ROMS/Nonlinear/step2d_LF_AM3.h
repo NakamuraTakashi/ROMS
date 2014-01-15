@@ -802,6 +802,9 @@
             zeta_new(i,j)=zeta_new(i,j)*rmask(i,j)
 # endif
             Dnew(i,j)=zeta_new(i,j)+h(i,j)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            Dnew(i,j)=MAX(Dnew(i,j), 0.01d0)  !!! for Error handring
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
             zwrk(i,j)=0.5_r8*(zeta(i,j,kstp)+zeta_new(i,j))
 # if defined VAR_RHO_2D && defined SOLVE3D
@@ -828,6 +831,9 @@
             zeta_new(i,j)=zeta_new(i,j)*rmask(i,j)
 # endif
             Dnew(i,j)=zeta_new(i,j)+h(i,j)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            Dnew(i,j)=MAX(Dnew(i,j), 0.01d0)  !!! for Error handring
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
             zwrk(i,j)=cff5*zeta(i,j,krhs)+                              &
      &                cff4*(zeta(i,j,kstp)+zeta_new(i,j))
@@ -859,6 +865,9 @@
             zeta_new(i,j)=zeta_new(i,j)*rmask(i,j)
 # endif
             Dnew(i,j)=zeta_new(i,j)+h(i,j)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            Dnew(i,j)=MAX(Dnew(i,j), 0.01d0)  !!! for Error handring
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
             zwrk(i,j)=cff5*zeta_new(i,j)+cff4*zeta(i,j,krhs)
 # if defined VAR_RHO_2D && defined SOLVE3D
@@ -2086,6 +2095,9 @@
       DO j=JstrV-1,Jend
         DO i=IstrU-1,Iend
           Dstp(i,j)=zeta(i,j,kstp)+h(i,j)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+          Dstp(i,j)=MAX(Dstp(i,j), 0.01d0)  !!! for Error handring
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END DO
       END DO
 !

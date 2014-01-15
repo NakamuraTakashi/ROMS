@@ -254,7 +254,6 @@
             ELSE
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
-!
 !  Calculate critical shear stress in Pa
 !
 # if defined COHESIVE_BED
@@ -286,6 +285,9 @@
 !  for erosive flux.
 !
             t(i,j,1,nnew,indx)=t(i,j,1,nnew,indx)+ero_flux(i,j,ised)
+!!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+            t(i,j,1,nnew,indx)=MAX(0.0_r8, t(i,j,1,nnew,indx))!!!---------Error Handling
+!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
           END DO
         END DO SED_LOOP
       END DO J_LOOP

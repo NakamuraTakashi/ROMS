@@ -379,9 +379,10 @@
       IF (LBC(ieast,isUbar,ng)%acquire.and.                             &
      &    LBC(ieast,isVbar,ng)%acquire.and.                             &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
-
-        DO j=JstrP,JendP
+        DO j=JstrT,JendT
           BOUNDARY(ng)%ubar_east(j)=ubar(Iend,j,knew)
+        END DO
+        DO j=JstrP,JendT
           BOUNDARY(ng)%vbar_east(j)=vbar(Iend,j,knew)
         END DO
       END IF

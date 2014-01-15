@@ -71,6 +71,9 @@
      &                GRID(ng) % z_w,                                   &
      &                GRID(ng) % angler,                                &
      &                GRID(ng) % ZoBot,                                 &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+     &                GRID(ng) % Hz,                                    &
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # ifdef MB_CALC_UB
      &                FORCES(ng) % Hwave,                               &
 # else
@@ -106,6 +109,9 @@
      &                      IminS, ImaxS, JminS, JmaxS,                 &
      &                      nrhs,                                       &
      &                      h, z_r, z_w, angler, ZoBot,                 &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+     &                      Hz,                                         &
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # ifdef MB_CALC_UB
      &                      Hwave,                                      &
 # else
@@ -142,6 +148,9 @@
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
       real(r8), intent(in) :: angler(LBi:,LBj:)
       real(r8), intent(in) :: ZoBot(LBi:,LBj:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      real(r8), intent(in) :: Hz(LBi:,LBj:,:)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  ifdef MB_CALC_UB
       real(r8), intent(in) :: Hwave(LBi:,LBj:)
 #  else
@@ -173,6 +182,9 @@
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
       real(r8), intent(in) :: angler(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: ZoBot(LBi:UBi,LBj:UBj)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #  ifdef MB_CALC_UB
       real(r8), intent(in) :: Hwave(LBi:UBi,LBj:UBj)
 #  else
@@ -227,7 +239,7 @@
 
       real(r8) :: Ab, Fwave_bot, Kbh, Kbh2, Kdh
       real(r8) :: angleC, angleW, phiC, phiCW
-      real(r8) :: cff, cff1, cff2, d50, viscosity, wset
+      real(r8) :: cff, cff1, cff2, cff3, d50, viscosity, wset   !!!<<<<<<<<<<<TN:Add cff3
       real(r8) :: RHbio, RHbiofac, RHmax, RLbio
       real(r8) :: rhoWater, rhoSed
       real(r8) :: rhgt, rlen, thetw
@@ -584,12 +596,28 @@
         DO i=IstrU,Iend
           angleC=Ur_mb(i,j)/(0.5*(Umag(i-1,j)+Umag(i,j)))
           bustr(i,j)=0.5_r8*(tauCW(i-1,j)+tauCW(i,j))*angleC
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef LIMIT_BSTRESS
+          cff3=0.75_r8*0.5_r8*(Hz(i-1,j,1)+Hz(i,j,1))
+          bustr(i,j)=SIGN(1.0_r8, bustr(i,j))*                          &
+     &               MIN(ABS(bustr(i,j)),                               &
+     &                   ABS(u(i,j,1,nrhs))*cff3/dt(ng))
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END DO
       END DO
       DO j=JstrV,Jend
         DO i=Istr,Iend
           angleC=Vr_mb(i,j)/(0.5_r8*(Umag(i,j-1)+Umag(i,j)))
           bvstr(i,j)=0.5_r8*(tauCW(i,j-1)+tauCW(i,j))*angleC
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# ifdef LIMIT_BSTRESS
+          cff3=0.75_r8*0.5_r8*(Hz(i,j-1,1)+Hz(i,j,1))
+          bvstr(i,j)=SIGN(1.0_r8, bvstr(i,j))*                          &
+     &               MIN(ABS(bvstr(i,j)),                               &
+     &                   ABS(v(i,j,1,nrhs))*cff3/dt(ng))
+# endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
         END DO
       END DO
       DO j=Jstr,Jend

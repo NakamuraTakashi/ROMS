@@ -99,6 +99,11 @@ else
            FFLAGS += -O3
 endif
 
+ifdef USE_OpenACC
+           FFLAGS += -Minfo=accel -ta=nvidia,cuda5.0
+endif
+
+
 # Save compiler flags without the MCT or ESMF libraries additions
 # to keep the string (MY_FFLAGS) in "mod_strings.o" short. Otherwise,
 # it will exceed the maximum number of characters allowed for
