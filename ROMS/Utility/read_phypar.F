@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2013 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2014 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -2634,13 +2634,13 @@
         NestLayers=1
         IF (.not.allocated(GridsInLayer)) THEN
           allocate ( GridsInLayer(NestLayers) )
-          GridsInLayer=1
         END IF
         IF (.not.allocated(GridNumber)) THEN
           allocate ( GridNumber(Ngrids,NestLayers) )
-          GridNumber=1
         END IF
       END IF
+      GridsInLayer=1              ! In case that users set illegal
+      GridNumber=1                ! values in non-nesting applications
 #else
       IF (.not.got_NestLayers) THEN
         IF (Master) THEN
