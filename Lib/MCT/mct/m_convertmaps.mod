@@ -1,94 +1,68 @@
-GFORTRAN module version '10' created from m_ConvertMaps.F90
-MD5:fcb1ca821b3c7cfef4df9c1b862cf32f -- If you edit this, you'll get what you deserve.
-
-(() () () () () () () () () () () () () () () () () () () () () () ()
-() () () ())
-
-()
-
-(('globalmaptoglobalsegmap' 'm_convertmaps' 2) ('globalsegmaptoglobalmap'
-'m_convertmaps' 3))
-
-()
-
-()
-
-()
-
-(2 'globalmaptoglobalsegmap_' 'm_convertmaps' '' 1 ((PROCEDURE
-UNKNOWN-INTENT MODULE-PROC DECL UNKNOWN 0 0 SUBROUTINE) (UNKNOWN 0 0 0 0
-UNKNOWN ()) 4 0 (5 6) () 0 () () () 0 0)
-3 'globalsegmaptoglobalmap_' 'm_convertmaps' '' 1 ((PROCEDURE
-UNKNOWN-INTENT MODULE-PROC DECL UNKNOWN 0 0 SUBROUTINE ALWAYS_EXPLICIT)
-(UNKNOWN 0 0 0 0 UNKNOWN ()) 7 0 (8 9 10) () 0 () () () 0 0)
-5 'gmap' '' '' 4 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY) (
-DERIVED 11 0 0 0 DERIVED ()) 0 0 () () 0 () () () 0 0)
-6 'gsmap' '' '' 4 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY)
-(DERIVED 12 0 0 0 DERIVED ()) 0 0 () () 0 () () () 0 0)
-8 'gsmap' '' '' 7 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY)
-(DERIVED 13 0 0 0 DERIVED ()) 0 0 () () 0 () () () 0 0)
-9 'gmap' '' '' 7 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY)
-(DERIVED 14 0 0 0 DERIVED ()) 0 0 () () 0 () () () 0 0)
-10 'status' '' '' 7 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0
-OPTIONAL DUMMY) (INTEGER 4 0 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
-11 'Globalmap' 'm_globalmap' '' 4 ((DERIVED UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0 POINTER_COMP) (UNKNOWN 0 0 0 0 UNKNOWN ()) 0 0 () ()
-0 ((15 'comp_id' (INTEGER 4 0 0 0 INTEGER ()) () (UNKNOWN-FL
-UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (16
-'gsize' (INTEGER 4 0 0 0 INTEGER ()) () (UNKNOWN-FL UNKNOWN-INTENT
-UNKNOWN-PROC UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (17 'lsize' (
-INTEGER 4 0 0 0 INTEGER ()) () (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (18 'counts' (INTEGER 4 0 0 0
-INTEGER ()) (1 0 DEFERRED () ()) (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0 DIMENSION POINTER) UNKNOWN-ACCESS ()) (19 'displs' (
-INTEGER 4 0 0 0 INTEGER ()) (1 0 DEFERRED () ()) (UNKNOWN-FL
-UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DIMENSION POINTER)
-UNKNOWN-ACCESS ())) PUBLIC (() () () ()) () 0 0 55028865)
-12 'Globalsegmap' 'm_globalsegmap' '' 4 ((DERIVED UNKNOWN-INTENT
-UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 POINTER_COMP) (UNKNOWN 0 0 0 0 UNKNOWN
-()) 0 0 () () 0 ((20 'comp_id' (INTEGER 4 0 0 0 INTEGER ()) () (
-UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (21 'ngseg' (INTEGER 4 0 0 0 INTEGER ()) () (
-UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (22 'gsize' (INTEGER 4 0 0 0 INTEGER ()) () (
-UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (23 'start' (INTEGER 4 0 0 0 INTEGER ()) (1 0
-DEFERRED () ()) (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN
-0 0 DIMENSION POINTER) UNKNOWN-ACCESS ()) (24 'length' (INTEGER 4 0 0 0
-INTEGER ()) (1 0 DEFERRED () ()) (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0 DIMENSION POINTER) UNKNOWN-ACCESS ()) (25 'pe_loc' (
-INTEGER 4 0 0 0 INTEGER ()) (1 0 DEFERRED () ()) (UNKNOWN-FL
-UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DIMENSION POINTER)
-UNKNOWN-ACCESS ())) PUBLIC (() () () ()) () 0 0 40927821)
-13 'Globalsegmap' 'm_globalsegmap' '' 7 ((DERIVED UNKNOWN-INTENT
-UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 POINTER_COMP) (UNKNOWN 0 0 0 0 UNKNOWN
-()) 0 0 () () 0 ((26 'comp_id' (INTEGER 4 0 0 0 INTEGER ()) () (
-UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (27 'ngseg' (INTEGER 4 0 0 0 INTEGER ()) () (
-UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (28 'gsize' (INTEGER 4 0 0 0 INTEGER ()) () (
-UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (29 'start' (INTEGER 4 0 0 0 INTEGER ()) (1 0
-DEFERRED () ()) (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN
-0 0 DIMENSION POINTER) UNKNOWN-ACCESS ()) (30 'length' (INTEGER 4 0 0 0
-INTEGER ()) (1 0 DEFERRED () ()) (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0 DIMENSION POINTER) UNKNOWN-ACCESS ()) (31 'pe_loc' (
-INTEGER 4 0 0 0 INTEGER ()) (1 0 DEFERRED () ()) (UNKNOWN-FL
-UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DIMENSION POINTER)
-UNKNOWN-ACCESS ())) PUBLIC (() () () ()) () 0 0 40927821)
-14 'Globalmap' 'm_globalmap' '' 7 ((DERIVED UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0 POINTER_COMP) (UNKNOWN 0 0 0 0 UNKNOWN ()) 0 0 () ()
-0 ((32 'comp_id' (INTEGER 4 0 0 0 INTEGER ()) () (UNKNOWN-FL
-UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (33
-'gsize' (INTEGER 4 0 0 0 INTEGER ()) () (UNKNOWN-FL UNKNOWN-INTENT
-UNKNOWN-PROC UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (34 'lsize' (
-INTEGER 4 0 0 0 INTEGER ()) () (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (35 'counts' (INTEGER 4 0 0 0
-INTEGER ()) (1 0 DEFERRED () ()) (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0 DIMENSION POINTER) UNKNOWN-ACCESS ()) (36 'displs' (
-INTEGER 4 0 0 0 INTEGER ()) (1 0 DEFERRED () ()) (UNKNOWN-FL
-UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DIMENSION POINTER)
-UNKNOWN-ACCESS ())) PUBLIC (() () () ()) () 0 0 55028865)
-)
-
-()
+V24 m_convertmaps
+17 m_ConvertMaps.F90 S582 0
+01/06/2014  21:00:25
+use m_globalsegmap private
+use m_globalmap private
+use m_globalsegmap private
+use m_globalmap private
+enduse
+D 44 24 596 192 595 7
+D 75 24 691 280 688 7
+D 187 18 25
+S 582 24 0 0 0 6 1 0 4659 10005 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 22 0 0 0 0 0 0 m_convertmaps
+S 584 23 0 0 0 8 595 582 4685 14 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 globalmap
+S 586 23 0 0 0 8 688 582 4710 14 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 globalsegmap
+S 590 3 0 0 0 6 1 1 0 0 0 0 0 0 0 0 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6
+R 595 25 1 m_globalmap globalmap
+R 596 5 2 m_globalmap comp_id globalmap
+R 597 5 3 m_globalmap gsize globalmap
+R 598 5 4 m_globalmap lsize globalmap
+R 600 5 6 m_globalmap counts globalmap
+R 601 5 7 m_globalmap counts$sd globalmap
+R 602 5 8 m_globalmap counts$p globalmap
+R 603 5 9 m_globalmap counts$o globalmap
+R 606 5 12 m_globalmap displs globalmap
+R 607 5 13 m_globalmap displs$sd globalmap
+R 608 5 14 m_globalmap displs$p globalmap
+R 609 5 15 m_globalmap displs$o globalmap
+R 688 25 1 m_globalsegmap globalsegmap
+R 691 5 4 m_globalsegmap comp_id globalsegmap
+R 692 5 5 m_globalsegmap gsize globalsegmap
+R 697 5 10 m_globalsegmap ngseg globalsegmap
+R 710 5 23 m_globalsegmap start globalsegmap
+R 711 5 24 m_globalsegmap start$sd globalsegmap
+R 712 5 25 m_globalsegmap start$p globalsegmap
+R 713 5 26 m_globalsegmap start$o globalsegmap
+R 716 5 29 m_globalsegmap length globalsegmap
+R 717 5 30 m_globalsegmap length$sd globalsegmap
+R 718 5 31 m_globalsegmap length$p globalsegmap
+R 719 5 32 m_globalsegmap length$o globalsegmap
+R 722 5 35 m_globalsegmap pe_loc globalsegmap
+R 723 5 36 m_globalsegmap pe_loc$sd globalsegmap
+R 724 5 37 m_globalsegmap pe_loc$p globalsegmap
+R 725 5 38 m_globalsegmap pe_loc$o globalsegmap
+S 977 19 0 0 0 8 1 582 6044 4000 0 0 0 0 0 0 0 0 0 0 0 0 0 74 1 0 0 0 0 0 582 0 0 0 0 globalmaptoglobalsegmap
+O 977 1 979
+S 978 19 0 0 0 8 1 582 6068 4000 0 0 0 0 0 0 0 0 0 0 0 0 0 76 1 0 0 0 0 0 582 0 0 0 0 globalsegmaptoglobalmap
+O 978 1 980
+S 979 27 0 0 0 8 983 582 6092 10010 0 0 0 77 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 globalmaptoglobalsegmap_
+Q 979 977 0
+S 980 27 0 0 0 8 987 582 6117 10010 0 0 0 78 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 globalsegmaptoglobalmap_
+Q 980 978 0
+S 981 3 0 0 0 187 0 1 0 0 0 0 0 0 0 6142 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 17 4d 43 54 3a 3a 6d 5f 43 6f 6e 76 65 72 74 4d 61 70
+S 982 16 0 0 0 187 1 582 4976 14 440000 0 0 0 0 981 179 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 myname
+S 983 23 5 0 0 0 986 582 6092 10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 globalmaptoglobalsegmap_
+S 984 1 3 1 0 44 1 983 5023 14 3000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 gmap
+S 985 1 3 2 0 75 1 983 5698 14 3000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 gsmap
+S 986 14 5 0 0 0 1 983 6092 10 400000 0 0 0 147 2 0 0 0 0 0 0 0 0 0 0 0 0 82 0 582 0 0 0 0 globalmaptoglobalsegmap_
+F 986 2 984 985
+S 987 23 5 0 0 0 991 582 6117 10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 globalsegmaptoglobalmap_
+S 988 1 3 1 0 75 1 987 5698 14 3000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 gsmap
+S 989 1 3 2 0 44 1 987 5023 14 3000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 gmap
+S 990 1 3 2 0 6 1 987 6160 80000014 3000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 status
+S 991 14 5 0 0 0 1 987 6117 10 400000 0 0 0 150 3 0 0 0 0 0 0 0 0 0 0 0 0 212 0 582 0 0 0 0 globalsegmaptoglobalmap_
+F 991 3 988 989 990
+A 25 2 0 0 0 6 590 0 0 0 25 0 0 0 0 0 0 0 0 0
+A 179 2 0 0 0 187 981 0 0 0 179 0 0 0 0 0 0 0 0 0
+Z
+Z

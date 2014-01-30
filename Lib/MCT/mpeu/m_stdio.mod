@@ -1,31 +1,17 @@
-GFORTRAN module version '10' created from m_stdio.F90
-MD5:17e83972261f7d5b1e8a6f6a264ca4ec -- If you edit this, you'll get what you deserve.
-
-(() () () () () () () () () () () () () () () () () () () () () () () ()
-() () ())
-
-()
-
-()
-
-()
-
-()
-
-()
-
-(2 'len_filename' 'm_stdio' '' 1 ((PARAMETER UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0 INTEGER ()) 0 0 () (
-CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '128') () 0 () () () 0 0)
-3 'stderr' 'm_stdio' '' 1 ((PARAMETER UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0 INTEGER ()) 0 0 () (
-CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '0') () 0 () () () 0 0)
-4 'stdin' 'm_stdio' '' 1 ((PARAMETER UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN
-IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0 INTEGER ()) 0 0 () (CONSTANT (
-INTEGER 4 0 0 0 INTEGER ()) 0 '5') () 0 () () () 0 0)
-5 'stdout' 'm_stdio' '' 1 ((PARAMETER UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0 INTEGER ()) 0 0 () (
-CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '6') () 0 () () () 0 0)
-)
-
-('len_filename' 0 2 'stderr' 0 3 'stdin' 0 4 'stdout' 0 5)
+V24 m_stdio
+11 m_stdio.F90 S582 0
+01/06/2014  21:00:09
+enduse
+S 582 24 0 0 0 6 1 0 4659 5 0 0 0 0 0 0 0 0 0 52 0 0 0 0 0 0 0 0 16 0 0 0 0 0 0 m_stdio
+S 583 16 0 0 0 6 584 582 4667 800004 400000 0 0 0 0 5 12 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 stdin
+S 584 16 0 0 0 6 585 582 4673 800004 400000 0 0 0 0 6 14 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 stdout
+S 585 16 0 0 0 6 586 582 4680 800004 400000 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 stderr
+S 586 16 0 0 0 6 0 582 4687 800004 400000 0 0 0 0 128 17 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 len_filename
+S 587 3 0 0 0 6 0 1 0 0 0 0 0 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6
+S 588 3 0 0 0 6 0 1 0 0 0 0 0 0 0 0 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6
+S 589 3 0 0 0 6 0 1 0 0 0 0 0 0 0 0 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6
+A 12 2 0 0 0 6 587 0 0 0 12 0 0 0 0 0 0 0 0 0
+A 14 2 0 0 0 6 588 0 0 0 14 0 0 0 0 0 0 0 0 0
+A 17 2 0 0 0 6 589 0 0 0 17 0 0 0 0 0 0 0 0 0
+Z
+Z

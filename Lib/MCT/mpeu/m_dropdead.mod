@@ -1,33 +1,23 @@
-GFORTRAN module version '10' created from m_dropdead.F90
-MD5:eb014737b273c5cdf44bdd8fe6dd9e2e -- If you edit this, you'll get what you deserve.
-
-(() () () () () () () () () () () () () () () () () () () () () () ()
-() () () ())
-
-()
-
-(('die' 'm_dropdead' 2 3))
-
-()
-
-()
-
-()
-
-(2 'diex_' 'm_dropdead' '' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
-UNKNOWN 0 0 SUBROUTINE) (UNKNOWN 0 0 0 0 UNKNOWN ()) 4 0 (5 6 7) () 0 ()
-() () 0 0)
-3 'die_' 'm_dropdead' '' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
-UNKNOWN 0 0 SUBROUTINE) (UNKNOWN 0 0 0 0 UNKNOWN ()) 8 0 (9) () 0 () ()
-() 0 0)
-5 'where' '' '' 4 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY)
-(CHARACTER 1 0 0 0 CHARACTER (())) 0 0 () () 0 () () () 0 0)
-6 'fnam' '' '' 4 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY) (
-CHARACTER 1 0 0 0 CHARACTER (())) 0 0 () () 0 () () () 0 0)
-7 'line' '' '' 4 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY) (
-INTEGER 4 0 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
-9 'where' '' '' 8 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY)
-(CHARACTER 1 0 0 0 CHARACTER (())) 0 0 () () 0 () () () 0 0)
-)
-
-()
+V24 m_dropdead
+14 m_dropdead.F90 S582 0
+01/06/2014  21:00:10
+enduse
+S 582 24 0 0 0 6 1 0 4659 10005 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 15 0 0 0 0 0 0 m_dropdead
+S 583 19 0 0 0 8 1 582 4670 4000 0 0 0 0 0 0 0 0 0 0 0 0 0 4 2 0 0 0 0 0 582 0 0 0 0 die
+O 583 2 585 584
+S 584 27 0 0 0 8 586 582 4674 10010 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 die_
+Q 584 583 0
+S 585 27 0 0 0 8 589 582 4679 10010 0 0 0 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 diex_
+Q 585 583 0
+S 586 23 5 0 0 0 588 582 4674 10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 die_
+S 587 1 3 1 0 28 1 586 4685 14 43000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 where
+S 588 14 5 0 0 0 1 586 4674 10 400000 0 0 0 2 1 0 0 0 0 0 0 0 0 0 0 0 0 46 0 582 0 0 0 0 die_
+F 588 1 587
+S 589 23 5 0 0 0 593 582 4679 10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 diex_
+S 590 1 3 1 0 28 1 589 4685 14 43000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 where
+S 591 1 3 1 0 28 1 589 4691 14 43000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 fnam
+S 592 1 3 1 0 6 1 589 4696 14 3000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 line
+S 593 14 5 0 0 0 1 589 4679 10 400000 0 0 0 4 3 0 0 0 0 0 0 0 0 0 0 0 0 116 0 582 0 0 0 0 diex_
+F 593 3 590 591 592
+Z
+Z

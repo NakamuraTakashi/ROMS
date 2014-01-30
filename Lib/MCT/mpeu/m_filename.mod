@@ -1,41 +1,41 @@
-GFORTRAN module version '10' created from m_Filename.F90
-MD5:01fc15aa962490f5d6f5564fd84bd9a5 -- If you edit this, you'll get what you deserve.
-
-(() () () () () () () () () () () () () () () () () () () () () () () ()
-() () ())
-
-()
-
-(('filename_base' 'm_filename' 2) ('filename_dir' 'm_filename' 3))
-
-()
-
-()
-
-()
-
-(2 'base_' 'm_filename' '' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
-UNKNOWN 0 0 FUNCTION IMPLICIT_PURE ALWAYS_EXPLICIT) (CHARACTER 1 0 0 0
-CHARACTER ((FUNCTION (INTEGER 4 0 0 0 INTEGER ()) 0 4 (('' (VARIABLE (
-CHARACTER 1 0 0 0 CHARACTER (())) 0 5 ())) ('' ())) '__len_1_i4' 0 'len')))
-6 0 (5 7) () 2 () () () 0 0)
-3 'dir_' 'm_filename' '' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
-UNKNOWN 0 0 FUNCTION IMPLICIT_PURE) (CHARACTER 1 0 0 0 CHARACTER ((
-FUNCTION (INTEGER 4 0 0 0 INTEGER ()) 0 8 (('' (VARIABLE (CHARACTER 1 0
-0 0 CHARACTER (())) 0 9 ())) ('' ())) '__len_1_i4' 0 'len'))) 10 0 (9) ()
-3 () () () 0 0)
-4 'len' '(intrinsic)' '' 6 ((PROCEDURE UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0 FUNCTION) (UNKNOWN 0 0 0 0 UNKNOWN ()) 0 0 () () 4 ()
-() () 0 0)
-5 'cstr' '' '' 6 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY) (
-CHARACTER 1 0 0 0 CHARACTER (())) 0 0 () () 0 () () () 0 0)
-7 'sfx' '' '' 6 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 OPTIONAL
-DUMMY) (CHARACTER 1 0 0 0 CHARACTER (())) 0 0 () () 0 () () () 0 0)
-8 'len' '(intrinsic)' '' 10 ((PROCEDURE UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0 FUNCTION) (UNKNOWN 0 0 0 0 UNKNOWN ()) 0 0 () () 8 ()
-() () 0 0)
-9 'cstr' '' '' 10 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY)
-(CHARACTER 1 0 0 0 CHARACTER (())) 0 0 () () 0 () () () 0 0)
-)
-
-()
+V24 m_filename
+14 m_Filename.F90 S582 0
+01/06/2014  21:00:14
+enduse
+D 44 18 12
+D 46 18 17
+D 48 18 20
+S 582 24 0 0 0 6 1 0 4659 10005 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 14 0 0 0 0 0 0 m_filename
+S 583 19 0 0 0 8 1 582 4670 4000 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 0 0 0 0 0 582 0 0 0 0 filename_base
+O 583 1 585
+S 584 19 0 0 0 8 1 582 4684 4000 0 0 0 0 0 0 0 0 0 0 0 0 0 4 1 0 0 0 0 0 582 0 0 0 0 filename_dir
+O 584 1 586
+S 585 27 0 0 0 8 590 582 4697 10010 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 base_
+Q 585 583 0
+S 586 27 0 0 0 8 595 582 4703 10010 0 0 0 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 dir_
+Q 586 584 0
+S 587 3 0 0 0 6 0 1 0 0 0 0 0 0 0 0 21 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6
+S 588 3 0 0 0 44 0 1 0 0 0 0 0 0 0 4708 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 21 4d 43 54 28 4d 50 45 55 29 3a 3a 6d 5f 46 69 6c 65 6e 61 6d 65
+S 589 16 0 0 0 44 1 582 4730 14 440000 0 0 0 0 588 13 0 0 0 0 0 0 0 0 0 0 0 0 0 582 0 0 0 0 myname
+S 590 23 5 0 0 8 593 582 4697 10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 base_
+S 591 6 3 1 0 28 1 590 4737 800014 43000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 cstr
+S 592 1 3 1 0 28 1 590 4742 80000014 43000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 sfx
+S 593 14 5 0 0 46 1 590 4697 14 480000 0 0 0 2 2 0 0 594 0 0 0 0 0 0 0 0 0 42 0 582 0 0 0 0 base_
+F 593 2 591 592
+S 594 1 3 0 0 46 1 590 4697 14 1083000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 base_
+S 595 23 5 0 0 8 597 582 4703 10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 dir_
+S 596 6 3 1 0 28 1 595 4737 800014 43000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 cstr
+S 597 14 5 0 0 48 1 595 4703 14 480000 0 0 0 5 1 0 0 598 0 0 0 0 0 0 0 0 0 81 0 582 0 0 0 0 dir_
+F 597 1 596
+S 598 1 3 0 0 48 1 595 4703 14 1083000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 dir_
+A 12 2 0 0 0 6 587 0 0 0 12 0 0 0 0 0 0 0 0 0
+A 13 2 0 0 0 44 588 0 0 0 13 0 0 0 0 0 0 0 0 0
+A 15 1 0 0 0 0 470 0 0 0 0 0 0 0 0 0 0 0 0 0
+A 16 1 0 0 0 28 591 0 0 0 0 0 0 0 0 0 0 0 0 0
+A 17 14 0 0 0 6 15 0 0 0 0 0 0 287 1 1 0 0 0 0
+W 1 16
+A 19 1 0 0 0 28 596 0 0 0 0 0 0 0 0 0 0 0 0 0
+A 20 14 0 0 0 6 15 0 0 0 0 0 0 287 1 3 0 0 0 0
+W 1 19
+Z
+Z

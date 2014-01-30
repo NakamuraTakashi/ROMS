@@ -343,6 +343,9 @@
       real(8), parameter :: Rd_max =  5.0d-3     !(nmol cm-3 s-1)  !!!‚Ä‚«‚Æ‚¤
       real(8), parameter :: Krd_DOC = 120.0d0    !(umol L-1)  !!!‚Ä‚«‚Æ‚¤
       real(8), parameter :: Krd_DO =  10.0d0     !(umol L-1)  !!!‚Ä‚«‚Æ‚¤
+
+      real(8), parameter :: Rdoc_max =  1.0d-3     !(nmol cm-3 s-1)  !!!‚Ä‚«‚Æ‚¤
+      real(8), parameter :: Krdoc_DO =  10.0d0     !(umol L-1)  !!!‚Ä‚«‚Æ‚¤
 !---- Decomposition --------------------------
       real(8), parameter :: Dp2d_max =1.0d-1     !(nmol cm-3 s-1)  !!!‚Ä‚«‚Æ‚¤
       real(8), parameter :: Kp2d_POC = 10.0d0     !(umol L-1)  !!!‚Ä‚«‚Æ‚¤
