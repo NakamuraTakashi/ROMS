@@ -1,0 +1,6 @@
+*.o
+*.mod
+*.a
+*.log
+*.status
+*.conf
