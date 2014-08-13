@@ -251,6 +251,14 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+10)=' ANA_MASK,'
 #endif
+#ifdef ANA_NUDGCOEF
+      IF (ANY(Lnudging(:))) THEN
+        IF (Master) WRITE (stdout,20) 'ANA_NUDGCOEF',                   &
+     &     'Analytical spatially varying nudging time-scales.'
+        is=LEN_TRIM(Coptions)+1
+        Coptions(is:is+14)=' ANA_NUDGCOEF,'
+      END IF
+#endif
 #if defined ANA_PAIR && defined BULK_FLUXES
       IF (Master) WRITE (stdout,20) 'ANA_PAIR',                         &
      &   'Analytical surface air pressure.'
@@ -315,6 +323,14 @@
      &   'Analytical time-varying rotation force.'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+14)=' ANA_SPINNING,'
+#endif
+#ifdef ANA_SPONGE
+      IF (ANY(Lsponge)) THEN
+        IF (Master) WRITE (stdout,20) 'ANA_SPONGE',                     &
+     &     'Analytical enhanced viscosity/diffusion sponge.'
+        is=LEN_TRIM(Coptions)+1
+        Coptions(is:is+12)=' ANA_SPONGE,'
+      END IF
 #endif
 #ifdef ANA_SRFLUX
       IF (Master) WRITE (stdout,20) 'ANA_SRFLUX',                       &
@@ -976,30 +992,6 @@
       Coptions(is:is+11)=' MIN_STRAT,'
 # endif
 #endif
-#ifdef M2CLIMATOLOGY
-      IF (Master) WRITE (stdout,20) 'M2CLIMATOLOGY',                    &
-     &   'Processing 2D momentum climatology data.'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+15)=' M2CLIMATOLOGY,'
-#endif
-#ifdef M2CLM_NUDGING
-      IF (Master) WRITE (stdout,20) 'M2CLM_NUDGING',                    &
-     &   'Nudging toward 2D momentum climatology.'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+15)=' M2CLM_NUDGING,'
-#endif
-#if defined M3CLIMATOLOGY && defined SOLVE3D
-      IF (Master) WRITE (stdout,20) 'M3CLIMATOLOGY',                    &
-     &   'Processing 3D momentum climatology data.'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+15)=' M3CLIMATOLOGY,'
-#endif
-#if defined M3CLM_NUDGING && defined SOLVE3D
-      IF (Master) WRITE (stdout,20) 'M3CLM_NUDGING',                    &
-     &   'Nudging toward 3D momentum climatology.'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+15)=' M3CLM_NUDGING,'
-#endif
 #ifdef MASKING
       IF (Master) WRITE (stdout,20) 'MASKING',                          &
      &   'Land/Sea masking.'
@@ -1166,6 +1158,12 @@
       Coptions(is:is+13)=' !NONLIN_EOS,'
 # endif
 #endif
+#if defined NO_CORRECT_TRACER && defined NESTING && defined SOLVE3D
+      IF (Master) WRITE (stdout,20) 'NO_CORRECT_TRACER',                &
+     &   'Avoid two-way correction of coaser grid boundary tracer.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+19)=' NO_CORRECT_TRACER,'
+#endif
 #ifdef NO_LBC_ATT
       IF (Master) WRITE (stdout,20) 'NO_LBC_ATT',                       &
      &   'Not checking NetCDF global attribute NLM_LBC during restart.'
@@ -1173,10 +1171,10 @@
       Coptions(is:is+12)=' NO_LBC_ATT,'
 #endif
 #if defined NO_READ_GHOST && defined DISTRIBUTE
-      IF (Master) WRITE (stdout,20) 'NO_READ_GRID',                     &
+      IF (Master) WRITE (stdout,20) 'NO_READ_GHOST',                    &
      &   'Not including ghost points during scattering read data.'
       is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+14)=' NO_READ_GRID,'
+      Coptions(is:is+15)=' NO_READ_GHOST,'
 #endif
 #ifdef NO_WRITE_GRID
       IF (Master) WRITE (stdout,20) 'NO_WRITE_GRID',                    &
@@ -1229,7 +1227,7 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+18)=' OBS_IMPACT_SPLIT,'
 #endif
-#if defined NESTING && defined ONE_WAY
+#if defined ONE_WAY && defined NESTING
       IF (Master) WRITE (stdout,20) 'ONE_WAY',                          &
      &   'One-way nesting in refinement grids.'
       is=LEN_TRIM(Coptions)+1
@@ -1613,12 +1611,6 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+11)=' SPHERICAL,'
 #endif
-#ifdef SPONGE
-      IF (Master) WRITE (stdout,20) 'SPONGE',                           &
-     &   'Enhanced horizontal mixing in the sponge areas.'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+8)=' SPONGE,'
-#endif
 #if defined SSH_TIDES
       IF (Master) WRITE (stdout,20) 'SSH_TIDES',                        &
      &   'Add tidal elevation to SSH climatology.'
@@ -1729,17 +1721,11 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+9)=' TANGENT,'
 #endif
-#if defined TCLIMATOLOGY && defined SOLVE3D
-      IF (Master) WRITE (stdout,20) 'TCLIMATOLOGY',                     &
-     &   'Processing tracer climatology data.'
+#if defined TIME_INTERP_FLUX && defined NESTING && defined SOLVE3D
+      IF (Master) WRITE (stdout,20) 'TIME_INTERP_FLUX',                 &
+     &   'Time interpolate coaser grid mass flux in refinement .'
       is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+14)=' TCLIMATOLOGY,'
-#endif
-#if defined TCLM_NUDGING && defined SOLVE3D
-      IF (Master) WRITE (stdout,20) 'TCLM_NUDGING',                     &
-     &   'Nudging toward tracer climatology.'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+14)=' TCLM_NUDGING,'
+      Coptions(is:is+18)=' TIME_INTERP_FLUX,'
 #endif
 #if defined TL_AVERAGES && defined TANGENT
       IF (Master) WRITE (stdout,20) 'TL_AVERAGES',                      &
@@ -2196,12 +2182,6 @@
      &   'Spatially varying Jerlov water type index.'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+12)=' WTYPE_GRID,'
-#endif
-#ifdef ZCLIMATOLOGY
-      IF (Master) WRITE (stdout,20) 'ZCLIMATOLOGY',                     &
-     &   'Processing sea surface height climatology data.'
-      is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+14)=' ZCLIMATOLOGY,'
 #endif
 #if defined ZETA_ELLIPTIC && defined BALANCE_OPERATOR && \
     defined FOUR_DVAR

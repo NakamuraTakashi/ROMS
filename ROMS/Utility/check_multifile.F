@@ -51,7 +51,7 @@
 !
 !  Get final time string for simulation.
 !
-      Tfinal=time(ng)+ntimes(ng)*dt(ng)
+      Tfinal=dstart*day2sec+ntimes(ng)*dt(ng)
       CALL time_string(tfinal, F_code)
 !
 !-----------------------------------------------------------------------
@@ -198,76 +198,76 @@
         END IF
       END DO
 #endif
-#ifdef CLM_FILE
 !
 !-----------------------------------------------------------------------
 !  Input climatology data.
 !-----------------------------------------------------------------------
 !
-      Nfiles=CLM(ng)%Nfiles
-      DO ifile=1,Nfiles
-        ncname=CLM(ng)%files(ifile)
-        foundit=check_file(ng, model, ncname, Tmin, Tmax, Tscale,       &
-     &                     Lcheck)
-        IF (exit_flag.ne.NoError) RETURN
-        CLM(ng)%time_min(ifile)=Tmin
-        CLM(ng)%time_max(ifile)=Tmax
-      END DO
+      IF (CLM_FILE(ng)) THEN
+        Nfiles=CLM(ng)%Nfiles
+        DO ifile=1,Nfiles
+          ncname=CLM(ng)%files(ifile)
+          foundit=check_file(ng, model, ncname, Tmin, Tmax, Tscale,     &
+     &                       Lcheck)
+          IF (exit_flag.ne.NoError) RETURN
+          CLM(ng)%time_min(ifile)=Tmin
+          CLM(ng)%time_max(ifile)=Tmax
+        END DO
 !
 !  Set the appropriate file counter to use during initialization or
 !  restart.
 !
-      Fcount=0
-      IF (Lcheck) THEN
-        DO ifile=1,Nfiles
-          Tmin=Tscale*CLM(ng)%time_min(ifile)
-          IF (time(ng).ge.Tmin) THEN
-            Fcount=ifile
-          END IF
-        END DO
-      ELSE
-        Fcount=1
-      END IF
+        Fcount=0
+        IF (Lcheck) THEN
+          DO ifile=1,Nfiles
+            Tmin=Tscale*CLM(ng)%time_min(ifile)
+            IF (time(ng).ge.Tmin) THEN
+              Fcount=ifile
+            END IF
+          END DO
+        ELSE
+          Fcount=1
+        END IF
 !
 !  Initialize other structure parameters or issue an error if data does
 !  not include initalization time.
 !
-      IF (Fcount.gt.0) THEN
-        CLM(ng)%Fcount=Fcount
-        ncname=CLM(ng)%files(Fcount)
-        lstr=LEN_TRIM(ncname)
-        CLM(ng)%name=TRIM(ncname)
-        CLM(ng)%base=ncname(1:lstr-3)
-      ELSE
-        IF (Master.and.Lcheck) THEN
-          WRITE (stdout,10) 'Climatology', I_code
-          DO ifile=1,Nfiles
-            Tmin=Tscale*CLM(ng)%time_min(ifile)
-            Tmax=Tscale*CLM(ng)%time_max(ifile)
-            CALL time_string(Tmin, Tmin_code)
-            CALL time_string(Tmax, Tmax_code)
-            WRITE (stdout,20) Tmin_code, Tmax_code,                     &
-     &                        TRIM(CLM(ng)%files(ifile))
-          END DO
-        END IF
-        exit_flag=4
-      END IF
-!
-!  Check if there is boundary data to the end of the simulation.
-!
-      IF (Lcheck) THEN
-        Tmax=Tscale*CLM(ng)%time_max(Nfiles)
-        IF (Tfinal.gt.Tmax) THEN
-          CALL time_string(Tmax, Tmax_code)
-          IF (Master) THEN
-            WRITE (stdout,30) 'Climatology',                            &
-     &                        TRIM(CLM(ng)%files(Nfiles)),              &
-     &                        Tmax_code, F_code
+        IF (Fcount.gt.0) THEN
+          CLM(ng)%Fcount=Fcount
+          ncname=CLM(ng)%files(Fcount)
+          lstr=LEN_TRIM(ncname)
+          CLM(ng)%name=TRIM(ncname)
+          CLM(ng)%base=ncname(1:lstr-3)
+        ELSE
+          IF (Master.and.Lcheck) THEN
+            WRITE (stdout,10) 'Climatology', I_code
+            DO ifile=1,Nfiles
+              Tmin=Tscale*CLM(ng)%time_min(ifile)
+              Tmax=Tscale*CLM(ng)%time_max(ifile)
+              CALL time_string(Tmin, Tmin_code)
+              CALL time_string(Tmax, Tmax_code)
+              WRITE (stdout,20) Tmin_code, Tmax_code,                   &
+     &                          TRIM(CLM(ng)%files(ifile))
+            END DO
           END IF
           exit_flag=4
         END IF
+!
+!  Check if there is boundary data to the end of the simulation.
+!
+        IF (Lcheck) THEN
+          Tmax=Tscale*CLM(ng)%time_max(Nfiles)
+          IF (Tfinal.gt.Tmax) THEN
+            CALL time_string(Tmax, Tmax_code)
+            IF (Master) THEN
+              WRITE (stdout,30) 'Climatology',                          &
+     &                          TRIM(CLM(ng)%files(Nfiles)),            &
+     &                          Tmax_code, F_code
+            END IF
+            exit_flag=4
+          END IF
+        END IF
       END IF
-#endif
 
  10   FORMAT (/,' CHECK_MULTIFILE - Error while processing ', a,        &
      &        ' multi-files: ',/,19x,'data does not include',           &
@@ -329,7 +329,7 @@
 !
 !  Local variable declarations.
 !
-      logical :: foundit
+      logical :: Lcycle, Lperpetual, Lspectral, foundit
 
       integer :: Nrec, TvarID, i, nvdim, nvatt
 
@@ -345,6 +345,9 @@
 !
       foundit=.FALSE.
       Lcheck=.TRUE.
+      Lcycle=.FALSE.
+      Lperpetual=.FALSE.
+      Lspectral =.FALSE.
       Tscale=1.0_r8                        ! seconds
       Tmin=0.0_r8
       Tmax=0.0_r8
@@ -367,7 +370,7 @@
      &            (var_ndim(i).eq.1)) THEN
           TvarName=TRIM(var_name(i))
           foundit=.TRUE.
-          Lcheck=.FALSE.            ! we do not need to check tidal data
+          Lspectral=.TRUE.          ! we do not need to check tidal data
           EXIT
         END IF
       END DO
@@ -391,21 +394,37 @@
 !  Also, set output logical switch 'Lcheck' for the calling to check
 !  the available data time range. For example, we need to check it
 !  there is enough data to finish the simulation.  Notice that for
-!  data with 'cycle_length', Lcheck = FALSE.
+!  data with 'cycle_length', Lcheck = FALSE.  Also,  Lcheck = FALSE
+!  for perpetual time axis: the 'calendar' attribute is 'none' or
+!  the number of records in the time dimension is one (Nrec=1).
 !
       Nrec=var_Dsize(1)              ! time is a 1D array
       DO i=1,nvatt
         IF (TRIM(var_Aname(i)).eq.'units') THEN
           Tunits=TRIM(var_Achar(i))
-          IF (Tunits(1:3).eq.'day') THEN
-            Tscale=day2sec
-          ELSE IF (Tunits(1:4).eq.'hour') THEN
+          IF (INDEX(TRIM(var_Achar(i)),'day').ne.0) THEN
+            Tscale=86400.0_r8
+          ELSE IF (INDEX(TRIM(var_Achar(i)),'hour').ne.0) THEN
             Tscale=3600.0_r8
+          ELSE IF (INDEX(TRIM(var_Achar(i)),'second').ne.0) THEN
+            Tscale=1.0_r8
+          END IF
+        ELSE IF (TRIM(var_Aname(i)).eq.'calendar') THEN
+          IF ((Nrec.eq.1).or.                                           &
+     &        (INDEX(TRIM(var_Achar(i)),'none').ne.0)) THEN
+            Lperpetual=.TRUE.
           END IF
         ELSE IF (TRIM(var_Aname(i)).eq.'cycle_length') THEN
-          Lcheck=.FALSE.
+          Lcycle=.TRUE.
         END IF
       END DO
+!
+!  Turn off the checking of time range if cycling, perpectual, or
+!  spectral time axis.
+!
+      IF (Lcycle.or.Lperpetual.or.Lspectral) THEN
+        Lcheck=.FALSE.
+      END IF
 !
 !  Read in time variable minimum and maximun values (input time units).
 !

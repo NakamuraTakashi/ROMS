@@ -9,7 +9,7 @@
 !=======================================================================
 !                                                                      !
 !  This routine creates restart NetCDF file, it defines its            !
-!  dimensions, attributes, and variables.                              !
+!  dimensions, attributes, and fvariables.                             !
 !                                                                      !
 #if defined PERFECT_RESTART && defined WRITE_WATER && defined MASKING
 !  Currently, perfect restart is not compatible with writing           !
@@ -306,7 +306,7 @@
 # endif
 #endif
 !
-!  Define dimension vectors for staggered u-momemtum type variables.
+!  Define dimension vectors for staggered u-momentum type variables.
 !
 #if !defined PERFECT_RESTART && \
     (defined WRITE_WATER && defined MASKING)
@@ -338,7 +338,7 @@
 # endif
 #endif
 !
-!  Define dimension vectors for staggered v-momemtum type variables.
+!  Define dimension vectors for staggered v-momentum type variables.
 !
 #if !defined PERFECT_RESTART && \
     (defined WRITE_WATER && defined MASKING)
@@ -384,7 +384,7 @@
         r2dgrd(4)=DimIDs(12)
 # endif
 !
-!  Define dimension vectors for RHS u-momemtum equation.
+!  Define dimension vectors for RHS u-momentum equation.
 !
 # if !defined PERFECT_RESTART && \
      (defined WRITE_WATER && defined MASKING)
@@ -408,7 +408,7 @@
 #  endif
 # endif
 !
-!  Define dimension vectors for RHS v-momemtum equation.
+!  Define dimension vectors for RHS v-momentum equation.
 !
 # if !defined PERFECT_RESTART && \
      (defined WRITE_WATER && defined MASKING)
@@ -434,7 +434,7 @@
 #endif
 #ifdef SOLVE3D
 !
-!  Define dimension vector for staggered w-momemtum type variables.
+!  Define dimension vector for staggered w-momentum type variables.
 !
 # if !defined PERFECT_RESTART && \
      (defined WRITE_WATER && defined MASKING)
@@ -627,7 +627,7 @@
         Vinfo(22)='coordinates'
         Aval(5)=REAL(Iinfo(1,idUwet,ng),r8)
         status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idUwet),     &
-     &                 NF_FOUT, nvd3, u2dgrd, Aval, Vinfo, ncname,      &
+     &                 NF_FOUT, nvd3, su2dgrd, Aval, Vinfo, ncname,     &
      &                 SetFillVal = .FALSE.)
         IF (exit_flag.ne.NoError) RETURN
 !
@@ -643,7 +643,7 @@
         Vinfo(22)='coordinates'
         Aval(5)=REAL(Iinfo(1,idVwet,ng),r8)
         status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idVwet),     &
-     &                 NF_FOUT, nvd3, v2dgrd, Aval, Vinfo, ncname,      &
+     &                 NF_FOUT, nvd3, sv2dgrd, Aval, Vinfo, ncname,     &
      &                 SetFillVal = .FALSE.)
         IF (exit_flag.ne.NoError) RETURN
 #endif
