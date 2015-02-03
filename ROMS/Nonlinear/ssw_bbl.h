@@ -6,7 +6,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2014 The ROMS/TOMS Group        Chris Sherwood   !
+!  Copyright (c) 2002-2015 The ROMS/TOMS Group        Chris Sherwood   !
 !    Licensed under a MIT/X style license               Rich Signell   !
 !    See License_ROMS.txt                             John C. Warner   !
 !=======================================================================
@@ -48,13 +48,13 @@
      &                IminS, ImaxS, JminS, JmaxS,                       &
      &                nrhs(ng),                                         &
      &                GRID(ng) % h,                                     &
+#ifdef LIMIT_BSTRESS
+     &                GRID(ng) % Hz,                                    &
+#endif
      &                GRID(ng) % z_r,                                   &
      &                GRID(ng) % z_w,                                   &
      &                GRID(ng) % angler,                                &
      &                GRID(ng) % ZoBot,                                 &
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-     &                GRID(ng) % Hz,                                    &
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #if defined SSW_CALC_UB
      &                FORCES(ng) % Hwave,                               &
 #else
@@ -99,10 +99,11 @@
      &                      LBi, UBi, LBj, UBj,                         &
      &                      IminS, ImaxS, JminS, JmaxS,                 &
      &                      nrhs,                                       &
-     &                      h, z_r, z_w, angler, ZoBot,                 &
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+     &                      h,                                          &
+#ifdef LIMIT_BSTRESS
      &                      Hz,                                         &
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+#endif
+     &                      z_r, z_w, angler, ZoBot,                    &
 #if defined SSW_CALC_UB
      &                      Hwave,                                      &
 #else
@@ -148,6 +149,9 @@
       integer, intent(inout) :: Iconv(LBi:,LBj:)
 
       real(r8), intent(in) :: h(LBi:,LBj:)
+# ifdef LIMIT_BSTRESS
+      real(r8), intent(in) :: Hz(LBi:,LBj:,:)
+# endif
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
       real(r8), intent(in) :: angler(LBi:,LBj:)
@@ -191,6 +195,9 @@
       integer, intent(inout) :: Iconv(LBi:UBi,LBj:UBj)
 
       real(r8), intent(in) :: h(LBi:UBi,LBj:UBj)
+# ifdef LIMIT_BSTRESS
+      real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
+# endif
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
       real(r8), intent(in) :: angler(LBi:UBi,LBj:UBj)
@@ -666,33 +673,42 @@
 !  Compute kinematic bottom stress components due current and wind-
 !  induced waves.
 !-----------------------------------------------------------------------
+#ifdef LIMIT_BSTRESS
+!
+!  Set limiting factor for bottom stress. The bottom stress is adjusted
+!  to not change the direction of momentum.  It only should slow down
+!  to zero.  The value of 0.75 is arbitrary limitation assigment.
+!
+      cff=0.75_r8/dt(ng)
+#endif
 !
       DO j=Jstr,Jend
         DO i=IstrU,Iend
           anglec=Ur_sg(i,j)/(0.5*(Umag(i-1,j)+Umag(i,j)))
           bustr(i,j)=0.5_r8*(Tauc(i-1,j)+Tauc(i,j))*anglec
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#    ifdef LIMIT_BSTRESS
-          cff3=0.75_r8*0.5_r8*(Hz(i-1,j,1)+Hz(i,j,1))
+#ifdef LIMIT_BSTRESS
+          cff1=cff*0.5_r8*(z_w(i-1,j,1)+z_w(i,j,1)-                     &
+     &                     z_w(i-1,j,0)-z_w(i,j,0))
+
           bustr(i,j)=SIGN(1.0_r8, bustr(i,j))*                          &
      &               MIN(ABS(bustr(i,j)),                               &
-     &                   ABS(u(i,j,1,nrhs))*cff3/dt(ng))
-#    endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+     &                   ABS(u(i,j,1,nrhs))*cff1)
+#endif
         END DO
       END DO
       DO j=JstrV,Jend
         DO i=Istr,Iend
           anglec=Vr_sg(i,j)/(0.5_r8*(Umag(i,j-1)+Umag(i,j)))
           bvstr(i,j)=0.5_r8*(Tauc(i,j-1)+Tauc(i,j))*anglec
-!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
-#    ifdef LIMIT_BSTRESS
-          cff3=0.75_r8*0.5_r8*(Hz(i,j-1,1)+Hz(i,j,1))
+#ifdef LIMIT_BSTRESS
+          cff1=cff*0.5_r8*(z_w(i,j-1,1)+z_w(i,j,1)-                     &
+     &                     z_w(i,j-1,0)-z_w(i,j,0))
+
+          cff3=cff*0.5_r8*(Hz(i,j-1,1)+Hz(i,j,1))
           bvstr(i,j)=SIGN(1.0_r8, bvstr(i,j))*                          &
      &               MIN(ABS(bvstr(i,j)),                               &
-     &                   ABS(v(i,j,1,nrhs))*cff3/dt(ng))
-#    endif
-!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+     &                   ABS(v(i,j,1,nrhs))*cff1)
+#endif
         END DO
       END DO
       DO j=Jstr,Jend

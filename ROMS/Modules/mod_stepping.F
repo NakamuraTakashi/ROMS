@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2014 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -158,7 +158,7 @@
       Lfinp(1:Ngrids)=1
 
       allocate ( Lfout(Ngrids) )
-      Lbout(1:Ngrids)=1
+      Lfout(1:Ngrids)=1
 #endif
 
       allocate ( Lnew(Ngrids) )

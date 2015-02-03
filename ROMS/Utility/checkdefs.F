@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2014 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -1227,11 +1227,18 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+18)=' OBS_IMPACT_SPLIT,'
 #endif
-#if defined ONE_WAY && defined NESTING
+#ifdef NESTING
+# ifdef ONE_WAY
       IF (Master) WRITE (stdout,20) 'ONE_WAY',                          &
      &   'One-way nesting in refinement grids.'
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+9)=' ONE_WAY,'
+# else
+      IF (Master) WRITE (stdout,20) '!ONE_WAY',                         &
+     &   'Two-way nesting in refinement grids.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+10)=' !ONE_WAY,'
+# endif
 #endif
 #ifdef OUT_DOUBLE
       IF (Master) WRITE (stdout,20) 'OUT_DOUBLE',                       &
@@ -1772,6 +1779,12 @@
       Coptions(is:is+11)=' TS_MPDATA,'
       itrcHadv=itrcHadv+1
       itrcVadv=itrcVadv+1
+#  ifdef TS_MPDATA_LIMIT
+      IF (Master) WRITE (stdout,20) 'TS_MPDATA_LIMIT',                  &
+     &   'Further limiter in upwind corrector fluxes for stability.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+17)=' TS_MPDATA_LIMIT,'
+#  endif
 # endif
 # ifdef TS_A4HADVECTION
       IF (Master) WRITE (stdout,20) 'TS_A4HADVECTION',                  &
@@ -2489,6 +2502,25 @@
      &          /,13x,'Use instead standard input switch: ',a,          &
      &          /,13x,'Edit header file or build script!')
         exit_flag=5
+      END IF
+#endif
+#if !defined DISTRIBUTE && defined NESTING
+!
+!  Stop if activating nesting in serial with partitions or shared-
+!  memory.
+!
+      IF (Master) THEN
+        DO ng=1,Ngrids
+          IF (NtileX(ng)*NtileE(ng).gt.1) THEN
+            WRITE (stdout,250) uppercase('nesting')
+            exit_flag=5
+            EXIT
+          END IF
+        END DO
+ 250    FORMAT (/,' CHECKDEFS - cannot activate option: ',a,           &
+     &          /,13x,'in serial with partitions or shared-memory...', &
+     &          /,13x,'There bugs in shared-memory that need fixing.', &
+     &          /,13x,'Use distributed-memory (MPI) in parallel runs.')
       END IF
 #endif
 

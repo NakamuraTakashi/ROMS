@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2014 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -110,8 +110,7 @@
 !  Application grid number as a function of the maximum number of grids
 !  in each nested layer and number of nested layers.
 !
-      integer, allocatable :: GridNumber(:,:)   ! [MAXVAL(GridsInLayer),
-                                                !  NestLayer]
+      integer, allocatable :: GridNumber(:,:)   ! [Ngrids,NestLayers]
 !
 !-----------------------------------------------------------------------
 !  Define derived type structure, T_IO, used to store information about
