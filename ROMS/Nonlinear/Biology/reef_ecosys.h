@@ -140,10 +140,15 @@
      &                   BBL(ng) % bvstrw,                              &
      &                   BBL(ng) % bustrcwmax,                          &
      &                   BBL(ng) % bvstrcwmax,                          &
+# ifdef SSW_BBL
+     &                   BBL(ng) % bstrcwave,                           &
+# endif
 #else
      &                   FORCES(ng) % bustr,                            &
      &                   FORCES(ng) % bvstr,                            &
 #endif
+     &                   FORCES(ng) % Dwave,                            &
+     &                   FORCES(ng) % Pwave_bot,                        &
      &                   OCEAN(ng) % t)
 
 
@@ -179,9 +184,13 @@
      &                         bustrc, bvstrc,                          &
      &                         bustrw, bvstrw,                          &
      &                         bustrcwmax, bvstrcwmax,                  &
+# ifdef SSW_BBL
+     &                         bstrcwave,                               &
+# endif
 #else
      &                         bustr, bvstr,                            &
 #endif
+     &                         Dwave, Pwave_bot,                        &
      &                         t)
 !-----------------------------------------------------------------------
 !
@@ -231,10 +240,15 @@
       real(r8), intent(in) :: bvstrw(LBi:,LBj:)
       real(r8), intent(in) :: bustrcwmax(LBi:,LBj:)
       real(r8), intent(in) :: bvstrcwmax(LBi:,LBj:)
+#   ifdef SSW_BBL
+      real(r8), intent(in) :: bstrcwave(LBi:,LBj:)
+#   endif
 #  else
       real(r8), intent(in) :: bustr(LBi:,LBj:)
       real(r8), intent(in) :: bvstr(LBi:,LBj:)
 #  endif
+      real(r8), intent(in) :: Dwave(LBi:,LBj:)
+      real(r8), intent(in) :: Pwave_bot(LBi:,LBj:)
       real(r8), intent(inout) :: t(LBi:,LBj:,:,:,:)
 
 #else
@@ -267,10 +281,15 @@
       real(r8), intent(in) :: bvstrw(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: bustrcwmax(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: bvstrcwmax(LBi:UBi,LBj:UBj)
+#   ifdef SSW_BBL
+      real(r8), intent(in) :: bstrcwave(LBi:UBi,LBj:UBj)
+#   endif
 #  else
       real(r8), intent(in) :: bustr(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: bvstr(LBi:UBi,LBj:UBj)
 #  endif
+      real(r8), intent(in) :: Dwave(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: Pwave_bot(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,UBk,3,UBt)
 #endif
 !
@@ -342,12 +361,17 @@
 !-----------------------------------------------------------------------
 
 #ifdef BBL_MODEL
+# ifdef SSW_BBL
+            tau = bstrcwave(i,j) *rho0    !! (m2 s-2) * (kg m-3) = (kg m-1 s-2) = (kg m s-2 m-2) = (N m-2)
+# else
             tau_u=bustrc(i,j)+0.5_r8*bustrw(i,j)
             tau_v=bvstrc(i,j)+0.5_r8*bvstrw(i,j)
             tau = SQRT(tau_u*tau_u + tau_v*tau_v) *rho0    !! (m2 s-2) * (kg m-3) = (kg m-1 s-2) = (kg m s-2 m-2) = (N m-2)
             
 !            tau = SQRT(bustrcwmax(i,j)*bustrcwmax(i,j)+          &
 !     &                   bvstrcwmax(i,j)*bvstrcwmax(i,j)) *rho0    !! (m2 s-2) * (kg m-3) = (kg m-1 s-2) = (kg m s-2 m-2) = (N m-2)
+
+# endif
 #else
             tau = 0.5_r8*SQRT((bustr(i,j)+bustr(i+1,j))*         &
      &                          (bustr(i,j)+bustr(i+1,j))+         &
@@ -460,6 +484,7 @@
             HisBio2d(i,j,ipCO2) = ssfCO2
             HisBio2d(i,j,iO2fx) = ssO2flux
             HisBio2d(i,j,iPARb) = PFDbott
+            HisBio2d(i,j,iTau_) = tau
 #ifdef CORAL_POLYP
             HisBio2d(i,j,iClPg) = coral_Pg
             HisBio2d(i,j,iCl_R) = coral_R
@@ -532,4 +557,5 @@
 
       RETURN
       END SUBROUTINE biology_tile
+      
 

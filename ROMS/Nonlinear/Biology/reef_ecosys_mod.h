@@ -140,6 +140,7 @@
       integer  :: ipCO2                       ! partial pressure of CO2
       integer  :: iO2fx                       ! air-sea O2 flux
       integer  :: iPARb                       ! bottom photon flux density (umol m-2 s-1)
+      integer  :: iTau_                       ! bottom shear stress (N m-2)
 !
 !  Biological 3D Histrory variable IDs.
 !
@@ -341,6 +342,9 @@
 
       ic=ic+1
       iPARb=ic
+
+      ic=ic+1
+      iTau_=ic
 
 #ifdef CORAL_POLYP
       ic=ic+1

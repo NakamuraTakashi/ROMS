@@ -927,6 +927,14 @@
 #  else
         NFV(ng)=NT(ng)+16
 #  endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+# elif defined FLOAT_REEF_ECOSYS
+#  ifdef FLOAT_VWALK
+        NFV(ng)=NT(ng)+18
+#  else
+        NFV(ng)=NT(ng)+16
+#  endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 # else
 #  ifdef FLOAT_VWALK
         NFV(ng)=NT(ng)+12

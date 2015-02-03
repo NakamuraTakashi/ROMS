@@ -163,6 +163,16 @@
         integer  :: idswim = -8   ! biological float swimming time
         integer  :: idwbio = -9   ! biological float w-velocity
         integer  :: idwsin = -10  ! biological float sinking velocity
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+#elif defined FLOAT_REEF_ECOSYS
+!
+!  Biological floats identification indices.
+!
+        integer  :: idsize = -7   ! biological float size (length)
+        integer  :: idswim = -8   ! biological float swimming time
+        integer  :: idwbio = -9   ! biological float w-velocity
+        integer  :: idwsin = -10  ! biological float sinking velocity
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #endif
 !
 !  Input/output identification indices.

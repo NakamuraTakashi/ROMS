@@ -707,7 +707,8 @@
       ! 1 nmol cm-2 s-1 = 0.01 mmol m-2 s-1, 1 mmol m-3 = 1 umol L-1 = 1/1.024 umol kg-1
       ! cff: convaert [nmol cm-2 s-1] to [umol L-1 s-1]
 
-        cff=0.01d0 /dz(1) * p_coral*10.0d0  !!!*10.0d0 ‚Ä‚«‚Æ‚¤ convert projected area to coral surface area
+!        cff=0.01d0 /dz(1) * p_coral*4.0d0  !!!*~4.0d0 convert projected area to coral surface area (Naumann et al. 2009)
+        cff=0.01d0 /dz(1) * p_coral*8.0d0  !!!*~8.0d0 convert projected area to coral surface area (Jokiel & Morrissey 1986; Nakamura and Nakamori 2009)
          
         dDIC_dt(1) = dDIC_dt(1) - Flux_DIC * cff/rho_sw
         dTA_dt (1) = dTA_dt (1) - Flux_TA  * cff/rho_sw

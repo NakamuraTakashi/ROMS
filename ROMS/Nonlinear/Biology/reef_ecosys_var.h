@@ -100,6 +100,9 @@
 
               CASE ('iHbio2(iPARb)')
                 iHbio2(iPARb)=varid
+
+              CASE ('iHbio2(iTau_)')
+                iHbio2(iTau_)=varid
 #ifdef CORAL_POLYP
               CASE ('iHbio2(iClPg)')
                 iHbio2(iClPg)=varid
