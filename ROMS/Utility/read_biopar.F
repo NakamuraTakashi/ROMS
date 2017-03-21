@@ -3,7 +3,7 @@
 !!
 !!svn $Id$
 !!================================================= Hernan G. Arango ===
-!! Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!! Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !!   Licensed under a MIT/X style license                              !
 !!   See License_ROMS.txt                                              !
 !!======================================================================
@@ -29,6 +29,8 @@
 # elif defined REEF_ECOSYS
 #  include <reef_ecosys_inp.h>
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+# elif defined RED_TIDE
+#  include <red_tide_inp.h>
 # endif
 #else
       SUBROUTINE read_BioPar

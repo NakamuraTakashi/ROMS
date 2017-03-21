@@ -3,13 +3,13 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
 !                                                                      !
 !  This routine creates restart NetCDF file, it defines its            !
-!  dimensions, attributes, and fvariables.                             !
+!  dimensions, attributes, and variables.                              !
 !                                                                      !
 #if defined PERFECT_RESTART && defined WRITE_WATER && defined MASKING
 !  Currently, perfect restart is not compatible with writing           !

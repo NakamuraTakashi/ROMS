@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -210,14 +210,6 @@
 !
       SFcount(ng)=Nfrec(ng)+1
 #  endif
-#  ifdef OBSERVATIONS
-!
-!  Initialize various variables needed for processing observations
-!  backwards in time.
-!
-      CALL obs_initial (ng, iADM, .TRUE.)
-      IF (exit_flag.ne.NoError) RETURN
-#  endif
 !$OMP END MASTER
 !$OMP BARRIER
 # endif
@@ -368,10 +360,11 @@
      defined OPT_OBSERVATIONS || defined SO_SEMI
 !
 !-----------------------------------------------------------------------
-!  Clear all adjoint variables.
+!  Clear all adjoint and nonlinear variables.
 !-----------------------------------------------------------------------
 !
       DO tile=first_tile(ng),last_tile(ng),+1
+        CALL initialize_ocean (ng, tile, iNLM)
         CALL initialize_ocean (ng, tile, iADM)
 #  if defined SOLVE3D
         CALL initialize_coupling (ng, tile, iADM)
@@ -525,6 +518,22 @@
         END DO
 !$OMP BARRIER
       END IF
+# endif
+
+# ifdef OBSERVATIONS
+!
+!-----------------------------------------------------------------------
+!  Initialize various variables needed for processing observations
+!  backwards in time. Need to be done after processing initial
+!  conditions since the correct initial time is needed to determine
+!  the first "ObsTime" to process.
+!-----------------------------------------------------------------------
+!
+!$OMP MASTER
+      CALL obs_initial (ng, iADM, .TRUE.)
+!$OMP MASTER
+!$OMP BARRIER
+      IF (exit_flag.ne.NoError) RETURN
 # endif
 
 # if defined ANA_PERTURB  && \

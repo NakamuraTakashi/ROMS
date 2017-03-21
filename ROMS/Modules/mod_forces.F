@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -241,6 +241,11 @@
 #  ifndef ANA_SRFLUX
           real(r8), pointer :: srflxG(:,:,:)
 #  endif
+# endif
+
+# if defined RED_TIDE && defined DAILY_SHORTWAVE
+          real(r8), pointer :: srflx_avg(:,:)
+          real(r8), pointer :: srflxG_avg(:,:,:)
 # endif
 
 # ifdef CLOUDS
@@ -542,6 +547,11 @@
 #  ifndef ANA_SRFLUX
       allocate ( FORCES(ng) % srflxG(LBi:UBi,LBj:UBj,2) )
 #  endif
+# endif
+
+# if defined RED_TIDE && defined DAILY_SHORTWAVE
+      allocate ( FORCES(ng) % srflx_avg(LBi:UBi,LBj:UBj) )
+      allocate ( FORCES(ng) % srflxG_avg(LBi:UBi,LBj:UBj,2) )
 # endif
 
 # ifdef CLOUDS
@@ -908,6 +918,11 @@
             FORCES(ng) % srflxG(i,j,1) = IniVal
             FORCES(ng) % srflxG(i,j,2) = IniVal
 #  endif
+# endif
+# if defined RED_TIDE && defined DAILY_SHORTWAVE
+            FORCES(ng) % srflx_avg(i,j) = IniVal
+            FORCES(ng) % srflxG_avg(i,j,1) = IniVal
+            FORCES(ng) % srflxG_avg(i,j,2) = IniVal
 # endif
 # ifdef CLOUDS
             FORCES(ng) % cloud(i,j) = IniVal

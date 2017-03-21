@@ -7,7 +7,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
 !========================================== Alexander F. Shchepetkin ===
@@ -334,7 +334,7 @@
 !=======================================================================
 !
       DO j=Jstr,Jend
-# ifdef SPLINES
+# ifdef RI_SPLINES
 !
 ! Construct parabolic splines for vertical derivatives of potential
 ! density and velocity components at W-points.  FC is a scratch array.
@@ -621,6 +621,16 @@
      &                     rmask,                                       &
 #  endif
      &                     hsbl)
+!
+      DO j=Jstr,Jend
+        DO i=Istr,Iend
+          hsbl(i,j)=MIN(hsbl(i,j),z_w(i,j,N(ng)))
+          hsbl(i,j)=MAX(hsbl(i,j),z_w(i,j,0))
+#  ifdef MASKING
+          hsbl(i,j)=hsbl(i,j)*rmask(i,j)
+#  endif
+        END DO
+      END DO
 # endif
 !
 !  Apply gradient or periodic boundary conditions.

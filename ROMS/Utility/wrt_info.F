@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -873,6 +873,12 @@
      &                        NpostI, (/0/), (/0/),                     &
      &                        ncid = ncid)
 # endif
+# if defined IS4DVAR_SENSITIVITY || defined W4DPSAS_SENSITIVITY || \
+     defined W4DVAR_SENSITIVITY
+        CALL netcdf_put_ivar (ng, model, ncname, 'Nimpact',             &
+     &                        Nimpact, (/0/), (/0/),                    &
+     &                        ncid = ncid)
+# endif
 # ifndef IS4DVAR_SENSITIVITY
       CALL netcdf_put_fvar (ng, model, ncname, 'GradErr',               &
      &                      GradErr, (/0/), (/0/),                      &
@@ -1251,6 +1257,8 @@
 # elif defined REEF_ECOSYS
 #  include <reef_ecosys_wrt.h>
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+# elif defined RED_TIDE
+#  include <red_tide_wrt.h>
 # endif
 #endif
 
@@ -1324,6 +1332,15 @@
 
       CALL netcdf_put_fvar (ng, model, ncname, 'hc',                    &
      &                      hc(ng), (/0/), (/0/),                       &
+     &                      ncid = ncid)
+      IF (exit_flag.ne.NoError) RETURN
+!
+!  SGRID conventions for staggered data on structured grids. The value
+!  is arbitrary but is set to unity so it can be used as logical during
+!  post-processing.
+!
+      CALL netcdf_put_ivar (ng, model, ncname, 'grid',                  &
+     &                      (/1/), (/0/), (/0/),                        &
      &                      ncid = ncid)
       IF (exit_flag.ne.NoError) RETURN
 !

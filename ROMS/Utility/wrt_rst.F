@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -1085,19 +1085,20 @@
 !
   10  FORMAT (/,' WRT_RST - error while writing variable: ',a,/,11x,    &
      &        'into restart NetCDF file for time record: ',i4)
+
 #ifdef SOLVE3D
-  20  FORMAT (6x,'WRT_RST   - wrote re-start fields (Index=', i1,       &
+  20  FORMAT (6x,'WRT_RST     - wrote re-start', t39,                   &
 # ifdef NESTING
-     &        ',',i1,') into time record = ',i7.7,2x,i2.2)
+     &        'fields (Index=',i1,',',i1,') in record = ',i7.7,2x,i2.2)
 # else
-     &        ',',i1,') into time record = ',i7.7)
+     &        'fields (Index=',i1,',',i1,') in record = ',i7.7)
 # endif
 #else
-  20  FORMAT (6x,'WRT_RST   - wrote re-start fields (Index=', i1,       &
+  20  FORMAT (6x,'WRT_RST     - wrote re-start', t39,                   &
 # ifdef NESTING
-     &        ') into time record = ',i7.7,2x,i2.2)
+     &        'fields (Index=',i1,')   in record = ',i7.7,2x,i2.2)
 # else
-     &        ') into time record = ',i7.7)
+     &        'fields (Index=',i1,')   in record = ',i7.7)
 # endif
 #endif
 

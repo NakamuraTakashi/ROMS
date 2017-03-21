@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -120,7 +120,7 @@
 #ifdef BIOLOGY
       character (len=512) :: bio_file
 #endif
-      character (len=1024) :: string
+      character (len=4096) :: string
 !
 !-----------------------------------------------------------------------
 !  Set dimension variables.
@@ -231,7 +231,7 @@
 !  Define file climate and forecast metadata convention global
 !  attribute.
 !
-        type='CF-1.4'
+        type='CF-1.4, SGRID-0.3'
         IF (exit_flag.eq.NoError) THEN
           status=nf90_put_att(ncid, nf90_global, 'Conventions',         &
      &                        TRIM(type))
@@ -272,6 +272,8 @@
           type='ROMS/TOMS tangent linear model initial file'
         ELSE IF (ncid.eq.LCZ(ng)%ncid) THEN
           type='ROMS/TOMS 4DVAR Lanczos vectors file'
+        ELSE IF (ncid.eq.LZE(ng)%ncid) THEN
+          type='ROMS/TOMS 4DVAR Evolved Lanczos vectors file'
         ELSE IF (ncid.eq.NRM(1,ng)%ncid) THEN
           type='ROMS/TOMS initial conditions error covariance norm file'
         ELSE IF (ncid.eq.NRM(2,ng)%ncid) THEN
@@ -280,6 +282,8 @@
          type='ROMS/TOMS boundary conditions error covariance norm file'
         ELSE IF (ncid.eq.NRM(4,ng)%ncid) THEN
           type='ROMS/TOMS surface forcing error covariance norm file'
+        ELSE IF (ncid.eq.QCK(ng)%ncid) THEN
+          type='ROMS/TOMS quicksave file'
         ELSE IF (ncid.eq.RST(ng)%ncid) THEN
           type='ROMS/TOMS restart file'
         ELSE IF (ncid.eq.STA(ng)%ncid) THEN
@@ -320,6 +324,16 @@
      &                        TRIM(title))
           IF (status.ne.nf90_noerr) THEN
             IF (Master) WRITE (stdout,20) 'title', TRIM(ncname)
+            exit_flag=3
+            ioerror=status
+          END IF
+        END IF
+
+        IF (exit_flag.eq.NoError) THEN
+          status=nf90_put_att(ncid, nf90_global, 'var_info',            &
+     &                        TRIM(varname))
+          IF (status.ne.nf90_noerr) THEN
+            IF (Master) WRITE (stdout,20) 'var_info', TRIM(ncname)
             exit_flag=3
             ioerror=status
           END IF
@@ -581,7 +595,7 @@
             CALL join_string (CLM(ng)%files, CLM(ng)%Nfiles,            &
      &                        string,lstr)
             status=nf90_put_att(ncid, nf90_global, 'clm_file',          &
-     &                          TRIM(CLM(ng)%name))
+     &                          string(1:lstr))
             IF (status.ne.nf90_noerr) THEN
               IF (Master) WRITE (stdout,20) 'clm_file', TRIM(ncname)
               exit_flag=3
@@ -2031,6 +2045,15 @@
      &               SetParAccess = .FALSE.)
       IF (exit_flag.ne.NoError) RETURN
 # endif
+# if defined IS4DVAR_SENSITIVITY || defined W4DPSAS_SENSITIVITY || \
+     defined W4DVAR_SENSITIVITY
+      Vinfo( 1)='Nimpact'
+      Vinfo( 2)='Observations impact/sensitivity outer loop to use'
+      status=def_var(ng, model, ncid, varid, nf90_int,                  &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (exit_flag.ne.NoError) RETURN
+# endif
 # ifndef IS4DVAR_SENSITIVITY
       Vinfo( 1)='GradErr'
       Vinfo( 2)='Upper bound on relative error of the gradient'
@@ -2600,6 +2623,8 @@
 # elif defined REEF_ECOSYS
 #  include <reef_ecosys_def.h>
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+# elif defined RED_TIDE
+#  include <red_tide_def.h>
 # endif
 #endif
 
@@ -2695,6 +2720,14 @@
       Vinfo( 2)='S-coordinate parameter, critical depth'
       Vinfo( 3)='meter'
       status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (exit_flag.ne.NoError) RETURN
+!
+!  SGRID conventions for staggered data on structured grids.
+!
+      Vinfo( 1)='grid'
+      status=def_var(ng, model, ncid, varid, nf90_int,                  &
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
       IF (exit_flag.ne.NoError) RETURN

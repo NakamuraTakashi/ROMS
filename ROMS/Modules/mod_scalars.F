@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -593,13 +593,14 @@
         real(r8), allocatable :: gamma2(:)
 !
 !  Weighting coefficient for the newest (implicit) time step derivatives
-!  in the Crack-Nicolson implicit scheme (usually, lambda=0.5).
+!  using either a Crack-Nicolson implicit scheme (lambda=0.5) or a
+!  backward implicit scheme (lambda=1.0).
 !
-#ifdef SPLINES
-        real(r8) :: lambda = 1.0_r8             ! backward implicit
+#if defined SPLINES_VDIFF || defined SPLINES_VVISC
+        real(r8) :: lambda = 1.0_r8
 #else
 !!      real(r8) :: lambda = 0.5_r8
-        real(r8) :: lambda = 1.0_r8             ! backward implicit
+        real(r8) :: lambda = 1.0_r8
 #endif
 !
 !  Jerlov water type to assign everywhere, range values: 1 - 5.
@@ -795,6 +796,7 @@
 !
         logical, allocatable :: LdefADJ(:)       ! Adjoint file
         logical, allocatable :: LdefAVG(:)       ! Average file
+        logical, allocatable :: LdefDAI(:)       ! DA initial/restart
         logical, allocatable :: LdefDIA(:)       ! Diagnostics file
         logical, allocatable :: LdefERR(:)       ! 4DVar error file
         logical, allocatable :: LdefFLT(:)       ! Floats file
@@ -803,8 +805,10 @@
         logical, allocatable :: LdefINI(:)       ! Initial file
         logical, allocatable :: LdefIRP(:)       ! Initial RPM file
         logical, allocatable :: LdefITL(:)       ! Initial TLM file
-        logical, allocatable :: LdefLCZ(:)       ! Lanczos file
+        logical, allocatable :: LdefLCZ(:)       ! Lanczos Vectors file
+        logical, allocatable :: LdefLZE(:)       ! Evolved Lanczos file
         logical, allocatable :: LdefMOD(:)       ! 4DVAR file
+        logical, allocatable :: LdefQCK(:)       ! Quicksave file
         logical, allocatable :: LdefRST(:)       ! Restart file
         logical, allocatable :: LdefSTA(:)       ! Stations file
         logical, allocatable :: LdefTIDE(:)      ! tide forcing file
@@ -816,6 +820,7 @@
         logical, allocatable :: LwrtDIA(:)       ! Write diagnostic file
         logical, allocatable :: LwrtHIS(:)       ! Write history file
         logical, allocatable :: LwrtPER(:)       ! Write during ensemble
+        logical, allocatable :: LwrtQCK(:)       ! write quicksave file
         logical, allocatable :: LwrtRST(:)       ! Write restart file
         logical, allocatable :: LwrtTLM(:)       ! Write tangent file
         logical, allocatable :: LwrtTLF(:)       ! Write impulse file
@@ -855,6 +860,7 @@
         integer, allocatable :: ndefAVG(:)       ! Average file
         integer, allocatable :: ndefDIA(:)       ! Diagnostics file
         integer, allocatable :: ndefHIS(:)       ! History file
+        integer, allocatable :: ndefQCK(:)       ! Quicksave file
         integer, allocatable :: ndefTLM(:)       ! Tangent linear file
 !
 !  Starting timestep for accumulation of output.
@@ -869,6 +875,7 @@
         integer, allocatable :: nDIA(:)          ! Diagnostics file
         integer, allocatable :: nFLT(:)          ! Floats file
         integer, allocatable :: nHIS(:)          ! History file
+        integer, allocatable :: nQCK(:)          ! Quicksave file
         integer, allocatable :: nRST(:)          ! Restart file
         integer, allocatable :: nSTA(:)          ! Stations file
         integer, allocatable :: nTLM(:)          ! Tangent linear file
@@ -1086,6 +1093,11 @@
         real(r8), allocatable :: Hdecay(:,:,:)
 !
 !  Initial conditions, model and surface forcing error covariance
+!  temporal decorrelation scales (second).
+!
+        real(r8), allocatable :: Tdecay(:,:)
+!
+!  Initial conditions, model and surface forcing error covariance
 !  vertical decorrelation scales (m).
 !
         real(r8), allocatable :: Vdecay(:,:,:)
@@ -1099,6 +1111,38 @@
 !  scales (m).
 !
         real(r8), allocatable :: VdecayB(:,:,:)
+!
+!  Method for background quality control of observations, [Ngrids].
+!
+!      [1] Quality control in terms of state variable indices
+!      [2] Quality control in terms of observation provenance
+!
+        integer, allocatable :: bgqc_type(:)
+!
+!  Background quality control standard deviation value for not
+!  rejection of observations.
+!
+        real(r8) :: bgqc_large = 1.0E+5_r8
+!
+!  Number of observation provenances used in background quality control,
+!  [Ngrids]. Only used when bgqc_type(ng)=2.
+!
+        integer, allocatable :: Nprovenance(:)
+!
+!  Observation provenance indices to process during background quality
+!  control of observations, [MAXVAL(Nprovenance),Ngrids].
+!
+        integer, allocatable :: Iprovenance(:,:)
+!
+!  Background quality control threshold standard deviations in terms
+!  of observation provenance indices, [MAXVAL(Nprovenance),Ngrids].
+!
+        real(r8), allocatable :: P_bgqc(:,:)
+!
+!  Background quality control threshold standard deviations in terms
+!  of state variable indices, [MstateVar,Ngrids]
+!
+        real(r8), allocatable :: S_bgqc(:,:)
 #endif
 !
 !-----------------------------------------------------------------------
@@ -1867,6 +1911,7 @@
 
       allocate ( LdefADJ(Ngrids) )
       allocate ( LdefAVG(Ngrids) )
+      allocate ( LdefDAI(Ngrids) )
       allocate ( LdefDIA(Ngrids) )
       allocate ( LdefERR(Ngrids) )
       allocate ( LdefFLT(Ngrids) )
@@ -1876,7 +1921,9 @@
       allocate ( LdefIRP(Ngrids) )
       allocate ( LdefITL(Ngrids) )
       allocate ( LdefLCZ(Ngrids) )
+      allocate ( LdefLZE(Ngrids) )
       allocate ( LdefMOD(Ngrids) )
+      allocate ( LdefQCK(Ngrids) )
       allocate ( LdefRST(Ngrids) )
       allocate ( LdefSTA(Ngrids) )
       allocate ( LdefTIDE(Ngrids) )
@@ -1888,6 +1935,7 @@
       allocate ( LwrtDIA(Ngrids) )
       allocate ( LwrtHIS(Ngrids) )
       allocate ( LwrtPER(Ngrids) )
+      allocate ( LwrtQCK(Ngrids) )
       allocate ( LwrtRST(Ngrids) )
       allocate ( LwrtTLM(Ngrids) )
       allocate ( LwrtTLF(Ngrids) )
@@ -1913,6 +1961,7 @@
       allocate ( ndefAVG(Ngrids) )
       allocate ( ndefDIA(Ngrids) )
       allocate ( ndefHIS(Ngrids) )
+      allocate ( ndefQCK(Ngrids) )
       allocate ( ndefTLM(Ngrids) )
 
       allocate ( ntsAVG(Ngrids) )
@@ -1923,6 +1972,7 @@
       allocate ( nDIA(Ngrids) )
       allocate ( nFLT(Ngrids) )
       allocate ( nHIS(Ngrids) )
+      allocate ( nQCK(Ngrids) )
       allocate ( nRST(Ngrids) )
       allocate ( nSTA(Ngrids) )
       allocate ( nTLM(Ngrids) )
@@ -1989,8 +2039,14 @@
       allocate ( Hdecay(2,MstateVar,Ngrids) )
       allocate ( Vdecay(2,MstateVar,Ngrids) )
 
+      allocate ( Tdecay(MstateVar,Ngrids) )
+
       allocate ( HdecayB(MstateVar,4,Ngrids) )
       allocate ( VdecayB(MstateVar,4,Ngrids) )
+
+      allocate ( bgqc_type(Ngrids) )
+      allocate ( Nprovenance(Ngrids) )
+      allocate ( S_bgqc(MstateVar,Ngrids) )
 #endif
 
       allocate ( obcfac(Ngrids) )
@@ -2349,6 +2405,7 @@
 
       Cnorm=.FALSE.
       Hdecay=IniVal
+      Tdecay=IniVal
       Vdecay=IniVal
 
       CnormB=.FALSE.
@@ -2369,6 +2426,7 @@
 
         LdefADJ(ng)=.FALSE.
         LdefAVG(ng)=.TRUE.
+        LdefDAI(ng)=.FALSE.
         LdefDIA(ng)=.TRUE.
         LdefERR(ng)=.FALSE.
 #ifdef FLOATS
@@ -2379,6 +2437,7 @@
         LdefIRP(ng)=.FALSE.
         LdefITL(ng)=.FALSE.
         LdefMOD(ng)=.FALSE.
+        LdefQCK(ng)=.FALSE.
         LdefRST(ng)=.TRUE.
         LdefSTA(ng)=.TRUE.
         LdefTLM(ng)=.FALSE.
@@ -2390,6 +2449,7 @@
         LwrtDIA(ng)=.FALSE.
         LwrtHIS(ng)=.FALSE.
         LwrtPER(ng)=.FALSE.
+        LwrtQCK(ng)=.FALSE.
         LwrtRST(ng)=.FALSE.
         LwrtTLM(ng)=.FALSE.
         LwrtInfo(ng)=.TRUE.

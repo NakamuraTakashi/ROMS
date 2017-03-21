@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
 !========================================== Alexander F. Shchepetkin ===
@@ -264,7 +264,11 @@
       integer :: ILB, IUB, JLB, JUB
       integer :: dg, cr, rg
 # endif
+      integer :: Isrc, Jsrc
       integer :: i, ic, is, itrc, j, k, ltrc
+# if defined AGE_MEAN && defined T_PASSIVE
+      integer :: iage
+# endif
 # ifdef DIAGNOSTICS_TS
       integer :: idiag
 # endif
@@ -534,52 +538,56 @@
 !  Apply tracers point sources to the horizontal advection terms,
 !  if any.
 !
-          IF (.not.LwSrc(ng).and.ANY(LtracerSrc(:,ng))) THEN
+          IF (LuvSrc(ng).and.ANY(LtracerSrc(:,ng))) THEN
             DO is=1,Nsrc(ng)
-              i=SOURCES(ng)%Isrc(is)
-              j=SOURCES(ng)%Jsrc(is)
+              Isrc=SOURCES(ng)%Isrc(is)
+              Jsrc=SOURCES(ng)%Jsrc(is)
               IF (INT(SOURCES(ng)%Dsrc(is)).eq.0) THEN
 # ifdef TS_MPDATA
-                IF (((IstrUm2.le.i).and.(i.le.Iendp3)).and.             &
-     &              ((JstrVm2.le.j).and.(j.le.Jendp2i))) THEN
+                IF (((IstrUm2.le.Isrc).and.(Isrc.le.Iendp3)).and.       &
+     &              ((JstrVm2.le.Jsrc).and.(Jsrc.le.Jendp2i))) THEN
 # else
-                IF (((Istr.le.i).and.(i.le.Iend+1)).and.                &
-     &              ((Jstr.le.j).and.(j.le.Jend))) THEN
+                IF (((Istr.le.Isrc).and.(Isrc.le.Iend+1)).and.          &
+     &              ((Jstr.le.Jsrc).and.(Jsrc.le.Jend))) THEN
 # endif
                   IF (LtracerSrc(itrc,ng)) THEN
-                    FX(i,j)=Huon(i,j,k)*                                &
-     &                      SOURCES(ng)%Tsrc(is,k,itrc)
+                    FX(Isrc,Jsrc)=Huon(Isrc,Jsrc,k)*                    &
+     &                            SOURCES(ng)%Tsrc(is,k,itrc)
 # ifdef MASKING
                   ELSE
-                    IF ((rmask(i  ,j).eq.0.0_r8).and.                   &
-     &                  (rmask(i-1,j).eq.1.0_r8)) THEN
-                      FX(i,j)=Huon(i,j,k)*t(i-1,j,k,3,itrc)
-                    ELSE IF ((rmask(i  ,j).eq.1.0_r8).and.              &
-     &                       (rmask(i-1,j).eq.0.0_r8)) THEN
-                      FX(i,j)=Huon(i,j,k)*t(i  ,j,k,3,itrc)
+                    IF ((rmask(Isrc  ,Jsrc).eq.0.0_r8).and.             &
+     &                  (rmask(Isrc-1,Jsrc).eq.1.0_r8)) THEN
+                      FX(Isrc,Jsrc)=Huon(Isrc,Jsrc,k)*                  &
+     &                              t(Isrc-1,Jsrc,k,3,itrc)
+                    ELSE IF ((rmask(Isrc  ,Jsrc).eq.1.0_r8).and.        &
+     &                       (rmask(Isrc-1,Jsrc).eq.0.0_r8)) THEN
+                      FX(Isrc,Jsrc)=Huon(Isrc,Jsrc,k)*                  &
+     &                              t(Isrc  ,Jsrc,k,3,itrc)
                     END IF
 # endif
                   END IF
                 END IF
               ELSE IF (INT(SOURCES(ng)%Dsrc(is)).eq.1) THEN
 # ifdef TS_MPDATA
-                IF (((IstrUm2.le.i).and.(i.le.Iendp2i)).and.            &
-     &              ((JstrVm2.le.j).and.(j.le.Jendp3))) THEN
+                IF (((IstrUm2.le.Isrc).and.(Isrc.le.Iendp2i)).and.      &
+     &              ((JstrVm2.le.Jsrc).and.(Jsrc.le.Jendp3))) THEN
 # else
-                IF (((Istr.le.i).and.(i.le.Iend)).and.                  &
-     &              ((Jstr.le.j).and.(j.le.Jend+1))) THEN
+                IF (((Istr.le.Isrc).and.(Isrc.le.Iend)).and.            &
+     &              ((Jstr.le.Jsrc).and.(Jsrc.le.Jend+1))) THEN
 # endif
                   IF (LtracerSrc(itrc,ng)) THEN
-                    FE(i,j)=Hvom(i,j,k)*                                &
-     &                      SOURCES(ng)%Tsrc(is,k,itrc)
+                    FE(Isrc,Jsrc)=Hvom(Isrc,Jsrc,k)*                    &
+     &                            SOURCES(ng)%Tsrc(is,k,itrc)
 # ifdef MASKING
                   ELSE
-                    IF ((rmask(i,j  ).eq.0.0_r8).and.                   &
-     &                  (rmask(i,j-1).eq.1.0_r8)) THEN
-                      FE(i,j)=Hvom(i,j,k)*t(i,j-1,k,3,itrc)
-                    ELSE IF ((rmask(i,j  ).eq.1.0_r8).and.              &
-     &                       (rmask(i,j-1).eq.0.0_r8)) THEN
-                      FE(i,j)=Hvom(i,j,k)*t(i,j  ,k,3,itrc)
+                    IF ((rmask(Isrc,Jsrc  ).eq.0.0_r8).and.             &
+     &                  (rmask(Isrc,Jsrc-1).eq.1.0_r8)) THEN
+                      FE(Isrc,Jsrc)=Hvom(Isrc,Jsrc,k)*                  &
+     &                              t(Isrc,Jsrc-1,k,3,itrc)
+                    ELSE IF ((rmask(Isrc,Jsrc  ).eq.1.0_r8).and.        &
+     &                       (rmask(Isrc,Jsrc-1).eq.0.0_r8)) THEN
+                      FE(Isrc,Jsrc)=Hvom(Isrc,Jsrc,k)*                  &
+     &                              t(Isrc,Jsrc  ,k,3,itrc)
                     END IF
 # endif
                   END IF
@@ -834,7 +842,7 @@
 !  Time-step vertical advection for intermediate diffusive tracer, Ta
 !  (Tunits).
 # else
-#  ifdef SPLINES
+#  ifdef SPLINES_VDIFF
 !  Time-step vertical advection term (Tunits).
 #  else
 !  Time-step vertical advection term (m Tunits).
@@ -850,25 +858,24 @@
 !
 !  Apply mass point sources (volume vertical influx), if any.
 !
-          IF (LwSrc(ng)) THEN
+          IF (LwSrc(ng).and.ANY(LtracerSrc(:,ng))) THEN
             DO is=1,Nsrc(ng)
-              i=SOURCES(ng)%Isrc(is)
-#  ifdef TS_MPDATA
-              IF (((IstrUm2.le.i).and.(i.le.Iendp2i)).and.              &
-     &            ((JstrVm2.le.j).and.(j.le.Jendp2i))) THEN
-#  else
-              IF (((IstrR.le.i).and.(i.le.IendR)).and.                  &
-     &            ((JstrR.le.j).and.(j.le.JendR))) THEN
-#  endif
-                IF (j.eq.SOURCES(ng)%Jsrc(is)) THEN
-                  DO k=1,N(ng)-1
-                    FC(i,k)=FC(i,k)+0.5_r8*                             &
-     &                      (SOURCES(ng)%Qsrc(is,k  )*                  &
-                             SOURCES(ng)%Tsrc(is,k  ,itrc)+             &
-     &                       SOURCES(ng)%Qsrc(is,k+1)*                  &
-     &                       SOURCES(ng)%Tsrc(is,k+1,itrc))
-                  END DO
-                END IF
+              Isrc=SOURCES(ng)%Isrc(is)
+              Jsrc=SOURCES(ng)%Jsrc(is)
+              IF (LtracerSrc(itrc,ng).and.                              &
+# ifdef TS_MPDATA
+     &            ((IstrUm2.le.Isrc).and.(Isrc.le.Iendp2i)).and.        &
+# else
+     &            ((IstrR.le.Isrc).and.(Isrc.le.IendR)).and.            &
+# endif
+     &            (j.eq.Jsrc)) THEN
+                DO k=1,N(ng)-1
+                  FC(Isrc,k)=FC(Isrc,k)+0.5_r8*                         &
+     &                       (SOURCES(ng)%Qsrc(is,k  )*                 &
+     &                        SOURCES(ng)%Tsrc(is,k  ,itrc)+            &
+     &                        SOURCES(ng)%Qsrc(is,k+1)*                 &
+     &                        SOURCES(ng)%Tsrc(is,k+1,itrc))
+                END DO
               END IF
             END DO
           END IF
@@ -895,7 +902,7 @@
 #  endif
 # else
               t(i,j,k,nnew,itrc)=t(i,j,k,nnew,itrc)-cff1
-#  ifdef SPLINES
+#  ifdef SPLINES_VDIFF
               t(i,j,k,nnew,itrc)=t(i,j,k,nnew,itrc)*oHz(i,j,k)
 #  endif
 #  ifdef DIAGNOSTICS_TS
@@ -1031,7 +1038,7 @@
         DO itrc=1,NT(ng)
           ltrc=MIN(NAT,itrc)
 
-# if defined SPLINES && !defined TS_MPDATA
+# if defined SPLINES_VDIFF && !defined TS_MPDATA
 !
 !  Use conservative, parabolic spline reconstruction of vertical
 !  diffusion derivatives.  Then, time step vertical diffusion term
@@ -1162,6 +1169,40 @@
 # endif
         END DO
       END DO
+
+# if defined AGE_MEAN && defined T_PASSIVE
+!
+!-----------------------------------------------------------------------
+!  If inert passive tracer and Mean Age, compute age concentration (even
+!  inert index) forced by the right-hand-side term that is concentration
+!  of an associated conservative passive tracer (odd inert index). Mean
+!  Age is age concentration divided by conservative passive tracer
+!  concentration. Code implements NPT/2 mean age tracer pairs.
+!
+!  Implemented and tested by W.G. Zhang and J. Wilkin. See following
+!  reference for details.
+!
+!   Zhang et al. (2010): Simulation of water age and residence time in
+!      the New York Bight, JPO, 40,965-982, doi:10.1175/2009JPO4249.1
+!-----------------------------------------------------------------------
+!
+      DO itrc=1,NPT,2
+        iage=inert(itrc+1)                     ! even inert tracer index
+        DO k=1,N(ng)
+          DO j=Jstr,Jend
+            DO i=Istr,Iend
+              t(i,j,k,nnew,iage)=t(i,j,k,nnew,iage)+                    &
+     &                           dt(ng)*                                &
+#  ifdef TS_MPDATA
+     &                           t(i,j,k,nnew,inert(itrc))
+#  else
+     &                           t(i,j,k,3,inert(itrc))
+#  endif
+            END DO
+          END DO
+        END DO
+      END DO
+# endif
 !
 !-----------------------------------------------------------------------
 !  Apply lateral boundary conditions and, if appropriate, nudge

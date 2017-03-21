@@ -5,7 +5,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license           Hernan G. Arango   !
 !    See License_ROMS.txt                             John C. Warner   !
 !=======================================================================
@@ -119,7 +119,9 @@
       PRIVATE :: get_metrics
       PRIVATE :: get_persisted2d
       PRIVATE :: get_refine
+# if defined MASKING || defined WET_DRY
       PRIVATE :: mask_hweights
+# endif
       PRIVATE :: put_composite
       PRIVATE :: put_refine
       PRIVATE :: put_refine2d
@@ -606,7 +608,7 @@
 # endif
 !
 !-----------------------------------------------------------------------
-!  Check mass and volume conservation durin refinement between coarse
+!  Check mass and volume conservation during refinement between coarse
 !  and fine grids.
 !-----------------------------------------------------------------------
 !
@@ -681,10 +683,11 @@
           Jbc_max=J_top(ngf)-1            ! interior points, no top
 !                                           left corner
 # ifdef NESTING_DEBUG
-          IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
+          IF (DOMAIN(ngf)%SouthWest_Test(tile)) THEN
             IF (Master) THEN
               WRITE (300,10) 'Western Boundary Mass Fluxes: ',          &
      &                       cr, dg, rg, iif(rg), iic(rg), INT(time(rg))
+              CALL my_flush (300)
             END IF
           END IF
 !
@@ -718,6 +721,7 @@
               END IF
               WRITE (300,30) Jbc, REFINED(cr)%DU_avg2(1,m,tnew),        &
      &                       WestSum, MFratio
+              CALL my_flush (300)
 # endif
             END IF
           END DO
@@ -732,10 +736,11 @@
           Jbc_max=J_top(ngf)-1            ! interior points, no top
 !                                           right corner
 # ifdef NESTING_DEBUG
-          IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
+          IF (DOMAIN(ngf)%SouthWest_Test(tile)) THEN
             IF (Master) THEN
               WRITE (300,10) 'Eastern Boundary Mass Fluxes: ',          &
      &                       cr, dg, rg, iif(rg), iic(rg), INT(time(rg))
+              CALL my_flush (300)
             END IF
           END IF
 !
@@ -750,7 +755,7 @@
               Jedge=Jo+(Jbc-Jbc_min)*RefineScale(ngf)
               DO jsum=-half,half
                 Jbf=Jedge+jsum
-                EastSum=WestSum+BRY_CONTACT(ieast,cr)%Mflux(Jbf)
+                EastSum=EastSum+BRY_CONTACT(ieast,cr)%Mflux(Jbf)
               END DO
               m=BRY_CONTACT(ieast,cr)%C2Bindex(Jbf)     ! pick last one
 !
@@ -763,12 +768,13 @@
 
 # ifdef NESTING_DEBUG
               IF (EastSum.ne.0) THEN
-                MFratio=REFINED(cr)%DU_avg2(1,m,tnew)/WestSum
+                MFratio=REFINED(cr)%DU_avg2(1,m,tnew)/EastSum
               ELSE
                 MFratio=1.0_r8
               END IF
               WRITE (300,30) Jbc, REFINED(cr)%DU_avg2(1,m,tnew),        &
      &                       EastSum, MFratio
+              CALL my_flush (300)
 # endif
             END IF
           END DO
@@ -783,10 +789,11 @@
           Ibc_max=I_right(ngf)-1          ! interior points, no bottom
 !                                           right corner
 # ifdef NESTING_DEBUG
-          IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
+          IF (DOMAIN(ngf)%SouthWest_Test(tile)) THEN
             IF (Master) THEN
               WRITE (300,20) 'Southern Boundary Mass Fluxes: ',         &
      &                       cr, dg, rg, iif(rg), iic(rg), INT(time(rg))
+              CALL my_flush (300)
             END IF
           END IF
 !
@@ -814,13 +821,14 @@
               BRY_CONTACT(isouth,cjcr)%Mflux(Ibc)=SouthSum
 
 # ifdef NESTING_DEBUG
-              IF (EastSum.ne.0) THEN
+              IF (SouthSum.ne.0) THEN
                 MFratio=REFINED(cr)%DV_avg2(1,m,tnew)/SouthSum
               ELSE
                 MFratio=1.0_r8
               END IF
               WRITE (300,30) Ibc, REFINED(cr)%DV_avg2(1,m,tnew),        &
      &                       SouthSum, MFratio
+              CALL my_flush (300)
 # endif
             END IF
           END DO
@@ -835,10 +843,11 @@
           Ibc_max=I_right(ngf)-1          ! interior points, no top
 !                                           right corner
 # ifdef NESTING_DEBUG
-          IF (DOMAIN(ng)%SouthWest_Test(tile)) THEN
+          IF (DOMAIN(ngf)%SouthWest_Test(tile)) THEN
             IF (Master) THEN
               WRITE (300,20) 'Northern Boundary Mass Fluxes: ',         &
      &                       cr, dg, rg, iif(rg), iic(rg), INT(time(rg))
+              CALL my_flush (300)
             END IF
           END IF
 !
@@ -856,7 +865,7 @@
                 Ibf=Iedge+isum
                 NorthSum=NorthSum+BRY_CONTACT(inorth,cr)%Mflux(Ibf)
               END DO
-              m=BRY_CONTACT(isouth,cr)%C2Bindex(Ibf)    ! pick last one
+              m=BRY_CONTACT(inorth,cr)%C2Bindex(Ibf)    ! pick last one
 !
 !  Load coarser grid northern boundary mass flux that have been averaged
 !  from finer grid. These values can be compared with the coarser grid
@@ -866,8 +875,8 @@
               BRY_CONTACT(inorth,cjcr)%Mflux(Ibc)=NorthSum
 
 # ifdef NESTING_DEBUG
-              IF (EastSum.ne.0) THEN
-                MFratio=REFINED(cr)%DV_avg2(1,m,tnew)/SouthSum
+              IF (NorthSum.ne.0) THEN
+                MFratio=REFINED(cr)%DV_avg2(1,m,tnew)/NorthSum
               ELSE
                 MFratio=1.0_r8
               END IF
@@ -915,7 +924,7 @@
 
 # ifndef ONE_WAY
 !
-      FUNCTION do_twoway (nl, il, istep, ng) RESULT (doit)
+      FUNCTION do_twoway (nl, il, ng, istep) RESULT (doit)
 !
 !=======================================================================
 !                                                                      !
@@ -932,13 +941,13 @@
 !     nl         Latest time-stepped nested layer index (integer)      !
 !     il         Current nested layer index in the two-way DO loop     !
 !                  call from main2d or main3d (integer)                !
+!     ng         Finer grid number to process in the fine to coarse    !
+!                  feedback (integer)                                  !
 !     istep      Current rime-step counter from STEP_LOOP in main2d    !
 !                  or main3d (integer)                                 !
 !                                                                      !
 !  On Output:                                                          !
 !                                                                      !
-!     ng         Finer grid number to process in the fine to coarse    !
-!                  feedback (integer)                                  !
 !     doit       The value of the result is TRUE/FALSE if the exchage  !
 !                  is required or not (logical)                        !
 !                                                                      !
@@ -950,15 +959,13 @@
 !
 !  Imported variable declarations.
 !
-      integer, intent(in) :: nl, il, istep
-
-      integer, intent(out) :: ng
+      integer, intent(in) :: nl, il, ng, istep
 !
 !  Local variable declarations.
 !
       logical :: doit
 
-      integer :: dgc, dgf, ig
+      integer :: dgc, dgf
 !
 !-----------------------------------------------------------------------
 !  Determine if two-way exchage is required at the corrent time-step.
@@ -966,36 +973,30 @@
 !
       doit=.FALSE.
 !
-      DO ig=1,GridsInLayer(il)
-        ng=GridNumber(ig,il)
-!
 !  Chech if ng is a refined grid, RefineScale(ng) > 0.
 !
-        IF (RefinedGrid(ng).and.(RefineScale(ng).gt.0)) THEN
+      IF (RefinedGrid(ng).and.(RefineScale(ng).gt.0)) THEN
 !
 !  If telescoping grid, the sequence of exchanges when all the nested
 !  grid reach the coarser grid (ng=1) time needs to be done in the
 !  correct sequence: finest grid exchage first.
 !
-          IF (Telescoping(ng)) THEN
-            dgc=coarserDonor(ng)                      ! for debbuging
-            dgf=FinerDonor(ng)
-            IF (TwoWayCounter(dgf).eq.RefineSteps(dgf)) THEN
-              doit=.TRUE.
-              EXIT
-            END IF
+        IF (Telescoping(ng)) THEN
+          dgc=coarserDonor(ng)                        ! for debbuging
+          dgf=FinerDonor(ng)
+          IF (TwoWayCounter(dgf).eq.RefineSteps(dgf)) THEN
+            doit=.TRUE.
+          END IF
 !
 !  If not telescoping, the exchange is in terms of the "istep" counter
 !  but also at the right sequence.
 !
-          ELSE
-            IF ((istep.eq.RefineSteps(ng)).and.(il.eq.nl)) THEN
-              doit=.TRUE.
-              EXIT
-            END IF
+        ELSE
+          IF ((istep.eq.RefineSteps(ng)).and.(il.eq.nl)) THEN
+            doit=.TRUE.
           END IF
         END IF
-      END DO
+      END IF
 !
 !  Update two-way exchange counter between fine and coarse grids.
 !
@@ -3145,6 +3146,10 @@
               END DO
             END DO
 !
+!  Zeroth order correction to fine grid time integral (RIL, 2016).
+!
+            TFF=TFF*dt(ngc)/dt(ngf)
+!
 !  Correct coarse grid tracer at the finer grid western boundary.
 !
             cff=GRID(ngc)%pm(Ibc-1,Jbc)*                                &
@@ -3200,6 +3205,10 @@
                 TFF=TFF+BRY_CONTACT(ieast,dgcr)%Tflux(Jbf,k,itrc)
               END DO
             END DO
+!
+!  Zeroth order correction to fine grid time integral (RIL, 2016).
+!
+            TFF=TFF*dt(ngc)/dt(ngf)
 !
 !  Correct coarse grid tracer at the finer grid eastern boundary.
 !
@@ -3257,6 +3266,10 @@
               END DO
             END DO
 !
+!  Zeroth order correction to fine grid time integral (RIL, 2016).
+!
+            TFF=TFF*dt(ngc)/dt(ngf)
+!
 !  Correct coarse grid tracer at the finer grid southern boundary.
 !
             cff=GRID(ngc)%pm(Ibc,Jbc-1)*                                &
@@ -3312,6 +3325,10 @@
                 TFF=TFF+BRY_CONTACT(inorth,dgcr)%Tflux(Ibf,k,itrc)
               END DO
             END DO
+!
+!  Zeroth order correction to fine grid time integral.
+!
+            TFF=TFF*dt(ngc)/dt(ngf)
 !
 !  Correct coarse grid tracer at the finer grid northern boundary.
 !
@@ -4073,7 +4090,7 @@
         END IF
       END IF
 #  ifdef MASKING
-      IF (allocated(F)) THEN
+      IF (allocated(Fmsk)) THEN
         deallocate (Fmsk)
       END IF
 #  endif
@@ -4428,7 +4445,7 @@
         END IF
       END IF
 #   ifdef MASKING
-      IF (allocated(F)) THEN
+      IF (allocated(Fmsk)) THEN
         deallocate (Fmsk)
       END IF
 #   endif

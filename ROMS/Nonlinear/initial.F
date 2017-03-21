@@ -3,7 +3,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -43,7 +43,7 @@
       USE nesting_mod, ONLY : nesting
 #endif
 #ifdef SOLVE3D
-      USE set_depth_mod, ONLY : set_depth
+      USE set_depth_mod, ONLY : set_depth0, set_depth
       USE omega_mod, ONLY : omega
       USE rho_eos_mod, ONLY : rho_eos
       USE set_massflux_mod, ONLY : set_massflux
@@ -233,22 +233,6 @@
       END DO
 # endif
 !$OMP END MASTER
-!$OMP BARRIER
-#endif
-#ifdef OBSERVATIONS
-!
-!-----------------------------------------------------------------------
-!  Open observations NetCDF file and initialize various variables
-!  needed for processing the nonlinear state solution at observation
-!  locations.
-!-----------------------------------------------------------------------
-!
-      DO ng=1,Ngrids
-!$OMP MASTER
-        CALL obs_initial (ng, iNLM, .FALSE.)
-        IF (exit_flag.ne.NoError) RETURN
-!$OMP END MASTER
-      END DO
 !$OMP BARRIER
 #endif
 !
@@ -574,6 +558,25 @@
       END DO
 #endif
 
+#ifdef OBSERVATIONS
+!
+!-----------------------------------------------------------------------
+!  Open observations NetCDF file and initialize various variables
+!  needed for processing the nonlinear state solution at observation
+!  locations. Need to be done after processing initial conditions since
+!  the correct initial time is needed to determine the first "ObsTime"
+!  to process.
+!-----------------------------------------------------------------------
+!
+      DO ng=1,Ngrids
+!$OMP MASTER
+        CALL obs_initial (ng, iNLM, .FALSE.)
+!$OMP END MASTER
+        IF (exit_flag.ne.NoError) RETURN
+      END DO
+!$OMP BARRIER
+#endif
+
 #if (defined W4DPSAS || defined TL_W4DPSAS || \
      defined W4DPSAS_SENSITIVITY)          && \
     (defined ADJUST_BOUNDARY || defined ADJUST_WSTRESS ||\
@@ -621,13 +624,14 @@
 #ifdef SOLVE3D
 !
 !-----------------------------------------------------------------------
-!  Compute initial unperturbed depths. Notice that during the
-!  initialization "Zt_avg1" is always zero.
+!  Compute time independent (Zt_avg1=0) anf initial time dependent
+!  depths and level thicknesses.
 !-----------------------------------------------------------------------
 !
       DO ng=1,Ngrids
         DO tile=first_tile(ng),last_tile(ng),+1
-          CALL set_depth (ng, tile)
+          CALL set_depth0 (ng, tile)
+          CALL set_depth  (ng, tile)
         END DO
 !$OMP BARRIER
       END DO

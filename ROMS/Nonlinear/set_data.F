@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -44,6 +44,9 @@
 !***********************************************************************
 !
       USE mod_param
+#if defined RED_TIDE
+      USE mod_biology
+#endif
       USE mod_boundary
       USE mod_clima
       USE mod_forces
@@ -194,6 +197,21 @@
 !
       CALL ana_srflux (ng, tile, iNLM)
 #   endif
+#  endif
+
+#  if defined RED_TIDE && defined DAILY_SHORTWAVE
+!
+!-----------------------------------------------------------------------
+!  Set kinematic daily-averaged surface solar shortwave radiation flux
+!  (degC m/s).
+!-----------------------------------------------------------------------
+!
+      CALL set_2dfld_tile (ng, tile, iNLM, idAsrf,                      &
+     &                     LBi, UBi, LBj, UBj,                          &
+     &                     FORCES(ng)%srflxG_avg,                       &
+     &                     FORCES(ng)%srflx_avg,                        &
+     &                     update)
+      IF (exit_flag.ne.NoError) RETURN
 #  endif
 
 #  if defined BULK_FLUXES && !defined LONGWAVE && !defined LONGWAVE_OUT
@@ -809,6 +827,20 @@
 #  endif
       END IF
 # endif
+
+# ifdef RED_TIDE
+!
+!-----------------------------------------------------------------------
+!  Red tide Observed Dissolved Inorganic Nutrient.
+!-----------------------------------------------------------------------
+!
+      CALL set_3dfld_tile (ng, tile, iNLM, idODIN,                      &
+     &                     LBi, UBi, LBj, UBj, 1, N(ng),                &
+     &                     OCEAN(ng)%DIN_obsG,                          &
+     &                     OCEAN(ng)%DIN_obs,                           &
+     &                     update)
+      IF (exit_flag.ne.NoError) RETURN
+# endif
 !
 !-----------------------------------------------------------------------
 !  Set open boundary conditions fields.  In grid refinement, only the
@@ -1306,8 +1338,6 @@
      &                       OCEAN(ng)%f_zeta,                          &
      &                       update)
         IF (exit_flag.ne.NoError) RETURN
-
-#  ifndef SOLVE3D
 !
 !  Set 2D momentum forcing.
 !
@@ -1324,7 +1354,6 @@
      &                       OCEAN(ng)%f_vbar,                          &
      &                       update)
         IF (exit_flag.ne.NoError) RETURN
-#  endif
 
 #  ifdef SOLVE3D
 !

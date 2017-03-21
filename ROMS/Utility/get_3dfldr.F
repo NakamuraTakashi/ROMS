@@ -10,7 +10,7 @@
 !
 !svn $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -148,7 +148,7 @@
      &    (iic(ng).eq.ntstart(ng))) THEN
         IF (Liocycle) THEN
           Trec=MOD(Trec,Nrec)-1
-          IF (Trec.le.0) Trec=Nrec-Trec
+          IF (Trec.le.0) Trec=Nrec+Trec
         ELSE
           Trec=Trec-1
         END IF

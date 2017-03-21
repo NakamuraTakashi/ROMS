@@ -2,7 +2,7 @@
 !
 !svn $Id$
 !=================================================== Andrew M. Moore ===
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group      Hernan G. Arango   !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group      Hernan G. Arango   !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                                              !
 !=======================================================================
@@ -241,6 +241,17 @@
         IF (exit_flag.ne.NoError) RETURN
       END DO
 #endif
+!
+!-----------------------------------------------------------------------
+!  Create 4D-Var analysis file that used as initial conditions for the
+!  next data assimilation cycle.
+!-----------------------------------------------------------------------
+!
+      DO ng=1,Ngrids
+        LdefDAI(ng)=.TRUE.
+        CALL def_dai (ng)
+        IF (exit_flag.ne.NoError) RETURN
+      END DO
 
       RETURN
       END SUBROUTINE ROMS_initialize
@@ -499,7 +510,9 @@
 #endif
 !
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-!  Run nonlinear model and compute basic state trajectory.
+!  Run nonlinear model and compute basic state trajectory. It processes
+!  and writes the observations accept/reject flag (ObsScale) once to
+!  allow background quality control, if any.
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 !
       DO ng=1,Ngrids
@@ -507,6 +520,7 @@
         LdefAVG(ng)=.FALSE.
         LwrtAVG(ng)=.FALSE.
 #endif
+        wrtObsScale(ng)=.TRUE.
         IF (Master) THEN
           WRITE (stdout,20) 'NL', ng, ntstart(ng), ntend(ng)
         END IF
@@ -523,6 +537,7 @@
 
       DO ng=1,Ngrids
         wrtNLmod(ng)=.FALSE.
+        wrtObsScale(ng)=.FALSE.
       END DO
 !
 !  Set forward basic state NetCDF ID to nonlinear model trajectory to
@@ -1468,7 +1483,24 @@
 !
 !  Local variable declarations.
 !
-      integer :: Fcount, ng, thread
+      integer :: Fcount, ng, tile, thread
+!
+!-----------------------------------------------------------------------
+!  Write out 4D-Var analysis fields that used as initial conditions for
+!  the next data assimilation cycle.
+!-----------------------------------------------------------------------
+!
+#ifdef DISTRIBUTE
+      tile=MyRank
+#else
+      tile=-1
+#endif
+!
+      IF (exit_flag.eq.NoError) THEN
+        DO ng=1,Ngrids
+          CALL wrt_dai (ng, tile)
+        END DO
+      END IF
 !
 !-----------------------------------------------------------------------
 !  Compute and report model-observation comparison statistics.

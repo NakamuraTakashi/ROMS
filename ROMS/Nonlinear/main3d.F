@@ -4,7 +4,7 @@
 !
 !svn $Id$
 !=======================================================================
-!  Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!  Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.txt                           Hernan G. Arango   !
 !========================================== Alexander F. Shchepetkin ===
@@ -228,6 +228,7 @@
               IF (FrequentImpulse(ng)) THEN
                 DO tile=first_tile(ng),last_tile(ng),+1
                   CALL forcing (ng, tile, kstp(ng), nstp(ng))
+                  CALL set_depth (ng, tile)
                 END DO
 !$OMP BARRIER
               END IF
@@ -807,9 +808,12 @@
 !-----------------------------------------------------------------------
 !
             DO il=NestLayers,1,-1
-              IF (do_twoway(nl,il,istep,ng)) THEN
-                CALL nesting (ng, iNLM, n2way)
-              END IF
+              DO ig=1,GridsInLayer(il)
+                ng=GridNumber(ig,il)
+                IF (do_twoway(nl,il,ng,istep)) THEN
+                  CALL nesting (ng, iNLM, n2way)
+                END IF
+              END DO
             END DO
 #  endif
 !
