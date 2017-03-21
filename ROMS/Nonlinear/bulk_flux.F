@@ -99,6 +99,10 @@
      &                     MIXING(ng) % beta,                           &
      &                     OCEAN(ng) % rho,                             &
      &                     OCEAN(ng) % t,                               &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+     &                     OCEAN(ng) % u,                               &
+     &                     OCEAN(ng) % v,                               &
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                     FORCES(ng) % Hair,                           &
      &                     FORCES(ng) % Pair,                           &
      &                     FORCES(ng) % Tair,                           &
@@ -148,6 +152,9 @@
      &                           rmask_wet, umask_wet, vmask_wet,       &
 # endif
      &                           alpha, beta, rho, t,                   &
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+     &                           u, v,                                  &
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                           Hair, Pair, Tair, Uwind, Vwind,        &
 # ifdef CLOUDS
      &                           cloud,                                 &
@@ -200,6 +207,10 @@
       real(r8), intent(in) :: beta(LBi:,LBj:)
       real(r8), intent(in) :: rho(LBi:,LBj:,:)
       real(r8), intent(in) :: t(LBi:,LBj:,:,:,:)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      real(r8), intent(in) :: u(LBi:,LBj:,:,:)
+      real(r8), intent(in) :: v(LBi:,LBj:,:,:)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: Hair(LBi:,LBj:)
       real(r8), intent(in) :: Pair(LBi:,LBj:)
       real(r8), intent(in) :: Tair(LBi:,LBj:)
@@ -247,6 +258,10 @@
       real(r8), intent(in) :: beta(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: rho(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      real(r8), intent(in) :: u(LBi:UBi,LBj:UBj,N(ng),3)
+      real(r8), intent(in) :: v(LBi:UBi,LBj:UBj,N(ng),3)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(in) :: Hair(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: Pair(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: Tair(LBi:UBi,LBj:UBj)
@@ -358,6 +373,10 @@
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: SRad
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: Taux
       real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: Tauy
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: UwinC
+      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: VwinC
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 
 # include "set_bounds.h"
 !
@@ -372,7 +391,15 @@
 !
 !  Input bulk parameterization fields.
 !
-          Wmag(i)=SQRT(Uwind(i,j)*Uwind(i,j)+Vwind(i,j)*Vwind(i,j))
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
+!  Wind vector needs to be referenced to the surface current
+          UwinC(i,j)=Uwind(i,j)                                         &
+     &               -0.5_r8*(u(i,j,N(ng),nrhs)+u(i+1,j,N(ng),nrhs))
+          VwinC(i,j)=Vwind(i,j)                                         &
+     &               -0.5_r8*(v(i,j,N(ng),nrhs)+v(i,j+1,N(ng),nrhs))
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!          Wmag(i)=SQRT(Uwind(i,j)*Uwind(i,j)+Vwind(i,j)*Vwind(i,j))!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+          Wmag(i)=SQRT(UwinC(i,j)*UwinC(i,j)+VwinC(i,j)*VwinC(i,j))   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:add
           PairM=Pair(i,j)
           TairC(i)=Tair(i,j)
           TairK(i)=TairC(i)+273.16_r8
@@ -432,7 +459,7 @@
           LRad(i,j)=LRad(i,j)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          LRad(i,j)=LRad(i,j)*rmask_wet(i,j)
+!          LRad(i,j)=LRad(i,j)*rmask_wet(i,j)        !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
 !
 !-----------------------------------------------------------------------
@@ -730,7 +757,7 @@
           SHeat(i,j)=SHeat(i,j)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          SHeat(i,j)=SHeat(i,j)*rmask_wet(i,j)
+!          SHeat(i,j)=SHeat(i,j)*rmask_wet(i,j)       !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
 !
 !  Compute turbulent latent heat flux (W/m2), Hl.
@@ -747,7 +774,7 @@
           LHeat(i,j)=LHeat(i,j)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          LHeat(i,j)=LHeat(i,j)*rmask_wet(i,j)
+!          LHeat(i,j)=LHeat(i,j)*rmask_wet(i,j)       !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
 !
 !  Compute momentum flux (N/m2) due to rainfall (kg/m2/s).
@@ -757,19 +784,21 @@
 !  Compute wind stress components (N/m2), Tau.
 !
           cff=rhoAir(i)*Cd*Wspeed
-          Taux(i,j)=(cff*Uwind(i,j)+Taur*SIGN(1.0_r8,Uwind(i,j)))
+!          Taux(i,j)=(cff*Uwind(i,j)+Taur*SIGN(1.0_r8,Uwind(i,j)))  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+          Taux(i,j)=(cff*UwinC(i,j)+Taur*SIGN(1.0_r8,UwinC(i,j)))   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:add
 # ifdef MASKING
           Taux(i,j)=Taux(i,j)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          Taux(i,j)=Taux(i,j)*rmask_wet(i,j)
+!          Taux(i,j)=Taux(i,j)*rmask_wet(i,j)        !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
-          Tauy(i,j)=(cff*Vwind(i,j)+Taur*SIGN(1.0_r8,Vwind(i,j)))
+!          Tauy(i,j)=(cff*Vwind(i,j)+Taur*SIGN(1.0_r8,Vwind(i,j)))  !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+          Tauy(i,j)=(cff*VwinC(i,j)+Taur*SIGN(1.0_r8,VwinC(i,j)))   !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:add
 # ifdef MASKING
           Tauy(i,j)=Tauy(i,j)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          Tauy(i,j)=Tauy(i,j)*rmask_wet(i,j)
+!          Tauy(i,j)=Tauy(i,j)*rmask_wet(i,j)        !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
         END DO
       END DO
@@ -815,19 +844,19 @@
           stflx(i,j,itemp)=stflx(i,j,itemp)*rmask(i,j)
 # endif
 # ifdef WET_DRY
-          stflx(i,j,itemp)=stflx(i,j,itemp)*rmask_wet(i,j)
+!          stflx(i,j,itemp)=stflx(i,j,itemp)*rmask_wet(i,j)        !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 # endif
 # ifdef EMINUSP
-!          evap(i,j)=LHeat(i,j)/Hlv(i,j)       !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
-          evap(i,j)=0.0_r8                     !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:add
+          evap(i,j)=LHeat(i,j)/Hlv(i,j)       !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+!          evap(i,j)=0.0_r8                     !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:add
           stflx(i,j,isalt)=cff*(evap(i,j)-rain(i,j))
 #  ifdef MASKING
           evap(i,j)=evap(i,j)*rmask(i,j)
           stflx(i,j,isalt)=stflx(i,j,isalt)*rmask(i,j)
 #  endif
 #  ifdef WET_DRY
-          evap(i,j)=evap(i,j)*rmask_wet(i,j)
-          stflx(i,j,isalt)=stflx(i,j,isalt)*rmask_wet(i,j)
+!          evap(i,j)=evap(i,j)*rmask_wet(i,j)        !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
+!          stflx(i,j,isalt)=stflx(i,j,isalt)*rmask_wet(i,j)       !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:rm
 #  endif
           EminusP(i,j)=stflx(i,j,isalt)
 # endif

@@ -51,6 +51,9 @@
       integer :: IorJdim, brecdim
 #endif
       integer :: DimIDs(32), t2dgrd(3), u2dgrd(3), v2dgrd(3)
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: Add
+      integer :: p2dgrd(3)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: Add
 #ifdef ADJUST_BOUNDARY
       integer :: t2dobc(4)
 #endif
@@ -298,6 +301,14 @@
         t3dobc(5)=DimIDs(12)
 # endif
 #endif
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: Add
+!
+!  Define dimension vectors for staggered type variables at PSI-points.
+!
+        p2dgrd(1)=DimIDs( 4)
+        p2dgrd(2)=DimIDs( 8)
+        p2dgrd(3)=DimIDs(12)
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: Add
 !
 !  Define dimension vectors for staggered u-momentum type variables.
 !
@@ -455,6 +466,24 @@
         END IF
 #endif
 #ifdef WET_DRY
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: Add
+!
+!  Define wet/dry mask on PSI-points.
+!
+        Vinfo( 1)=Vname(1,idPwet)
+        Vinfo( 2)=Vname(2,idPwet)
+        Vinfo( 3)=Vname(3,idPwet)
+        Vinfo( 9)='land'
+        Vinfo(10)='water'
+        Vinfo(14)=Vname(4,idPwet)
+        Vinfo(16)=Vname(1,idtime)
+        Vinfo(22)='coordinates'
+        Aval(5)=REAL(Iinfo(1,idPwet,ng),r8)
+        status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idPwet),     &
+     &                 NF_FOUT, nvd3, p2dgrd, Aval, Vinfo, ncname,     &
+     &                 SetFillVal = .FALSE.)
+        IF (exit_flag.ne.NoError) RETURN
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: Add
 !
 !  Define wet/dry mask on RHO-points.
 !
@@ -2345,18 +2374,37 @@
 !
 !  Define time-varying coral coverage.
 !
-        IF (Hout(idCorl,ng)) THEN
-          Vinfo( 1)=Vname(1,idCorl)
-          Vinfo( 2)=Vname(2,idCorl)
-          Vinfo( 3)=Vname(3,idCorl)
-          Vinfo(14)=Vname(4,idCorl)
+        IF (Hout(idCrl1,ng)) THEN
+          Vinfo( 1)=Vname(1,idCrl1)
+          Vinfo( 2)=Vname(2,idCrl1)
+          Vinfo( 3)=Vname(3,idCrl1)
+          Vinfo(14)=Vname(4,idCrl1)
           Vinfo(16)=Vname(1,idtime)
 # if defined WRITE_WATER && defined MASKING
           Vinfo(20)='mask_rho'
 # endif
           Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idCorl,ng),r8)
-          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCorl),   &
+          Aval(5)=REAL(Iinfo(1,idCrl1,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCrl1),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
+     &                   SetFillVal = .FALSE.)
+          IF (exit_flag.ne.NoError) RETURN
+        END IF
+!
+!  Define time-varying coral2 coverage.
+!
+        IF (Hout(idCrl1,ng)) THEN
+          Vinfo( 1)=Vname(1,idCrl2)
+          Vinfo( 2)=Vname(2,idCrl2)
+          Vinfo( 3)=Vname(3,idCrl2)
+          Vinfo(14)=Vname(4,idCrl2)
+          Vinfo(16)=Vname(1,idtime)
+# if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+# endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idCrl2,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idCrl2),   &
      &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
      &                   SetFillVal = .FALSE.)
           IF (exit_flag.ne.NoError) RETURN

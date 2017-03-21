@@ -113,8 +113,8 @@
      &                   nstp(ng), nnew(ng),                            &
 #ifdef MASKING
      &                   GRID(ng) % rmask,                              &
-# if defined WET_DRY
-     &                   GRID(ng) % rmask_io,                           &
+# if defined WET_DRY && defined DIAGNOSTICS_BIO
+     &                   GRID(ng) % rmask_full,                         &
 # endif
 #endif
      &                   GRID(ng) % Hz,                                 &
@@ -130,9 +130,18 @@
 #endif
      &                   OCEAN(ng) % HisBio2d,                          &
      &                   OCEAN(ng) % HisBio3d,                          &
+#ifdef CORAL_POLYP
      &                   GRID(ng) % p_coral,                            &
+#endif
+#ifdef SEAGRASS
      &                   GRID(ng) % p_seagrass,                         &
+#endif
+#ifdef MACROALGAE
      &                   GRID(ng) % p_algae,                            &
+#endif
+#ifdef SEDIMENT_ECOSYS
+     &                   GRID(ng) % p_sand,                             &
+#endif
 #ifdef BBL_MODEL
      &                   BBL(ng) % bustrc,                              &
      &                   BBL(ng) % bvstrc,                              &
@@ -147,8 +156,6 @@
      &                   FORCES(ng) % bustr,                            &
      &                   FORCES(ng) % bvstr,                            &
 #endif
-     &                   FORCES(ng) % Dwave,                            &
-     &                   FORCES(ng) % Pwave_bot,                        &
      &                   OCEAN(ng) % t)
 
 
@@ -166,8 +173,8 @@
      &                         nstp, nnew,                              &
 #ifdef MASKING
      &                         rmask,                                   &
-# if defined WET_DRY
-     &                         rmask_io,                                &
+# if defined WET_DRY && defined DIAGNOSTICS_BIO
+     &                         rmask_full,                              &
 # endif
 #endif
      &                         Hz, z_r, z_w, srflx,                     &
@@ -177,9 +184,18 @@
      &                         sustr, svstr,                            &
 #endif
      &                         HisBio2d, HisBio3d,                      &
+#ifdef CORAL_POLYP
      &                         p_coral,                                 &
+#endif
+#ifdef SEAGRASS
      &                         p_seagrass,                              &
+#endif
+#ifdef MACROALGAE
      &                         p_algae,                                 &
+#endif
+#ifdef SEDIMENT_ECOSYS
+     &                         p_sand,                                  &
+#endif
 #ifdef BBL_MODEL
      &                         bustrc, bvstrc,                          &
      &                         bustrw, bvstrw,                          &
@@ -190,7 +206,6 @@
 #else
      &                         bustr, bvstr,                            &
 #endif
-     &                         Dwave, Pwave_bot,                        &
      &                         t)
 !-----------------------------------------------------------------------
 !
@@ -201,7 +216,18 @@
       
       USE mod_reef_ecosys  !!!<<<<<<<<<<<<<<<< Reef ecosystem model
       USE mod_geochem
+#ifdef CORAL_POLYP
       USE mod_coral
+#endif
+#ifdef MACROALGAE
+      USE mod_macroalgae
+#endif
+#ifdef SEAGRASS
+      USE mod_seagrass
+#endif
+#ifdef SEDIMENT_ECOSYS
+      USE mod_sedecosys
+#endif
 !
 !  Imported variable declarations.
 !
@@ -213,8 +239,8 @@
 #ifdef ASSUMED_SHAPE
 # ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:,LBj:)
-#  if defined WET_DRY
-      real(r8), intent(in) :: rmask_io(LBi:,LBj:)
+#  if defined WET_DRY && defined DIAGNOSTICS_BIO
+      real(r8), intent(in) :: rmask_full(LBi:,LBj:)
 #  endif
 # endif
       real(r8), intent(in) :: Hz(LBi:,LBj:,:)
@@ -230,10 +256,19 @@
 # endif
       real(r8), intent(inout) :: HisBio2d(LBi:,LBj:,:)
       real(r8), intent(inout) :: HisBio3d(LBi:,LBj:,:,:)
-      real(r8), intent(inout) :: p_coral(LBi:UBi,LBj:UBj)
+# ifdef CORAL_POLYP
+      real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
+# endif
+# ifdef SEAGRASS
       real(r8), intent(inout) :: p_seagrass(LBi:UBi,LBj:UBj)
+# endif
+# ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
-#  ifdef BBL_MODEL
+# endif
+# ifdef SEDIMENT_ECOSYS
+      real(r8), intent(inout) :: p_sand(LBi:UBi,LBj:UBj)
+# endif
+# ifdef BBL_MODEL
       real(r8), intent(in) :: bustrc(LBi:,LBj:)
       real(r8), intent(in) :: bvstrc(LBi:,LBj:)
       real(r8), intent(in) :: bustrw(LBi:,LBj:)
@@ -247,15 +282,13 @@
       real(r8), intent(in) :: bustr(LBi:,LBj:)
       real(r8), intent(in) :: bvstr(LBi:,LBj:)
 #  endif
-      real(r8), intent(in) :: Dwave(LBi:,LBj:)
-      real(r8), intent(in) :: Pwave_bot(LBi:,LBj:)
       real(r8), intent(inout) :: t(LBi:,LBj:,:,:,:)
 
 #else
 # ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
-#  if defined WET_DRY
-      real(r8), intent(in) :: rmask_io(LBi:UBi,LBj:UBj)
+#  if defined WET_DRY && defined DIAGNOSTICS_BIO
+      real(r8), intent(in) :: rmask_full(LBi:UBi,LBj:UBj)
 #  endif
 # endif
       real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,UBk)
@@ -271,10 +304,19 @@
 # endif
       real(r8), intent(inout) :: HisBio2d(LBi:UBi,LBj:UBj,NHbio2d)
       real(r8), intent(inout) :: HisBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
-      real(r8), intent(inout) :: p_coral(LBi:UBi,LBj:UBj)
+# ifdef CORAL_POLYP
+      real(r8), intent(inout) :: p_coral(2,LBi:UBi,LBj:UBj)
+# endif
+# ifdef SEAGRASS
       real(r8), intent(inout) :: p_seagrass(LBi:UBi,LBj:UBj)
+# endif
+# ifdef MACROALGAE
       real(r8), intent(inout) :: p_algae(LBi:UBi,LBj:UBj)
-#  ifdef BBL_MODEL
+# endif
+# ifdef SEDIMENT_ECOSYS
+      real(r8), intent(inout) :: p_sand(LBi:UBi,LBj:UBj)
+# endif
+# ifdef BBL_MODEL
       real(r8), intent(in) :: bustrc(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: bvstrc(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: bustrw(LBi:UBi,LBj:UBj)
@@ -288,8 +330,6 @@
       real(r8), intent(in) :: bustr(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: bvstr(LBi:UBi,LBj:UBj)
 #  endif
-      real(r8), intent(in) :: Dwave(LBi:UBi,LBj:UBj)
-      real(r8), intent(in) :: Pwave_bot(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,UBk,3,UBt)
 #endif
 !
@@ -307,11 +347,7 @@
       real(r8) :: ssCO2flux 
       real(r8) :: ssO2flux  
       real(r8) :: PFDbott   
-      real(r8) :: coral_Pg  
-      real(r8) :: coral_R   
-      real(r8) :: coral_Gn  
-      real(r8) :: sgrass_Pg 
-      real(r8) :: sgrass_R  
+
 #ifdef CORAL_CARBON_ISOTOPE
       real(r8) :: R13CH2O
 #endif
@@ -337,11 +373,6 @@
           ssWarg    = 4.0_r8         ! sea surface aragonite saturation state
           ssCO2flux = 0.0_r8         ! sea surface CO2 flux (mmol m-2 s-1)
           ssO2flux  = 0.0_r8         ! sea surface O2 flux (mmol m-2 s-1)
-          coral_Pg  = 0.0_r8         ! Coral gross photosynthesis rate (nmol cm-2 s-1)
-          coral_R   = 0.0_r8         ! Coral respiration rate (nmol cm-2 s-1)
-          coral_Gn  = 0.0_r8         ! Coral calcification rate (nmol cm-2 s-1)
-          sgrass_Pg = 0.0_r8         ! seagrass gross photosynthesis rate (mmol m-2 s-1)
-          sgrass_R  = 0.0_r8         ! seagrass respiration rate (mmol m-2 s-1)
 
 #ifdef MASKING
           IF (rmask(i,j).eq.1.0_r8) THEN
@@ -378,9 +409,6 @@
      &                          (bvstr(i,j)+bvstr(i,j+1))*         &
      &                          (bvstr(i,j)+bvstr(i,j+1))) *rho0
 #endif
-#ifdef WET_DRY
-            tau = tau*rmask_io(i,j)
-#endif
 
 !----- Ecosystem model ----------------------------------------
 
@@ -396,11 +424,18 @@
      &            ,tau                 &   ! bottom shear stress (N m-2)
      &            ,pCO2air(ng)         &   ! Air CO2 pertial pressure (uatm)
      &            ,u10                 &   ! wind speed (m s-1)
-
-     &            ,p_coral(i,j)        &   ! Coral coverage (0-1)
+#ifdef CORAL_POLYP
+     &            ,p_coral(:,i,j)      &   ! Coral coverage (0-1)
+#endif
+#ifdef SEAGRASS
      &            ,p_seagrass(i,j)     &   ! seagrass coverage (0-1)
+#endif
+#ifdef MACROALGAE
      &            ,p_algae(i,j)        &   ! algal coverage (0-1)
-     &            ,1.0_r8              &   ! sediment coverage (0-1)
+#endif
+#ifdef SEDIMENT_ECOSYS
+     &            ,p_sand(i,j)         &   ! sediment coverage (0-1)
+#endif
 
      &            ,t(i,j,:,nstp,iTemp)     &   ! Tmp(N): Temperature (oC)
      &            ,t(i,j,:,nstp,iSalt)     &   ! Sal(N): Salinity (PSU)
@@ -410,7 +445,8 @@
 #if defined ORGANIC_MATTER
      &            ,t(i,j,:,nstp,iDOC_)     &   ! DOC(N): Dissolved organic carbon (DOC: umol L-1)
      &            ,t(i,j,:,nstp,iPOC_)     &   ! POC(N): Particulate organic carbon (POC: umol L-1)
-     &            ,t(i,j,:,nstp,iPhyt)     &   ! PHY(N): phytoplankton (umol C L-1)
+     &            ,t(i,j,:,nstp,iPhy1)     &   ! PHY1(N): phytoplankton1 (umol C L-1)
+     &            ,t(i,j,:,nstp,iPhy2)     &   ! PHY2(N): phytoplankton2 (umol C L-1)
      &            ,t(i,j,:,nstp,iZoop)     &   ! ZOO(N): zooplankton (umol C L-1)
 #endif
 #if defined CARBON_ISOTOPE
@@ -439,7 +475,8 @@
 #if defined ORGANIC_MATTER
      &            ,dtrc_dt(:,iDOC_)   &   ! dDOC_dt(N): dDOC/dt (umol L-1 s-1)
      &            ,dtrc_dt(:,iPOC_)   &   ! dPOC_dt(N): dPOC/dt (umol L-1 s-1)
-     &            ,dtrc_dt(:,iPhyt)   &   ! dPHY_dt(N): dPHY/dt (umol C L-1 s-1)
+     &            ,dtrc_dt(:,iPhy1)   &   ! dPHY1_dt(N): dPHY1/dt (umol C L-1 s-1)
+     &            ,dtrc_dt(:,iPhy2)   &   ! dPHY2_dt(N): dPHY2/dt (umol C L-1 s-1)
      &            ,dtrc_dt(:,iZoop)   &   ! dZOO_dt(N): dZOO/dt (umol C L-1 s-1)
 #endif
 #if defined CARBON_ISOTOPE
@@ -467,11 +504,6 @@
      &            ,ssCO2flux      &   ! sea surface CO2 flux (mmol m-2 s-1)
      &            ,ssO2flux       &   ! sea surface O2 flux (mmol m-2 s-1)
      &            ,PFDbott        &   ! Bottom photon flux density (umol m-2 s-1)
-     &            ,coral_Pg       &   ! Coral gross photosynthesis rate (nmol cm-2 s-1)
-     &            ,coral_R        &   ! Coral respiration rate (nmol cm-2 s-1)
-     &            ,coral_Gn       &   ! Coral calcification rate (nmol cm-2 s-1)
-     &            ,sgrass_Pg      &   ! seagrass gross photosynthesis rate (mmol m-2 s-1)
-     &            ,sgrass_R       &   ! seagrass respiration rate (mmol m-2 s-1)
      &             )
 !
 #ifdef MASKING
@@ -486,27 +518,48 @@
             HisBio2d(i,j,iPARb) = PFDbott
             HisBio2d(i,j,iTau_) = tau
 #ifdef CORAL_POLYP
-            HisBio2d(i,j,iClPg) = coral_Pg
-            HisBio2d(i,j,iCl_R) = coral_R
-            HisBio2d(i,j,iClPn) = coral_Pg-coral_R
-            HisBio2d(i,j,iCl_G) = coral_Gn
-            HisBio2d(i,j,iCogC) = CORAL(ng)%QC(1,i,j)
+            HisBio2d(i,j,iC1Pg) = CORAL(ng)%Pg(1,i,j)
+            HisBio2d(i,j,iC1_R) = CORAL(ng)%R(1,i,j)
+            HisBio2d(i,j,iC1Pn) = CORAL(ng)%Pg(1,i,j)-CORAL(ng)%R(1,i,j)
+            HisBio2d(i,j,iC1_G) = CORAL(ng)%G(1,i,j)
+            HisBio2d(i,j,iC1OC) = CORAL(ng)%QC(1,i,j)
+            HisBio2d(i,j,iC2Pg) = CORAL(ng)%Pg(2,i,j)
+            HisBio2d(i,j,iC2_R) = CORAL(ng)%R(2,i,j)
+            HisBio2d(i,j,iC2Pn) = CORAL(ng)%Pg(2,i,j)-CORAL(ng)%R(2,i,j)
+            HisBio2d(i,j,iC2_G) = CORAL(ng)%G(2,i,j)
+            HisBio2d(i,j,iC2OC) = CORAL(ng)%QC(2,i,j)
 # ifdef CORAL_CARBON_ISOTOPE
             R13CH2O = CORAL(ng)%Q13C(1,i,j) / CORAL(ng)%QC(1,i,j)   !coral organism
-            HisBio2d(i,j,iC13t) = d13C_fromR13C(R13CH2O)
+            HisBio2d(i,j,iC113) = d13C_fromR13C(R13CH2O)
+            R13CH2O = CORAL(ng)%Q13C(2,i,j) / CORAL(ng)%QC(2,i,j)   !coral organism
+            HisBio2d(i,j,iC213) = d13C_fromR13C(R13CH2O)
 # endif
 # ifdef CORAL_ZOOXANTHELLAE
-            HisBio2d(i,j,iCzox) = ZOOX(ng)%dens(1,i,j)
+            HisBio2d(i,j,iC1zx) = ZOOX(ng)%dens(1,i,j)
+            HisBio2d(i,j,iC2zx) = ZOOX(ng)%dens(2,i,j)
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
-            HisBio2d(i,j,iCmrt) = CORAL(ng)%mort(1,i,j)
-            HisBio2d(i,j,iCgrw) = CORAL(ng)%growth(1,i,j)
+            HisBio2d(i,j,iC1mt) = CORAL(ng)%mort(1,i,j)
+            HisBio2d(i,j,iC1gr) = CORAL(ng)%growth(1,i,j)
+            HisBio2d(i,j,iC2mt) = CORAL(ng)%mort(2,i,j)
+            HisBio2d(i,j,iC2gr) = CORAL(ng)%growth(2,i,j)
 # endif
 #endif
 #ifdef SEAGRASS
-            HisBio2d(i,j,iSgPg) = sgrass_Pg
-            HisBio2d(i,j,iSg_R) = sgrass_R
-            HisBio2d(i,j,iSgPn) = sgrass_Pg-sgrass_R
+            HisBio2d(i,j,iSgPg) = SGRASS(ng)%Pg(1,i,j)
+            HisBio2d(i,j,iSg_R) = SGRASS(ng)%R (1,i,j)
+            HisBio2d(i,j,iSgPn) = SGRASS(ng)%Pg(1,i,j)-SGRASS(ng)%R (1,i,j)
+#endif
+#ifdef MACROALGAE
+            HisBio2d(i,j,iAgPg) = ALGAE(ng)%Pg(1,i,j)
+            HisBio2d(i,j,iAg_R) = ALGAE(ng)%R (1,i,j)
+            HisBio2d(i,j,iAgPn) = ALGAE(ng)%Pg(1,i,j)-ALGAE(ng)%R (1,i,j)
+#endif
+#ifdef SEDIMENT_ECOSYS
+            HisBio2d(i,j,iSdPg) = SEDECO(ng)%Pg(i,j)
+            HisBio2d(i,j,iSd_R) = SEDECO(ng)%R (i,j)
+            HisBio2d(i,j,iSdPn) = SEDECO(ng)%Pg(i,j)-SEDECO(ng)%R (i,j)
+            HisBio2d(i,j,iSd_G) = SEDECO(ng)%G (i,j)
 #endif
 
 !-----------------------------------------------------------------------
@@ -533,8 +586,7 @@
                 dtrc_dt(k,ibio)=0.0_r8
                 write(50,*) i,j,k,ibio,dtrc_dt(k,ibio)                &
     &            ,t(i,j,k,nnew,ibio),t(i,j,k,nstp,ibio)               &
-    &            ,coral_Pg,coral_R,sgrass_Pg,sgrass_R,ssO2flux        &
-    &            ,ssCO2flux,rmask_io(i,j)
+    &            ,ssO2flux, ssCO2flux,rmask(i,j)
               END IF
               
               t(i,j,k,nnew,ibio)=t(i,j,k,nnew,ibio)                    &

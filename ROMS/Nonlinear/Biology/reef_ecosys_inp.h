@@ -151,8 +151,10 @@
               Npts=load_r(Nval, Rval, Ngrids, DOC_0)
             CASE ('POC_0')
               Npts=load_r(Nval, Rval, Ngrids, POC_0)
-            CASE ('Phyt0')
-              Npts=load_r(Nval, Rval, Ngrids, Phyt0)
+            CASE ('Phy10')
+              Npts=load_r(Nval, Rval, Ngrids, Phy10)
+            CASE ('Phy20')
+              Npts=load_r(Nval, Rval, Ngrids, Phy20)
             CASE ('Zoop0')
               Npts=load_r(Nval, Rval, Ngrids, Zoop0)
 #endif
@@ -326,13 +328,20 @@
               END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 
-            CASE ('Hout(idCorl)')
-              IF (idCorl.eq.0) THEN
-                IF (Master) WRITE (out,30) 'idCorl'
+            CASE ('Hout(idCrl1)')
+              IF (idCrl1.eq.0) THEN
+                IF (Master) WRITE (out,30) 'idCrl1'
                 exit_flag=5
                 RETURN
               END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idCorl,:))
+              Npts=load_l(Nval, Cval, Ngrids, Hout(idCrl1,:))
+            CASE ('Hout(idCrl2)')
+              IF (idCrl2.eq.0) THEN
+                IF (Master) WRITE (out,30) 'idCrl2'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Hout(idCrl2,:))
 
             CASE ('Hout(idSgrs)')
               IF (idSgrs.eq.0) THEN
@@ -584,8 +593,10 @@
      &            'Dissolved organic carbon (umolC/L).'
             WRITE (out,80) POC_0(ng), 'POC_0',                          &
      &            'Particulate organic carbon (umolC/L).'
-            WRITE (out,80) Phyt0(ng), 'Phyt0',                          &
-     &            'Phytoplankton (umolC/L).'
+            WRITE (out,80) Phy10(ng), 'Phy10',                          &
+     &            'Phytoplankton1 (umolC/L).'
+            WRITE (out,80) Phy20(ng), 'Phy20',                          &
+     &            'Phytoplankton2 (umolC/L).'
             WRITE (out,80) Zoop0(ng), 'Zoop0',                          &
      &            'Zooplankton (umolC/L).'
 #endif
@@ -723,9 +734,12 @@
             END DO
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 
-            IF (Hout(idCorl,ng)) WRITE (out,120) Hout(idCorl,ng),         &
-     &         'Hout(idCorls)',                                            &
+            IF (Hout(idCrl1,ng)) WRITE (out,120) Hout(idCrl1,ng),         &
+     &         'Hout(idCrl1)',                                            &
      &         'Write out time-dependent coral coverage.'
+            IF (Hout(idCrl2,ng)) WRITE (out,120) Hout(idCrl2,ng),         &
+     &         'Hout(idCrl2)',                                            &
+     &         'Write out time-dependent coral2 coverage.'
             IF (Hout(idSgrs,ng)) WRITE (out,120) Hout(idSgrs,ng),         &
      &         'Hout(idSgrs)',                                            &
      &         'Write out time-dependent seagrass coverage.'

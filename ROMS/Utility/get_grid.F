@@ -244,24 +244,42 @@
         exit_flag=2
         RETURN
       END IF
-# endif
+#endif
 #ifdef REEF_ECOSYS
+# ifdef CORAL_POLYP
       IF (.not.find_string(var_name,n_var,'p_coral',vindex)) THEN
         IF (Master) WRITE (stdout,10) 'p_coral', TRIM(ncname)
         exit_flag=2
         RETURN
       END IF
+      IF (.not.find_string(var_name,n_var,'p_coral2',vindex)) THEN
+        IF (Master) WRITE (stdout,10) 'p_coral2', TRIM(ncname)
+        exit_flag=2
+        RETURN
+      END IF
+# endif
+# ifdef SEAGRASS
       IF (.not.find_string(var_name,n_var,'p_seagrass',vindex)) THEN
         IF (Master) WRITE (stdout,10) 'p_seagrass', TRIM(ncname)
         exit_flag=2
         RETURN
       END IF
+# endif
+# ifdef MACROALGAE
       IF (.not.find_string(var_name,n_var,'p_algae',vindex)) THEN
         IF (Master) WRITE (stdout,10) 'p_algae', TRIM(ncname)
         exit_flag=2
         RETURN
       END IF
 # endif
+# ifdef SEDIMENT_ECOSYS
+      IF (.not.find_string(var_name,n_var,'p_sand',vindex)) THEN
+        IF (Master) WRITE (stdout,10) 'p_sand', TRIM(ncname)
+        exit_flag=2
+        RETURN
+      END IF
+# endif
+#endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 !
 !  Open grid NetCDF file for reading.
@@ -1582,6 +1600,7 @@
 #  endif
 # endif
 # ifdef REEF_ECOSYS
+#  ifdef CORAL_POLYP
 !
 !  Read in coral coverage.
 !
@@ -1592,10 +1611,10 @@
      &                        0, gtype, Vsize,                          &
      &                        LBi, UBi, LBj, UBj,                       &
      &                        Fscl, Fmin, Fmax,                         &
-#  ifdef MASKING
+#   ifdef MASKING
      &                        GRID(ng) % rmask,                         &
-#  endif
-     &                        GRID(ng) % p_coral)
+#   endif
+     &                        GRID(ng) % p_coral(1,:,:))
             IF (status.ne.nf90_noerr) THEN
               exit_flag=2
               ioerror=status
@@ -1604,15 +1623,48 @@
             IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
               CALL exchange_r2d_tile (ng, tile,                         &
      &                                LBi, UBi, LBj, UBj,               &
-     &                                GRID(ng) % p_coral)
+     &                                GRID(ng) % p_coral(1,:,:))
             END IF
-#  ifdef DISTRIBUTE
+#   ifdef DISTRIBUTE
             CALL mp_exchange2d (ng, tile, model, 1,                     &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          NghostPoints,                           &
      &                          EWperiodic(ng), NSperiodic(ng),         &
-     &                          GRID(ng) % p_coral)
+     &                          GRID(ng) % p_coral(1,:,:))
+#   endif
+!
+!  Read in coral2 coverage.
+!
+          CASE ('p_coral2')
+            gtype=r2dvar
+            status=nf_fread2d(ng, model, ncname, GRD(ng)%ncid,          &
+     &                        var_name(i), var_id(i),                   &
+     &                        0, gtype, Vsize,                          &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        Fscl, Fmin, Fmax,                         &
+#   ifdef MASKING
+     &                        GRID(ng) % rmask,                         &
+#   endif
+     &                        GRID(ng) % p_coral(2,:,:))
+            IF (status.ne.nf90_noerr) THEN
+              exit_flag=2
+              ioerror=status
+              EXIT
+            END IF
+            IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+              CALL exchange_r2d_tile (ng, tile,                         &
+     &                                LBi, UBi, LBj, UBj,               &
+     &                                GRID(ng) % p_coral(2,:,:))
+            END IF
+#   ifdef DISTRIBUTE
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          GRID(ng) % p_coral(2,:,:))
+#   endif
 #  endif
+#  ifdef SEAGRASS
 !
 !  Read in seagrass coverage.
 !
@@ -1623,9 +1675,9 @@
      &                        0, gtype, Vsize,                          &
      &                        LBi, UBi, LBj, UBj,                       &
      &                        Fscl, Fmin, Fmax,                         &
-#  ifdef MASKING
+#   ifdef MASKING
      &                        GRID(ng) % rmask,                         &
-#  endif
+#   endif
      &                        GRID(ng) % p_seagrass)
             IF (status.ne.nf90_noerr) THEN
               exit_flag=2
@@ -1637,13 +1689,15 @@
      &                                LBi, UBi, LBj, UBj,               &
      &                                GRID(ng) % p_seagrass)
             END IF
-#  ifdef DISTRIBUTE
+#   ifdef DISTRIBUTE
             CALL mp_exchange2d (ng, tile, model, 1,                     &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          NghostPoints,                           &
      &                          EWperiodic(ng), NSperiodic(ng),         &
      &                          GRID(ng) % p_seagrass)
+#   endif
 #  endif
+#  ifdef MACROALGAE
 !
 !  Read in algal coverage.
 !
@@ -1654,9 +1708,9 @@
      &                        0, gtype, Vsize,                          &
      &                        LBi, UBi, LBj, UBj,                       &
      &                        Fscl, Fmin, Fmax,                         &
-#  ifdef MASKING
+#   ifdef MASKING
      &                        GRID(ng) % rmask,                         &
-#  endif
+#   endif
      &                        GRID(ng) % p_algae)
             IF (status.ne.nf90_noerr) THEN
               exit_flag=2
@@ -1668,12 +1722,46 @@
      &                                LBi, UBi, LBj, UBj,               &
      &                                GRID(ng) % p_algae)
             END IF
-#  ifdef DISTRIBUTE
+#   ifdef DISTRIBUTE
             CALL mp_exchange2d (ng, tile, model, 1,                     &
      &                          LBi, UBi, LBj, UBj,                     &
      &                          NghostPoints,                           &
      &                          EWperiodic(ng), NSperiodic(ng),         &
      &                          GRID(ng) % p_algae)
+#   endif
+#  endif
+#  ifdef SEDIMENT_ECOSYS
+!
+!  Read in sand coverage.
+!
+          CASE ('p_sand')
+            gtype=r2dvar
+            status=nf_fread2d(ng, model, ncname, GRD(ng)%ncid,          &
+     &                        var_name(i), var_id(i),                   &
+     &                        0, gtype, Vsize,                          &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        Fscl, Fmin, Fmax,                         &
+#   ifdef MASKING
+     &                        GRID(ng) % rmask,                         &
+#   endif
+     &                        GRID(ng) % p_sand)
+            IF (status.ne.nf90_noerr) THEN
+              exit_flag=2
+              ioerror=status
+              EXIT
+            END IF
+            IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+              CALL exchange_r2d_tile (ng, tile,                         &
+     &                                LBi, UBi, LBj, UBj,               &
+     &                                GRID(ng) % p_sand)
+            END IF
+#   ifdef DISTRIBUTE
+            CALL mp_exchange2d (ng, tile, model, 1,                     &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          GRID(ng) % p_sand)
+#   endif
 #  endif
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add

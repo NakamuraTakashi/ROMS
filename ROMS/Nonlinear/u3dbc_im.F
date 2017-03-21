@@ -386,7 +386,8 @@
                   IF ((dUdt*dUde).lt.0.0_r8) THEN
                     tau=obc_in
                   ELSE
-                    tau=obc_out
+!                    tau=obc_out   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+                    tau=obc_in     !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
                   END IF
                   tau=tau*dt(ng)
                 END IF
@@ -534,7 +535,8 @@
                   IF ((dUdt*dUde).lt.0.0_r8) THEN
                     tau=obc_in
                   ELSE
-                    tau=obc_out
+!                    tau=obc_out   !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: rm
+                    tau=obc_in     !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
                   END IF
                   tau=tau*dt(ng)
                 END IF

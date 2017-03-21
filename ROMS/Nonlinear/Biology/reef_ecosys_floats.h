@@ -153,6 +153,9 @@
       real(r8) :: oGrate_DF, oGrate_DL
       real(r8) :: oswim_DL, oswim_DT
       real(r8) :: HalfDT
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TN: add
+      real(r8) :: Prho, gee, Psed, vis
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TN: add
 !
 !-----------------------------------------------------4-----------------
 !  Estimate larval growth, as length (um), based on food, salinity,
@@ -385,7 +388,14 @@
 #ifdef GROWTH_ONLY
           w_bio=0.0_r8
 #else
-          w_bio=SwimTime*SwimRate-(1.0_r8-SwimTime)*sink
+!          w_bio=SwimTime*SwimRate-(1.0_r8-SwimTime)*sink
+           Prho=0.9_r8/1.024_r8	! larval density/water density
+           gee=9.807_r8	!gravity acceleration
+           Psed=0.0005_r8	!sediment diameter(m) (<100um)
+           vis=0.00000105_r8	!seawater kinematic molecular viscosity (m2/s)
+           
+           w_bio=(1.0_r8-Prho)*gee*Psed**2.0_r8/18.0_r8/vis
+
 #endif
 !
 !  Load behavior into track array. Apply settlement condition: larvae

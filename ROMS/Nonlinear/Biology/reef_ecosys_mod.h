@@ -66,9 +66,11 @@
 !
 !  Set biological tracer identification indices.
 !
-      integer :: idCorl                 ! Coral coverage
+      integer :: idCrl1                 ! Coral coverage
+      integer :: idCrl2                 ! Coral2 coverage
       integer :: idSgrs                 ! Seagrass coverage
       integer :: idAlga                 ! Algal coverage
+      integer :: idSand                 ! Sand coverage
       
       integer :: idd13C                 ! d13C of DIC
 
@@ -79,15 +81,17 @@
 #if defined ORGANIC_MATTER
       integer :: iDOC_                  ! Dissolved organic C-concentration
       integer :: iPOC_                  ! Particulate organic C-concentration
-      integer :: iPhyt                  ! Phytoplankton concentration
-      integer :: iZoop                  ! Zooplankton concentration
+      integer :: iPhy1                  ! Phytoplankton1 density
+      integer :: iPhy2                  ! Phytoplankton2 density
+      integer :: iZoop                  ! Zooplankton density
 #endif
 #if defined CARBON_ISOTOPE
       integer :: iT13C                  ! Corbon 13 of total inorganic carbon
 # if defined ORGANIC_MATTER
       integer :: iDO13                  ! Dissolved organic 13C-concentration
       integer :: iPO13                  ! Particulate organic 13C-concentration
-      integer :: iPh13                  ! Phytoplankton 13C-concentration
+      integer :: iP113                  ! Phytoplankton1 13C-concentration
+      integer :: iP213                  ! Phytoplankton2 13C-concentration
       integer :: iZo13                  ! Zooplankton 13C-concentration
 # endif
 #endif
@@ -112,26 +116,46 @@
 !
       integer, allocatable :: iHbio2(:)       ! 2D biological terms
 #ifdef CORAL_POLYP
-      integer  :: iClPg                       ! coral gross photosynthesis rate
-      integer  :: iCl_R                       ! coral respiration rate
-      integer  :: iClPn                       ! coral net photosynthesis rate
-      integer  :: iCl_G                       ! coral calcification rate
-      integer  :: iCogC                       ! coral tissue organic carbon
+      integer  :: iC1Pg                       ! coral1 gross photosynthesis rate
+      integer  :: iC1_R                       ! coral1 respiration rate
+      integer  :: iC1Pn                       ! coral1 net photosynthesis rate
+      integer  :: iC1_G                       ! coral1 calcification rate
+      integer  :: iC1OC                       ! coral1 tissue organic carbon
+      integer  :: iC2Pg                       ! coral2 gross photosynthesis rate
+      integer  :: iC2_R                       ! coral2 respiration rate
+      integer  :: iC2Pn                       ! coral2 net photosynthesis rate
+      integer  :: iC2_G                       ! coral2 calcification rate
+      integer  :: iC2OC                       ! coral2 tissue organic carbon
 # ifdef CORAL_CARBON_ISOTOPE
-      integer  :: iC13t                       ! coral tissue carbon isotope ratio
+      integer  :: iC113                       ! coral1 tissue carbon isotope ratio
+      integer  :: iC213                       ! coral2 tissue carbon isotope ratio
 # endif
 # ifdef CORAL_ZOOXANTHELLAE
-      integer  :: iCzox                       ! coral zooxanthellae density
+      integer  :: iC1zx                       ! coral1 zooxanthellae density
+      integer  :: iC2zx                       ! coral2 zooxanthellae density
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
-      integer  :: iCmrt                       ! coral mortality
-      integer  :: iCgrw                       ! coral growth rate
+      integer  :: iC1mt                       ! coral1 mortality
+      integer  :: iC1gr                       ! coral1 growth rate
+      integer  :: iC2mt                       ! coral2 mortality
+      integer  :: iC2gr                       ! coral2 growth rate
 # endif
 #endif
 #ifdef SEAGRASS
       integer  :: iSgPg                       ! seagrass gross photosynthesis rate
       integer  :: iSg_R                       ! seagrass respiration rate
       integer  :: iSgPn                       ! seagrass net photosynthesis rate
+#endif
+#ifdef MACROALGAE
+      integer  :: iAgPg                       ! Algal gross photosynthesis rate
+      integer  :: iAg_R                       ! Algal respiration rate
+      integer  :: iAgPn                       ! Algal net photosynthesis rate
+#endif
+#ifdef SEDIMENT_ECOSYS
+      integer  :: iSdPg                       ! Sediment gross photosynthesis rate
+      integer  :: iSd_R                       ! Sediment respiration rate
+      integer  :: iSdPn                       ! Sediment net photosynthesis rate
+      integer  :: iSd_G                       ! Sediment net calcification rate
 #endif
       integer  :: ipHt_                       ! sea surface pH (total scale)
       integer  :: iWarg                       ! sea surface aragonite saturation state
@@ -204,7 +228,8 @@
 #if defined ORGANIC_MATTER
       real(r8), allocatable :: DOC_0(:)              ! umol/L
       real(r8), allocatable :: POC_0(:)              ! umol/L
-      real(r8), allocatable :: Phyt0(:)              ! umol/L
+      real(r8), allocatable :: Phy10(:)              ! umol/L
+      real(r8), allocatable :: Phy20(:)              ! umol/L
       real(r8), allocatable :: Zoop0(:)              ! umol/L
 #endif
 #if defined CARBON_ISOTOPE
@@ -212,7 +237,8 @@
 # if defined ORGANIC_MATTER
       real(r8), allocatable :: d13C_DOC0(:)          ! permil (VPDB)
       real(r8), allocatable :: d13C_POC0(:)          ! permil (VPDB)
-      real(r8), allocatable :: d13C_Phy0(:)          ! permil (VPDB)
+      real(r8), allocatable :: d13C_Ph10(:)          ! permil (VPDB)
+      real(r8), allocatable :: d13C_Ph20(:)          ! permil (VPDB)
       real(r8), allocatable :: d13C_Zoo0(:)          ! permil (VPDB)
 # endif
 #endif
@@ -268,7 +294,9 @@
       i=i+1
       iPOC_=ic+i
       i=i+1
-      iPhyt=ic+i
+      iPhy1=ic+i
+      i=i+1
+      iPhy2=ic+i
       i=i+1
       iZoop=ic+i
 #endif
@@ -348,28 +376,46 @@
 
 #ifdef CORAL_POLYP
       ic=ic+1
-      iClPg=ic
+      iC1Pg=ic
       ic=ic+1
-      iCl_R=ic
+      iC1_R=ic
       ic=ic+1
-      iClPn=ic
+      iC1Pn=ic
       ic=ic+1
-      iCl_G=ic
+      iC1_G=ic
       ic=ic+1
-      iCogC=ic
+      iC1OC=ic
+      ic=ic+1
+      iC2Pg=ic
+      ic=ic+1
+      iC2_R=ic
+      ic=ic+1
+      iC2Pn=ic
+      ic=ic+1
+      iC2_G=ic
+      ic=ic+1
+      iC2OC=ic
 # ifdef CORAL_CARBON_ISOTOPE
       ic=ic+1
-      iC13t=ic
+      iC113=ic
+      ic=ic+1
+      iC213=ic
 # endif
 # ifdef CORAL_ZOOXANTHELLAE
       ic=ic+1
-      iCzox=ic
+      iC1zx=ic
+      ic=ic+1
+      iC2zx=ic
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
       ic=ic+1
-      iCmrt=ic
+      iC1mt=ic
       ic=ic+1
-      iCgrw=ic
+      iC1gr=ic
+      ic=ic+1
+      iC2mt=ic
+      ic=ic+1
+      iC2gr=ic
 # endif
 #endif
 #ifdef SEAGRASS
@@ -379,6 +425,24 @@
       iSg_R=ic
       ic=ic+1
       iSgPn=ic
+#endif
+#ifdef MACROALGAE
+      ic=ic+1
+      iAgPg=ic
+      ic=ic+1
+      iAg_R=ic
+      ic=ic+1
+      iAgPn=ic
+#endif
+#ifdef SEDIMENT_ECOSYS
+      ic=ic+1
+      iSdPg=ic
+      ic=ic+1
+      iSd_R=ic
+      ic=ic+1
+      iSdPn=ic
+      ic=ic+1
+      iSd_G=ic
 #endif
 
 !  Set number of 2D history terms.
@@ -547,8 +611,11 @@
       IF (.not.allocated(POC_0)) THEN
         allocate ( POC_0(Ngrids) )
       END IF
-      IF (.not.allocated(Phyt0)) THEN
-        allocate ( Phyt0(Ngrids) )
+      IF (.not.allocated(Phy10)) THEN
+        allocate ( Phy10(Ngrids) )
+      END IF
+      IF (.not.allocated(Phy20)) THEN
+        allocate ( Phy20(Ngrids) )
       END IF
       IF (.not.allocated(Zoop0)) THEN
         allocate ( Zoop0(Ngrids) )
@@ -565,8 +632,11 @@
       IF (.not.allocated(d13C_POC0)) THEN
         allocate ( d13C_POC0(Ngrids) )
       END IF
-      IF (.not.allocated(d13C_Phy0)) THEN
-        allocate ( d13C_Phy0(Ngrids) )
+      IF (.not.allocated(d13C_Ph10)) THEN
+        allocate ( d13C_Ph10(Ngrids) )
+      END IF
+      IF (.not.allocated(d13C_Ph20)) THEN
+        allocate ( d13C_Ph20(Ngrids) )
       END IF
       IF (.not.allocated(d13C_Zoo0)) THEN
         allocate ( d13C_Zoo0(Ngrids) )

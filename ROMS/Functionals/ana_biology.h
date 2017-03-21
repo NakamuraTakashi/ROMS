@@ -402,7 +402,8 @@
 # if defined ORGANIC_MATTER
             t(i,j,k,1,iDOC_)=DOC_0(ng)     ! umolC L-1
             t(i,j,k,1,iPOC_)=POC_0(ng)     ! umolC L-1
-            t(i,j,k,1,iPhyt)=Phyt0(ng)     ! umolC L-1
+            t(i,j,k,1,iPhy1)=Phy10(ng)     ! umolC L-1
+            t(i,j,k,1,iPhy2)=Phy20(ng)     ! umolC L-1
             t(i,j,k,1,iZoop)=Zoop0(ng)     ! umolC L-1
 # endif
 # if defined CARBON_ISOTOPE
@@ -410,7 +411,8 @@
 #  if defined ORGANIC_MATTER
             t(i,j,k,1,iDO13)=R13C_fromd13C( d13C_DOC0(ng) )*DOC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
             t(i,j,k,1,iPO13)=R13C_fromd13C( d13C_POC0(ng) )*POC_0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
-            t(i,j,k,1,iPh13)=R13C_fromd13C( d13C_Phy0(ng) )*Phyt0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+            t(i,j,k,1,iP113)=R13C_fromd13C( d13C_Ph10(ng) )*Phy10(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
+            t(i,j,k,1,iP213)=R13C_fromd13C( d13C_Ph20(ng) )*Phy20(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
             t(i,j,k,1,iZo13)=R13C_fromd13C( d13C_Zoo0(ng) )*Zoop0(ng) ! umol L-1  !!! R13C_fromd13C included geochem module
 #  endif
 # endif
@@ -447,10 +449,14 @@
           Salt = t(i,j,N(ng),1,iSalt)
 
 # if defined CORAL_POLYP
-          HisBio2d(i,j,iClPg) = 0.0_r8
-          HisBio2d(i,j,iCl_R) = 0.0_r8
-          HisBio2d(i,j,iClPn) = 0.0_r8
-          HisBio2d(i,j,iCl_G) = 0.0_r8
+          HisBio2d(i,j,iC1Pg) = 0.0_r8
+          HisBio2d(i,j,iC1_R) = 0.0_r8
+          HisBio2d(i,j,iC1Pn) = 0.0_r8
+          HisBio2d(i,j,iC1_G) = 0.0_r8
+          HisBio2d(i,j,iC2Pg) = 0.0_r8
+          HisBio2d(i,j,iC2_R) = 0.0_r8
+          HisBio2d(i,j,iC2Pn) = 0.0_r8
+          HisBio2d(i,j,iC2_G) = 0.0_r8
 # endif
 # if defined SEAGRASS
           HisBio2d(i,j,iSgPg) = 0.0_r8

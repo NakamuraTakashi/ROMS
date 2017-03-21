@@ -22,11 +22,15 @@
 
 !!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>TN:Add
 
-              CASE ('idCorl')
-                idCorl=varid
+              CASE ('idCrl1')
+                idCrl1=varid
+              CASE ('idCrl2')
+                idCrl2=varid
               CASE ('idSgrs')
                 idSgrs=varid
               CASE ('idAlga')
+                idAlga=varid
+              CASE ('idSand')
                 idAlga=varid
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
               CASE ('idTvar(iTIC_)')
@@ -40,8 +44,10 @@
                 idTvar(iDOC_)=varid
               CASE ('idTvar(iPOC_)')
                 idTvar(iPOC_)=varid
-              CASE ('idTvar(iPhyt)')
-                idTvar(iPhyt)=varid
+              CASE ('idTvar(iPhy1)')
+                idTvar(iPhy1)=varid
+              CASE ('idTvar(iPhy2)')
+                idTvar(iPhy2)=varid
               CASE ('idTvar(iZoop)')
                 idTvar(iZoop)=varid
 #endif
@@ -53,8 +59,10 @@
                 idTvar(iDO13)=varid
               CASE ('idTvar(iPO13)')
                 idTvar(iPO13)=varid
-              CASE ('idTvar(iPh13)')
-                idTvar(iPh13)=varid
+              CASE ('idTvar(iP113)')
+                idTvar(iP113)=varid
+              CASE ('idTvar(iP213)')
+                idTvar(iP213)=varid
               CASE ('idTvar(iZo13)')
                 idTvar(iZo13)=varid
 # endif
@@ -104,29 +112,47 @@
               CASE ('iHbio2(iTau_)')
                 iHbio2(iTau_)=varid
 #ifdef CORAL_POLYP
-              CASE ('iHbio2(iClPg)')
-                iHbio2(iClPg)=varid
-              CASE ('iHbio2(iCl_R)')
-                iHbio2(iCl_R)=varid
-              CASE ('iHbio2(iClPn)')
-                iHbio2(iClPn)=varid
-              CASE ('iHbio2(iCl_G)')
-                iHbio2(iCl_G)=varid
-              CASE ('iHbio2(iCogC)')
-                iHbio2(iCogC)=varid
+              CASE ('iHbio2(iC1Pg)')
+                iHbio2(iC1Pg)=varid
+              CASE ('iHbio2(iC1_R)')
+                iHbio2(iC1_R)=varid
+              CASE ('iHbio2(iC1Pn)')
+                iHbio2(iC1Pn)=varid
+              CASE ('iHbio2(iC1_G)')
+                iHbio2(iC1_G)=varid
+              CASE ('iHbio2(iC1OC)')
+                iHbio2(iC1OC)=varid
+              CASE ('iHbio2(iC2Pg)')
+                iHbio2(iC2Pg)=varid
+              CASE ('iHbio2(iC2_R)')
+                iHbio2(iC2_R)=varid
+              CASE ('iHbio2(iC2Pn)')
+                iHbio2(iC2Pn)=varid
+              CASE ('iHbio2(iC2_G)')
+                iHbio2(iC2_G)=varid
+              CASE ('iHbio2(iC2OC)')
+                iHbio2(iC2OC)=varid
 # ifdef CORAL_CARBON_ISOTOPE
-              CASE ('iHbio2(iC13t)')
-                iHbio2(iC13t)=varid
+              CASE ('iHbio2(iC113)')
+                iHbio2(iC113)=varid
+              CASE ('iHbio2(iC213)')
+                iHbio2(iC213)=varid
 # endif
 # ifdef CORAL_ZOOXANTHELLAE
-              CASE ('iHbio2(iCzox)')
-                iHbio2(iCzox)=varid
+              CASE ('iHbio2(iC1zx)')
+                iHbio2(iC1zx)=varid
+              CASE ('iHbio2(iC2zx)')
+                iHbio2(iC2zx)=varid
 # endif
 # ifdef CORAL_SIZE_DYNAMICS
-              CASE ('iHbio2(iCmrt)')
-                iHbio2(iCmrt)=varid
-              CASE ('iHbio2(iCgrw)')
-                iHbio2(iCgrw)=varid
+              CASE ('iHbio2(iC1mt)')
+                iHbio2(iC1mt)=varid
+              CASE ('iHbio2(iC1gr)')
+                iHbio2(iC1gr)=varid
+              CASE ('iHbio2(iC2mt)')
+                iHbio2(iC2mt)=varid
+              CASE ('iHbio2(iC2gr)')
+                iHbio2(iC2gr)=varid
 # endif
 #endif
 #ifdef SEAGRASS
@@ -136,6 +162,24 @@
                 iHbio2(iSg_R)=varid
               CASE ('iHbio2(iSgPn)')
                 iHbio2(iSgPn)=varid
+#endif
+#ifdef MACROALGAE
+              CASE ('iHbio2(iAgPg)')
+                iHbio2(iAgPg)=varid
+              CASE ('iHbio2(iAg_R)')
+                iHbio2(iAg_R)=varid
+              CASE ('iHbio2(iAgPn)')
+                iHbio2(iAgPn)=varid
+#endif
+#ifdef SEDIMENT_ECOSYS
+              CASE ('iHbio2(iSdPg)')
+                iHbio2(iSdPg)=varid
+              CASE ('iHbio2(iSd_R)')
+                iHbio2(iSd_R)=varid
+              CASE ('iHbio2(iSdPn)')
+                iHbio2(iSdPn)=varid
+              CASE ('iHbio2(iSd_G)')
+                iHbio2(iSd_G)=varid
 #endif
 
               CASE ('iHbio3(iPPro)')
@@ -171,8 +215,10 @@
                 idTads(iDOC_)=varid
               CASE ('idTads(iPOC_)')
                 idTads(iPOC_)=varid
-              CASE ('idTads(iPhyt)')
-                idTads(iPhyt)=varid
+              CASE ('idTads(iPhy1)')
+                idTads(iPhy1)=varid
+              CASE ('idTads(iPhy2)')
+                idTads(iPhy2)=varid
               CASE ('idTads(iZoop)')
                 idTads(iZoop)=varid
 # endif
@@ -184,8 +230,10 @@
                 idTads(iDO13)=varid
               CASE ('idTads(iPO13)')
                 idTads(iPO13)=varid
-              CASE ('idTads(iPh13)')
-                idTads(iPh13)=varid
+              CASE ('idTads(iP113)')
+                idTads(iP113)=varid
+              CASE ('idTads(iP213)')
+                idTads(iP213)=varid
               CASE ('idTads(iZo13)')
                 idTads(iZo13)=varid
 #  endif
@@ -267,14 +315,23 @@
               CASE ('idTbry(inorth,iPOC_)')
                 idTbry(inorth,iPOC_)=varid
 
-              CASE ('idTbry(iwest,iPhyt)')
-                idTbry(iwest,iPhyt)=varid
-              CASE ('idTbry(ieast,iPhyt)')
-                idTbry(ieast,iPhyt)=varid
-              CASE ('idTbry(isouth,iPhyt)')
-                idTbry(isouth,iPhyt)=varid
-              CASE ('idTbry(inorth,iPhyt)')
-                idTbry(inorth,iPhyt)=varid
+              CASE ('idTbry(iwest,iPhy1)')
+                idTbry(iwest,iPhy1)=varid
+              CASE ('idTbry(ieast,iPhy1)')
+                idTbry(ieast,iPhy1)=varid
+              CASE ('idTbry(isouth,iPhy1)')
+                idTbry(isouth,iPhy1)=varid
+              CASE ('idTbry(inorth,iPhy1)')
+                idTbry(inorth,iPhy1)=varid
+
+              CASE ('idTbry(iwest,iPhy2)')
+                idTbry(iwest,iPhy2)=varid
+              CASE ('idTbry(ieast,iPhy2)')
+                idTbry(ieast,iPhy2)=varid
+              CASE ('idTbry(isouth,iPhy2)')
+                idTbry(isouth,iPhy2)=varid
+              CASE ('idTbry(inorth,iPhy2)')
+                idTbry(inorth,iPhy2)=varid
 
               CASE ('idTbry(iwest,iZoop)')
                 idTbry(iwest,iZoop)=varid
@@ -314,14 +371,23 @@
               CASE ('idTbry(inorth,iPO13)')
                 idTbry(inorth,iPO13)=varid
 
-              CASE ('idTbry(iwest,iPh13)')
-                idTbry(iwest,iPh13)=varid
-              CASE ('idTbry(ieast,iPh13)')
-                idTbry(ieast,iPh13)=varid
-              CASE ('idTbry(isouth,iPh13)')
-                idTbry(isouth,iPh13)=varid
-              CASE ('idTbry(inorth,iPh13)')
-                idTbry(inorth,iPh13)=varid
+              CASE ('idTbry(iwest,iP113)')
+                idTbry(iwest,iP113)=varid
+              CASE ('idTbry(ieast,iP113)')
+                idTbry(ieast,iP113)=varid
+              CASE ('idTbry(isouth,iP113)')
+                idTbry(isouth,iP113)=varid
+              CASE ('idTbry(inorth,iP113)')
+                idTbry(inorth,iP113)=varid
+                
+              CASE ('idTbry(iwest,iP213)')
+                idTbry(iwest,iP213)=varid
+              CASE ('idTbry(ieast,iP213)')
+                idTbry(ieast,iP213)=varid
+              CASE ('idTbry(isouth,iP213)')
+                idTbry(isouth,iP213)=varid
+              CASE ('idTbry(inorth,iP213)')
+                idTbry(inorth,iP213)=varid
 
               CASE ('idTbry(iwest,iZo13)')
                 idTbry(iwest,iZo13)=varid
@@ -444,8 +510,10 @@
                 idRtrc(iDOC_)=varid
               CASE ('idRtrc(iPOC_)')
                 idRtrc(iPOC_)=varid
-              CASE ('idRtrc(iPhyt)')
-                idRtrc(iPhyt)=varid
+              CASE ('idRtrc(iPhy1)')
+                idRtrc(iPhy1)=varid
+              CASE ('idRtrc(iPhy2)')
+                idRtrc(iPhy2)=varid
               CASE ('idRtrc(iZoop)')
                 idRtrc(iZoop)=varid
 #endif
