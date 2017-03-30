@@ -622,7 +622,7 @@
       END IF
 #endif
 #if defined CARBON_ISOTOPE
-      IF (.not.allocated(d13C_TIC0) THEN
+      IF (.not.allocated(d13C_TIC0)) THEN
         allocate ( d13C_TIC0(Ngrids) )
       END IF
 # if defined ORGANIC_MATTER
