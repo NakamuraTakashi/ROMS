@@ -151,6 +151,7 @@
 !      real(8), parameter :: p0   =  15.05d0 !
       real(8), parameter :: p1 =  0.02166d0 ! Nakamura & Nakamori 2009
       real(8), parameter :: p0 = 13.13d0    !  Model skill = 0.991
+      real(8), parameter :: Kr =  50.0d0  !
 #if defined NUTRIENTS         
       real(8) npref
       real(8) ldocn,ldocd
@@ -165,7 +166,7 @@
 
 !      ALGAE(ng)%Pg(n,i,j)= pmax*tanh(PFD/pIk)/3600.d0   !Light response curve [mmolC/m2/s]
       ALGAE(ng)%Pg(n,i,j)= p1*PFD/3600.d0   !Linear regression line [mmolC/m2/s]
-      ALGAE(ng)%R (n,i,j)= p0/3600.d0   ! Constant [mmolC/m2/s]
+      ALGAE(ng)%R (n,i,j)= p0/3600.d0 * DOamb/(Kr+DOamb)   ![mmolC/m2/s]
       
       IF(DICamb<=0.d0) THEN !-----For Error handling
         ALGAE(ng)%Pg(n,i,j) = 0.d0

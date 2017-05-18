@@ -160,6 +160,7 @@
 !      real(8), parameter :: g0   =  0.61d0
       real(8), parameter :: p1 = 3.188d-3 ! Nakamura & Nakamori 2009
       real(8), parameter :: p0 = 2.369d0  !  Model skill = 0.968
+      real(8), parameter :: Kr =  50.0d0  !
       real(8), parameter :: g1 = 1.193d-3 ! Nakamura & Nakamori 2009
       real(8), parameter :: g0 = 0.6267d0 !  Model skill = 0.981
 # if defined NUTRIENTS         
@@ -180,7 +181,7 @@
 !      SEDECO(ng)%R (i,j)= p0/3600.d0   !Constant [mmolC/m2/s]
 !      SEDECO(ng)%G (i,j)= (gmax*tanh(PFD/gIk)-g0)/3600.d0   !Light response curve [mmolC/m2/s]
       SEDECO(ng)%Pg(i,j)= p1*PFD/3600.d0   !Light response curve [mmolC/m2/s]
-      SEDECO(ng)%R (i,j)= p0/3600.d0   !Constant [mmolC/m2/s]
+      SEDECO(ng)%R (i,j)= p0/3600.d0 * DOamb/(Kr+DOamb)   ![mmolC/m2/s]
       SEDECO(ng)%G (i,j)= (g1*PFD-g0)/3600.d0   !Light response curve [mmolC/m2/s]
       
       IF(DICamb<=0.d0) THEN !-----For Error handling
