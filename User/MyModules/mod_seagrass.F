@@ -153,6 +153,7 @@
       real(8), parameter :: pmax =  55.81d0  ! Nakamura & Nakamori 2009
       real(8), parameter :: pIk  = 671.8d0   !  Model skill = 0.990
       real(8), parameter :: p0   =  21.62d0  !
+      real(8), parameter :: Kr   =  50.0d0  !
 #if defined NUTRIENTS         
       real(8) npref
       real(8) ldocn,ldocd
@@ -166,7 +167,7 @@
 ! --- Organic and Inorganic Production Rate -----------------
 
       SGRASS(ng)%Pg(n,i,j)= pmax*tanh(PFD/pIk)/3600.d0   !Light response curve [mmolC/m2/s]
-      SGRASS(ng)%R (n,i,j)= p0/3600.d0   !Constant [mmolC/m2/s]
+      SGRASS(ng)%R (n,i,j)= p0/3600.d0 * DOamb/(Kr+DOamb)   ! [mmolC/m2/s]
       
       IF(DICamb<=0.d0) THEN !-----For Error handling
         SGRASS(ng)%Pg(n,i,j) = 0.d0
