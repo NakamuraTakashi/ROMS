@@ -2,7 +2,7 @@
 !
 !! svn $Id$
 !!======================================================================
-!! Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
+!! Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
 !!   Licensed under a MIT/X style license                              !
 !!   See License_ROMS.txt                                              !
 !=======================================================================
@@ -497,10 +497,14 @@
           Salt = t(i,j,N(ng),1,iSalt)
 
 # if defined CORAL_POLYP
-          HisBio2d(i,j,iClPg) = 0.0_r8
-          HisBio2d(i,j,iCl_R) = 0.0_r8
-          HisBio2d(i,j,iClPn) = 0.0_r8
-          HisBio2d(i,j,iCl_G) = 0.0_r8
+          HisBio2d(i,j,iC1Pg) = 0.0_r8
+          HisBio2d(i,j,iC1_R) = 0.0_r8
+          HisBio2d(i,j,iC1Pn) = 0.0_r8
+          HisBio2d(i,j,iC1_G) = 0.0_r8
+          HisBio2d(i,j,iC2Pg) = 0.0_r8
+          HisBio2d(i,j,iC2_R) = 0.0_r8
+          HisBio2d(i,j,iC2Pn) = 0.0_r8
+          HisBio2d(i,j,iC2_G) = 0.0_r8
 # endif
 # if defined SEAGRASS
           HisBio2d(i,j,iSgPg) = 0.0_r8
