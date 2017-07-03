@@ -96,6 +96,12 @@
           Tair(i,j)=23.567_r8
         END DO
       END DO
+#elif defined CORAL_TRIANGLE
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Tair(i,j)=25.0_r8
+        END DO
+      END DO
 !!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       ana_tair.h: no values provided for Tair.
