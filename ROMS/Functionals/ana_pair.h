@@ -97,6 +97,12 @@
           Pair(i,j)=1013.48_r8
         END DO
       END DO
+#elif defined CORAL_TRIANGLE
+      DO j=JstrT,JendT
+        DO i=IstrT,IendT
+          Pair(i,j)=1013.48_r8
+        END DO
+      END DO
 !!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
 #else
       ana_pair.h: no values provided for Pair.
