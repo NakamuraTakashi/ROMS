@@ -2,7 +2,7 @@
 !
 !! svn $Id$
 !!======================================================================
-!! Copyright (c) 2002-2017 The ROMS/TOMS Group                         !
+!! Copyright (c) 2002-2015 The ROMS/TOMS Group                         !
 !!   Licensed under a MIT/X style license                              !
 !!   See License_ROMS.txt                                              !
 !=======================================================================
@@ -15,6 +15,7 @@
       USE mod_param
       USE mod_ncparam
       USE mod_ocean
+      USE mod_grid
 !
 ! Imported variable declarations.
 !
@@ -29,6 +30,7 @@
 #if defined REEF_ECOSYS
      &                       OCEAN(ng) % HisBio2d,                      &
      &                       OCEAN(ng) % HisBio3d,                      &
+     &                       GRID(ng)  % z_r,                             &
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                       OCEAN(ng) % t)
@@ -54,6 +56,7 @@
 #if defined REEF_ECOSYS
      &                             HisBio2d,                            &
      &                             HisBio3d,                            &
+     &                             z_r,                                   &
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
      &                             t)
@@ -77,6 +80,7 @@
 # if defined REEF_ECOSYS
       real(r8), intent(inout) :: HisBio2d(LBi:,LBj:,:)
       real(r8), intent(inout) :: HisBio3d(LBi:,LBj:,:,:)
+      real(r8), intent(inout) :: z_r(LBi:,LBj:,:)
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: t(LBi:,LBj:,:,:,:)
@@ -85,6 +89,7 @@
 # if defined REEF_ECOSYS
       real(r8), intent(inout) :: HisBio2d(LBi:UBi,LBj:UBj,NHbio2d)
       real(r8), intent(inout) :: HisBio3d(LBi:UBi,LBj:UBj,UBk,NHbio3d)
+      real(r8), intent(inout) :: z_r(LBi:UBi,LBj:UBj,N(ng))
 # endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
@@ -107,6 +112,11 @@
       real(r8) :: DOsatu, ssO2flux
 #endif
 !!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<TN:Add
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
+#if defined REEF_ECOSYS
+      real(r8) :: c_NO3_s, c_NO3_sc, c_NO3_d, c_NO3_dc, c_PO4_s, c_PO4_sc, c_PO4_d, c_PO4_dc
+#endif
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
 
 #include "set_bounds.h"
 
@@ -393,6 +403,16 @@
 !  Coral reef ecosystem model.
 !-----------------------------------------------------------------------
 !
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
+      c_NO3_s=-0.0508_r8
+      c_NO3_sc=-2.9698_r8
+      c_NO3_d=0.0018_r8
+      c_NO3_dc=43.891_r8
+      c_PO4_s=-0.0037_r8
+      c_PO4_sc=-0.1513_r8
+      c_PO4_d=0.0002_r8
+      c_PO4_dc=3.3429_r8
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
       DO k=1,N(ng)
         DO j=JstrT,JendT
           DO i=IstrT,IendT
@@ -402,9 +422,21 @@
 # if defined ORGANIC_MATTER
             t(i,j,k,1,iDOC_)=DOC_0(ng)     ! umolC L-1
             t(i,j,k,1,iPOC_)=POC_0(ng)     ! umolC L-1
-            t(i,j,k,1,iPhy1)=Phy10(ng)     ! umolC L-1
-            t(i,j,k,1,iPhy2)=Phy20(ng)     ! umolC L-1
+!            t(i,j,k,1,iPhy1)=Phy10(ng)     ! umolC L-1
+!            t(i,j,k,1,iPhy2)=Phy20(ng)     ! umolC L-1
             t(i,j,k,1,iZoop)=Zoop0(ng)     ! umolC L-1
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
+            IF (z_r(i,j,k).gt.-155_r8) THEN
+              t(i,j,k,1,iPhy1)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
+            ELSE IF (z_r(i,j,k).le.-155_r8) THEN
+              t(i,j,k,1,iPhy1)=0.0_r8     ! umol L-1
+            END IF
+            IF (z_r(i,j,k).gt.-155_r8) THEN
+              t(i,j,k,1,iPhy2)=(-0.00095_r8*(z_r(i,j,k)+50.0_r8)**2+10.5_r8)/24.0_r8     ! umol L-1
+            ELSE IF (z_r(i,j,k).le.-155_r8) THEN
+              t(i,j,k,1,iPhy2)=0.0_r8     ! umol L-1
+            END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
 # endif
 # if defined CARBON_ISOTOPE
             t(i,j,k,1,iT13C)=R13C_fromd13C( d13C_TIC0(ng) )*TIC_0(ng) ! umol kg-1  !!! R13C_fromd13C included geochem module
@@ -417,10 +449,26 @@
 #  endif
 # endif
 # if defined NUTRIENTS
-            t(i,j,k,1,iNO3_)=NO3_0(ng)     ! umol L-1
+!            t(i,j,k,1,iNO3_)=NO3_0(ng)     ! umol L-1  !exclude
             t(i,j,k,1,iNO2_)=NO2_0(ng)     ! umol L-1
             t(i,j,k,1,iNH4_)=NH4_0(ng)     ! umol L-1
-            t(i,j,k,1,iPO4_)=PO4_0(ng)     ! umol L-1
+!            t(i,j,k,1,iPO4_)=PO4_0(ng)     ! umol L-1  !exclude
+!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SA:Add
+            IF (z_r(i,j,k).gt.-63.9196_r8) THEN
+              t(i,j,k,1,iNO3_)=NO3_0(ng)     ! umol L-1
+            ELSE IF (z_r(i,j,k).gt.-900_r8) THEN
+              t(i,j,k,1,iNO3_)=c_NO3_s*z_r(i,j,k)+c_NO3_sc     ! umol L-1
+            ELSE IF (z_r(i,j,k).le.-900_r8) THEN
+              t(i,j,k,1,iNO3_)=c_NO3_d*z_r(i,j,k)+c_NO3_dc     ! umol L-1
+            END IF
+            IF (z_r(i,j,k).gt.-52.716_r8) THEN
+              t(i,j,k,1,iPO4_)=PO4_0(ng)     ! umol L-1
+            ELSE IF (z_r(i,j,k).gt.-950_r8) THEN
+              t(i,j,k,1,iPO4_)=c_PO4_s*z_r(i,j,k)+c_PO4_sc     ! umol L-1
+            ELSE IF (z_r(i,j,k).le.-950_r8) THEN
+              t(i,j,k,1,iPO4_)=c_PO4_d*z_r(i,j,k)+c_PO4_dc     ! umol L-1
+            END IF
+!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SA:Add
 #  if defined ORGANIC_MATTER
             t(i,j,k,1,iDON_)=DON_0(ng)     ! umolN L-1
             t(i,j,k,1,iPON_)=PON_0(ng)     ! umolN L-1
@@ -449,14 +497,10 @@
           Salt = t(i,j,N(ng),1,iSalt)
 
 # if defined CORAL_POLYP
-          HisBio2d(i,j,iC1Pg) = 0.0_r8
-          HisBio2d(i,j,iC1_R) = 0.0_r8
-          HisBio2d(i,j,iC1Pn) = 0.0_r8
-          HisBio2d(i,j,iC1_G) = 0.0_r8
-          HisBio2d(i,j,iC2Pg) = 0.0_r8
-          HisBio2d(i,j,iC2_R) = 0.0_r8
-          HisBio2d(i,j,iC2Pn) = 0.0_r8
-          HisBio2d(i,j,iC2_G) = 0.0_r8
+          HisBio2d(i,j,iClPg) = 0.0_r8
+          HisBio2d(i,j,iCl_R) = 0.0_r8
+          HisBio2d(i,j,iClPn) = 0.0_r8
+          HisBio2d(i,j,iCl_G) = 0.0_r8
 # endif
 # if defined SEAGRASS
           HisBio2d(i,j,iSgPg) = 0.0_r8
