@@ -64,7 +64,8 @@ endif
 ifdef USE_MPI
          CPPFLAGS += -DMPI
  ifdef USE_MPIF90
-               FC := mpif90
+#               FC := mpif90
+               FC := mpiifort
  else
              LIBS += -lfmpi-pgi -lmpi-pgi
  endif
@@ -80,7 +81,8 @@ ifdef USE_DEBUG
            FFLAGS += -g -check bounds -traceback -check uninit -warn interfaces,nouncalled -gen-interfaces
 #          FFLAGS += -g -check uninit -ftrapuv -traceback
 else
-           FFLAGS += -ip -O3
+#           FFLAGS += -ip -O3
+           FFLAGS += -O3 -xCORE-AVX2
 endif
 
 ifdef USE_MCT
